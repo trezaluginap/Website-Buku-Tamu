@@ -12,7 +12,7 @@ const AdminDashboard = () => {
   const [error, setError] = useState(null);
   const [showAll, setShowAll] = useState(false);
   const [selectedGuest, setSelectedGuest] = useState(null);
-  const [activeTab, setActiveTab] = useState("all"); // "all", "processed", "unprocessed", "completed"
+  const [activeTab, setActiveTab] = useState("all"); 
 
   // Fetch guests data
   const fetchGuests = () => {

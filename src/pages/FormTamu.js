@@ -9,18 +9,18 @@ const FormTamu = () => {
   const [formStep, setFormStep] = useState(1);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Set current date
+  
   const today = new Date();
   const currentDate = today.toISOString().split("T")[0];
 
-  // Initialize formData with the fixed date
+  
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
       tanggal_kedatangan: currentDate,
     }));
 
-    // Add a small delay to trigger animations when the component mounts
+    
     const timer = setTimeout(() => {
       setIsLoaded(true);
     }, 100);
@@ -59,7 +59,7 @@ const FormTamu = () => {
         e.target.reset();
         setKeperluan("");
         setFormData({
-          tanggal_kedatangan: currentDate, // Maintain the date even after reset
+          tanggal_kedatangan: currentDate, 
         });
         setFormStep(1);
       } else {

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Buku Tamu</title>
+</head>
+<body>
+  <h1>Buku Tamu</h1>
+  <form id="formTamu">
+    <input type="text" id="nama" name="nama" placeholder="Nama" required /><br />
+    <textarea id="pesan" name="pesan" placeholder="Pesan" required></textarea><br />
+    <button type="submit">Kirim</button>
+  </form>
+
+  <script>
+    const form = document.getElementById('formTamu');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const nama = document.getElementById('nama').value;
+      const pesan = document.getElementById('pesan').value;
+
+      fetch('http://localhost:3000/tamu', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ nama, pesan })
+      })
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Server error ${res.status}: ${text}`);
+        }
+        return res.json(); // hanya parse jika status OK dan isi JSON
+      })
+      .then(data => {
+        alert('Data berhasil dikirim!');
+        form.reset();
+      })
+      .catch(err => {
+        console.error(err); // untuk debugging
+        alert('Gagal mengirim data: ' + err.message);
+      });
+    });
+  </script>
+</body>
+</html>

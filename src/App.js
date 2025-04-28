@@ -9,6 +9,8 @@ import GuestDetail from "./components/GuestDetail";
 import EditGuestForm from "./pages/EditGuestForm"; // ✅ Tambahan halaman edit
 import FollowUpForm from "./pages/FollowUpForm"; // ✅ Tambahan halaman tindak lanjut
 import { GuestContext } from "./context/GuestContext";
+import FormBukuTamu from './components/FormBukuTamu';
+
 import "./Styles.css";
 
 function App() {
@@ -24,11 +26,11 @@ function App() {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/detail/:id" element={<GuestDetail />} />
           <Route path="/pages/EditGuestForm/:id" element={<EditGuestForm />} /> {/* ✅ */}
-          <Route
-            path="/pages/FollowUpForm/:id"
-            element={<FollowUpForm />}
+          <Route path="/pages/FollowUpForm/:id" element={<FollowUpForm />}
           />{" "}
           {/* ✅ */}
+          <Route path="/form-buku-tamu" element={<FormBukuTamu />} />
+
         </Routes>
       </Router>
     </GuestContext.Provider>
