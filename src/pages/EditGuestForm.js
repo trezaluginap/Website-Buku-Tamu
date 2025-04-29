@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../Styles.css"; // Make sure to create this CSS file
+import "../Styles.css"; 
 
 const EditGuestForm = () => {
   const { id } = useParams();

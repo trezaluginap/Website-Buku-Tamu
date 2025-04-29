@@ -7,12 +7,32 @@ const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (email === "admin@buku.com" && password === "admin123") {
-      navigate("/admin");
-    } else {
-      alert("Email atau password salah!");
+
+    if (!email || !password) {
+      alert("Email dan password wajib diisi!");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/api/admin-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Login berhasil!");
+        navigate("/admin");
+      } else {
+        alert(data.error || "Email atau password salah!");
+      }
+    } catch (error) {
+      console.error("Gagal login:", error);
+      alert("Terjadi kesalahan saat login. Silakan coba lagi.");
     }
   };
 
@@ -25,6 +45,7 @@ const AdminLogin = () => {
           <input
             type="email"
             placeholder="Masukkan email"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
@@ -35,6 +56,7 @@ const AdminLogin = () => {
           <input
             type="password"
             placeholder="Masukkan password"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
