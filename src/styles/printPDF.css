@@ -1,0 +1,132 @@
+/* src/styles/printPDF.css */
+.content-container {
+  margin-left: 220px;
+  padding: 20px;
+  height: 100vh;
+  background: linear-gradient(135deg, #a8e0ff 0%, #87ceeb 100%);
+  overflow-y: auto;
+  transition: margin-left 0.3s ease;
+}
+
+.sidebar.closed + .content-container {
+  margin-left: 0;
+}
+
+.page-header {
+  text-align: right;
+  margin-bottom: 30px;
+}
+
+.page-title {
+  color: #1e3a8a;
+  font-size: 32px;
+  margin: 0;
+  font-weight: 600;
+}
+
+.page-subtitle {
+  color: #1e3a8a;
+  font-size: 18px;
+  margin: 0 0 10px 0;
+}
+
+.user-info {
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: inline-block;
+  font-size: 14px;
+}
+
+.content-area {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.print-form {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.rating-label {
+  color: #e74c3c;
+  font-weight: 700;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.print-button {
+  background-color: #4361ee;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.print-button:hover {
+  background-color: #3730a3;
+}
+
+@media (max-width: 768px) {
+  .content-container {
+    margin-left: 0;
+    padding: 15px;
+  }
+  
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .print-button {
+    width: 100%;
+  }
+}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../s  tyles/Form.css";
+import "../styles/Form.css";
 import BPSLogo from "../assets/BPS.png";
 
 const FormTamu = () => {

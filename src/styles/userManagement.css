@@ -1,0 +1,162 @@
+/* src/styles/userManagement.css */
+.content-container {
+  margin-left: 220px;
+  padding: 20px;
+  height: 100vh;
+  background: linear-gradient(135deg, #a8e0ff 0%, #87ceeb 100%);
+  overflow-y: auto;
+  transition: margin-left 0.3s ease;
+}
+
+.sidebar.closed + .content-container {
+  margin-left: 0;
+}
+
+.page-header {
+  text-align: right;
+  margin-bottom: 30px;
+}
+
+.page-title {
+  color: #1e3a8a;
+  font-size: 32px;
+  margin: 0;
+  font-weight: 600;
+}
+
+.page-subtitle {
+  color: #1e3a8a;
+  font-size: 18px;
+  margin: 0 0 10px 0;
+}
+
+.user-info {
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: inline-block;
+  font-size: 14px;
+}
+
+.content-area {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #d1ecff;
+  border-radius: 5px;
+}
+
+.table-container {
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.data-table th, 
+.data-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.data-table th {
+  background-color: #1e3a8a;
+  color: white;
+  font-weight: 500;
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tr:hover {
+  background-color: #f5f5f5;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-button, .delete-button, .add-button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.edit-button {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.edit-button:hover {
+  background-color: #2563eb;
+}
+
+.delete-button {
+  background-color: #dc2626;
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #b91c1c;
+}
+
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.add-button {
+  background-color: #10b981;
+  color: white;
+  padding: 8px 16px;
+}
+
+.add-button:hover {
+  background-color: #059669;
+}
+
+@media (max-width: 768px) {
+  .content-container {
+    margin-left: 0;
+    padding: 15px;
+  }
+  
+  .data-table th, 
+  .data-table td {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .edit-button, 
+  .delete-button {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
