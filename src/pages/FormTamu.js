@@ -9,18 +9,15 @@ const FormTamu = () => {
   const [formStep, setFormStep] = useState(1);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  
   const today = new Date();
   const currentDate = today.toISOString().split("T")[0];
 
-  
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
       tanggal_kedatangan: currentDate,
     }));
 
-    
     const timer = setTimeout(() => {
       setIsLoaded(true);
     }, 100);
@@ -38,28 +35,24 @@ const FormTamu = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!window.confirm("Apakah Anda yakin ingin mengirim formulir ini?"))
-      return;
+    if (!window.confirm("Apakah Anda yakin ingin mengirim formulir ini?")) return;
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(
-        "https://67d524cbd2c7857431ef80e1.mockapi.io/Guest",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch("http://localhost:5000/api/guests", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
       if (response.ok) {
         alert("Data berhasil dikirim!");
         e.target.reset();
         setKeperluan("");
         setFormData({
-          tanggal_kedatangan: currentDate, 
+          tanggal_kedatangan: currentDate,
         });
         setFormStep(1);
       } else {
@@ -85,21 +78,11 @@ const FormTamu = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Get current day name in Indonesian
   const getDayName = () => {
-    const days = [
-      "Minggu",
-      "Senin",
-      "Selasa",
-      "Rabu",
-      "Kamis",
-      "Jumat",
-      "Sabtu",
-    ];
+    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
     return days[today.getDay()];
   };
 
-  // Format date to Indonesian format
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
@@ -114,8 +97,7 @@ const FormTamu = () => {
           </div>
           <h2>Buku Tamu Digital</h2>
           <p className="form-description">
-            Silakan lengkapi formulir di bawah ini untuk melakukan registrasi
-            kunjungan pada {getDayName()}, {formatDate(currentDate)}
+            Silakan lengkapi formulir di bawah ini untuk melakukan registrasi kunjungan pada {getDayName()}, {formatDate(currentDate)}
           </p>
         </div>
 
@@ -123,13 +105,7 @@ const FormTamu = () => {
           <div className="form-content">
             <div className="form-group">
               <label className="required">Nama Lengkap</label>
-              <input
-                type="text"
-                name="nama"
-                required
-                onChange={handleChange}
-                placeholder="Masukkan nama lengkap"
-              />
+              <input type="text" name="nama_lengkap" required onChange={handleChange} placeholder="Masukkan nama lengkap" />
             </div>
 
             <div className="form-group">
@@ -143,64 +119,31 @@ const FormTamu = () => {
 
             <div className="form-group">
               <label>Email</label>
-              <input
-                type="email"
-                name="email"
-                onChange={handleChange}
-                placeholder="contoh@email.com"
-              />
+              <input type="email" name="email" onChange={handleChange} placeholder="contoh@email.com" />
             </div>
 
             <div className="form-group">
               <label className="required">No HP</label>
-              <input
-                type="text"
-                name="no_hp"
-                required
-                onChange={handleChange}
-                placeholder="08xxxxxxxxxx"
-              />
+              <input type="text" name="no_hp" required onChange={handleChange} placeholder="08xxxxxxxxxx" />
             </div>
 
             <div className="form-group">
               <label>Pekerjaan</label>
-              <input
-                type="text"
-                name="pekerjaan"
-                onChange={handleChange}
-                placeholder="Masukkan pekerjaan"
-              />
+              <input type="text" name="pekerjaan" onChange={handleChange} placeholder="Masukkan pekerjaan" />
             </div>
 
             <div className="form-group">
               <label className="required">Tanggal Kedatangan</label>
-              <input
-                type="text"
-                name="tanggal_kedatangan"
-                value={formatDate(currentDate)}
-                readOnly
-                className="date-fixed"
-              />
+              <input type="text" name="tanggal_kedatangan" value={formatDate(currentDate)} readOnly className="date-fixed" />
             </div>
 
             <div className="form-group full-width">
               <label className="required">Alamat</label>
-              <textarea
-                name="alamat"
-                required
-                onChange={handleChange}
-                placeholder="Masukkan alamat lengkap"
-              ></textarea>
+              <textarea name="alamat" required onChange={handleChange} placeholder="Masukkan alamat lengkap"></textarea>
             </div>
 
             <div className="button-group">
-              <button
-                onClick={goToNextStep}
-                className="next-button"
-                type="button"
-              >
-                Lanjutkan
-              </button>
+              <button onClick={goToNextStep} className="next-button" type="button">Lanjutkan</button>
             </div>
           </div>
         )}
@@ -219,9 +162,7 @@ const FormTamu = () => {
                 required
               >
                 <option value="">Pilih keperluan</option>
-                <option value="mitra_statistik">
-                  Kegiatan Mitra Statistik
-                </option>
+                <option value="mitra_statistik">Kegiatan Mitra Statistik</option>
                 <option value="konsultasi">Konsultasi Statistik</option>
                 <option value="tamu_umum">Tamu Umum</option>
               </select>
@@ -240,9 +181,7 @@ const FormTamu = () => {
 
             {keperluan === "mitra_statistik" && (
               <div className="subform">
-                <h3 className="subform-title">
-                  Detail Kegiatan Mitra Statistik
-                </h3>
+                <h3 className="subform-title">Detail Kegiatan Mitra Statistik</h3>
                 <div className="form-content">
                   <div className="form-group full-width">
                     <label className="required">Tujuan Kunjungan</label>
@@ -305,19 +244,9 @@ const FormTamu = () => {
             )}
 
             <div className="button-group">
-              <button
-                type="button"
-                onClick={goToPrevStep}
-                className="secondary-button"
-              >
-                Kembali
-              </button>
-              <button type="reset" className="secondary-button">
-                Reset
-              </button>
-              <button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Mengirim..." : "Kirim"}
-              </button>
+              <button type="button" onClick={goToPrevStep} className="secondary-button">Kembali</button>
+              <button type="reset" className="secondary-button">Reset</button>
+              <button type="submit" disabled={isSubmitting}>{isSubmitting ? "Mengirim..." : "Kirim"}</button>
             </div>
           </div>
         )}

@@ -71,27 +71,6 @@
   gap: 0.75rem;
 }
 
-.refresh-btn {
-  background-color: var(--primary-light);
-  color: var(--primary);
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 1.25rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: var(--transition);
-}
-
-.refresh-btn:hover {
-  background-color: var(--primary);
-  color: var(--white);
-  transform: rotate(180deg);
-}
-
 /* Dashboard Grid */
 .dashboard-grid {
   display: grid;

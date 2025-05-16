@@ -4,6 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../styles/AdminDashboard.css";
 import BPSLogo from "../assets/BPS.png";
+import Sidebar from "./sidebar";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const AdminDashboard = () => {
   const [error, setError] = useState(null);
   const [showAll, setShowAll] = useState(false);
   const [selectedGuest, setSelectedGuest] = useState(null);
-  const [activeTab, setActiveTab] = useState("all"); 
+  const [activeTab, setActiveTab] = useState("all");
 
   // Fetch guests data
   const fetchGuests = () => {
@@ -130,310 +131,336 @@ const AdminDashboard = () => {
     return <span className="badge processing">Diproses</span>;
   };
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // This function will be passed to the Sidebar component
+  const handleToggleSidebar = (isOpen) => {
+    setIsSidebarOpen(isOpen);
+  };
+
   return (
-    <div className="admin-dashboard">
-      <header className="dashboard-header">
-        <div className="header-content">
-          <div className="logo-title">
-            <img src={BPSLogo} alt="BPS Logo" className="bps-logo" />
-            <h1>Dashboard Admin</h1>
-          </div>
-          <div className="action-buttons">
-            <button
-              className="refresh-btn"
-              onClick={handleRefresh}
-              title="Refresh Data"
-            >
-              ↻
-            </button>
-          </div>
-        </div>
-      </header>
+    <div style={{ display: "flex" }}>
+      <Sidebar />
+      <div
+        style={{
+          marginLeft: isSidebarOpen ? "220px" : "0",
+          padding: "20px",
+          flex: 1,
+          transition: "margin-left 0.3s ease",
+        }}
+      >
+        <div className="admin-dashboard">
+          <header className="dashboard-header">
+            <div className="header-content">
+              <div className="logo-title">
+                <img src={BPSLogo} alt="BPS Logo" className="bps-logo" />
+                <h1>Dashboard Admin</h1>
+              </div>
+              <div className="action-buttons">
+                <button
+                  className="refresh-btn"
+                  onClick={handleRefresh}
+                  title="Refresh Data"
+                >
+                  ↻
+                </button>
+              </div>
+            </div>
+          </header>
 
-      <div className="dashboard-grid">
-        <div className="stats-card">
-          <div className="stat-container">
-            <div className="stat-item">
-              <div className="stat-icon today">
-                <span className="icon">📅</span>
+          <div className="dashboard-grid">
+            <div className="stats-card">
+              <div className="stat-container">
+                <div className="stat-item">
+                  <div className="stat-icon today">
+                    <span className="icon">📅</span>
+                  </div>
+                  <div className="stat-content">
+                    <div className="stat-value">{todayGuests}</div>
+                    <div className="stat-label">Tamu Hari Ini</div>
+                  </div>
+                </div>
               </div>
-              <div className="stat-content">
-                <div className="stat-value">{todayGuests}</div>
-                <div className="stat-label">Tamu Hari Ini</div>
+
+              <div className="stat-container">
+                <div className="stat-item">
+                  <div className="stat-icon weekly">
+                    <span className="icon">📈</span>
+                  </div>
+                  <div className="stat-content">
+                    <div className="stat-value">{weeklyGuests}</div>
+                    <div className="stat-label">Tamu Minggu Ini</div>
+                  </div>
+                </div>
               </div>
+
+              <div className="stat-container">
+                <div className="stat-item">
+                  <div className="stat-icon pending">
+                    <span className="icon">⏳</span>
+                  </div>
+                  <div className="stat-content">
+                    <div className="stat-value">{unprocessedGuests}</div>
+                    <div className="stat-label">Belum Diproses</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="stat-container">
+                <div className="stat-item">
+                  <div className="stat-icon completed">
+                    <span className="icon">✓</span>
+                  </div>
+                  <div className="stat-content">
+                    <div className="stat-value">{completedGuests}</div>
+                    <div className="stat-label">Selesai</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="guests-card">
+              <div className="card-header">
+                <h2>Daftar Tamu</h2>
+                <div className="tab-controls">
+                  <button
+                    className={`tab-btn ${activeTab === "all" ? "active" : ""}`}
+                    onClick={() => setActiveTab("all")}
+                  >
+                    Semua
+                  </button>
+                  <button
+                    className={`tab-btn ${
+                      activeTab === "unprocessed" ? "active" : ""
+                    }`}
+                    onClick={() => setActiveTab("unprocessed")}
+                  >
+                    Belum Diproses
+                  </button>
+                  <button
+                    className={`tab-btn ${
+                      activeTab === "processed" ? "active" : ""
+                    }`}
+                    onClick={() => setActiveTab("processed")}
+                  >
+                    Diproses
+                  </button>
+                  <button
+                    className={`tab-btn ${
+                      activeTab === "completed" ? "active" : ""
+                    }`}
+                    onClick={() => setActiveTab("completed")}
+                  >
+                    Selesai
+                  </button>
+                </div>
+              </div>
+
+              {isLoading ? (
+                <div className="loading-container">
+                  <div className="loading-spinner"></div>
+                  <p>Memuat data...</p>
+                </div>
+              ) : error ? (
+                <div className="error-container">
+                  <p className="error-message">{error}</p>
+                  <button onClick={fetchGuests} className="retry-btn">
+                    Coba Lagi
+                  </button>
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="guests-table">
+                    <thead>
+                      <tr>
+                        <th>Nama</th>
+                        <th>Keperluan</th>
+                        <th>Tanggal</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {displayedGuests.map((guest) => (
+                        <tr key={guest.id}>
+                          <td>{guest.nama}</td>
+                          <td className="purpose-cell">{guest.keperluan}</td>
+                          <td>{guest.tanggal_kedatangan}</td>
+                          <td>{getStatusBadge(guest)}</td>
+                          <td className="actions-cell">
+                            <button
+                              className="action-btn view"
+                              onClick={() => setSelectedGuest(guest)}
+                            >
+                              Detail
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {displayedGuests.length === 0 && (
+                        <tr>
+                          <td colSpan="5" className="no-data">
+                            {activeTab === "completed"
+                              ? "Tidak ada tamu yang telah selesai."
+                              : activeTab === "unprocessed"
+                              ? "Tidak ada tamu yang belum diproses."
+                              : activeTab === "processed"
+                              ? "Tidak ada tamu yang sedang diproses."
+                              : "Belum ada data tamu."}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {filteredGuests.length > 5 && (
+                <div className="show-more">
+                  <button onClick={() => setShowAll(!showAll)}>
+                    {showAll ? "Sembunyikan" : "Lihat Semua"}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="stat-container">
-            <div className="stat-item">
-              <div className="stat-icon weekly">
-                <span className="icon">📈</span>
-              </div>
-              <div className="stat-content">
-                <div className="stat-value">{weeklyGuests}</div>
-                <div className="stat-label">Tamu Minggu Ini</div>
-              </div>
-            </div>
-          </div>
+          {/* Detail Modal */}
+          {selectedGuest && (
+            <div className="modal-backdrop">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h3>Detail Tamu</h3>
+                  <button
+                    className="close-btn"
+                    onClick={() => setSelectedGuest(null)}
+                  >
+                    ×
+                  </button>
+                </div>
 
-          <div className="stat-container">
-            <div className="stat-item">
-              <div className="stat-icon pending">
-                <span className="icon">⏳</span>
-              </div>
-              <div className="stat-content">
-                <div className="stat-value">{unprocessedGuests}</div>
-                <div className="stat-label">Belum Diproses</div>
-              </div>
-            </div>
-          </div>
+                <div className="guest-details">
+                  <div className="detail-status">
+                    {getStatusBadge(selectedGuest)}
+                  </div>
 
-          <div className="stat-container">
-            <div className="stat-item">
-              <div className="stat-icon completed">
-                <span className="icon">✓</span>
-              </div>
-              <div className="stat-content">
-                <div className="stat-value">{completedGuests}</div>
-                <div className="stat-label">Selesai</div>
-              </div>
-            </div>
-          </div>
-        </div>
+                  <div className="detail-grid">
+                    <div className="detail-item">
+                      <div className="detail-label">Nama</div>
+                      <div className="detail-value">{selectedGuest.nama}</div>
+                    </div>
 
-        <div className="guests-card">
-          <div className="card-header">
-            <h2>Daftar Tamu</h2>
-            <div className="tab-controls">
-              <button
-                className={`tab-btn ${activeTab === "all" ? "active" : ""}`}
-                onClick={() => setActiveTab("all")}
-              >
-                Semua
-              </button>
-              <button
-                className={`tab-btn ${
-                  activeTab === "unprocessed" ? "active" : ""
-                }`}
-                onClick={() => setActiveTab("unprocessed")}
-              >
-                Belum Diproses
-              </button>
-              <button
-                className={`tab-btn ${
-                  activeTab === "processed" ? "active" : ""
-                }`}
-                onClick={() => setActiveTab("processed")}
-              >
-                Diproses
-              </button>
-              <button
-                className={`tab-btn ${
-                  activeTab === "completed" ? "active" : ""
-                }`}
-                onClick={() => setActiveTab("completed")}
-              >
-                Selesai
-              </button>
-            </div>
-          </div>
+                    <div className="detail-item">
+                      <div className="detail-label">Email</div>
+                      <div className="detail-value">{selectedGuest.email}</div>
+                    </div>
 
-          {isLoading ? (
-            <div className="loading-container">
-              <div className="loading-spinner"></div>
-              <p>Memuat data...</p>
-            </div>
-          ) : error ? (
-            <div className="error-container">
-              <p className="error-message">{error}</p>
-              <button onClick={fetchGuests} className="retry-btn">
-                Coba Lagi
-              </button>
-            </div>
-          ) : (
-            <div className="table-responsive">
-              <table className="guests-table">
-                <thead>
-                  <tr>
-                    <th>Nama</th>
-                    <th>Keperluan</th>
-                    <th>Tanggal</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {displayedGuests.map((guest) => (
-                    <tr key={guest.id}>
-                      <td>{guest.nama}</td>
-                      <td className="purpose-cell">{guest.keperluan}</td>
-                      <td>{guest.tanggal_kedatangan}</td>
-                      <td>{getStatusBadge(guest)}</td>
-                      <td className="actions-cell">
-                        <button
-                          className="action-btn view"
-                          onClick={() => setSelectedGuest(guest)}
-                        >
-                          Detail
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {displayedGuests.length === 0 && (
-                    <tr>
-                      <td colSpan="5" className="no-data">
-                        {activeTab === "completed"
-                          ? "Tidak ada tamu yang telah selesai."
-                          : activeTab === "unprocessed"
-                          ? "Tidak ada tamu yang belum diproses."
-                          : activeTab === "processed"
-                          ? "Tidak ada tamu yang sedang diproses."
-                          : "Belum ada data tamu."}
-                      </td>
-                    </tr>
+                    <div className="detail-item">
+                      <div className="detail-label">No HP</div>
+                      <div className="detail-value">{selectedGuest.no_hp}</div>
+                    </div>
+
+                    <div className="detail-item">
+                      <div className="detail-label">Tanggal</div>
+                      <div className="detail-value">
+                        {selectedGuest.tanggal_kedatangan}
+                      </div>
+                    </div>
+
+                    <div className="detail-item full-width">
+                      <div className="detail-label">Keperluan</div>
+                      <div className="detail-value">
+                        {selectedGuest.keperluan}
+                      </div>
+                    </div>
+
+                    <div className="detail-item full-width">
+                      <div className="detail-label">Alamat</div>
+                      <div className="detail-value">{selectedGuest.alamat}</div>
+                    </div>
+
+                    <div className="detail-item full-width">
+                      <div className="detail-label">Pekerjaan</div>
+                      <div className="detail-value">
+                        {selectedGuest.pekerjaan}
+                      </div>
+                    </div>
+
+                    {selectedGuest.isi_pertemuan && (
+                      <div className="detail-item full-width">
+                        <div className="detail-label">Hasil Pertemuan</div>
+                        <div className="detail-value">
+                          {selectedGuest.isi_pertemuan}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedGuest.dokumentasi && (
+                      <div className="detail-item full-width">
+                        <div className="detail-label">Dokumentasi</div>
+                        <div className="detail-value image-container">
+                          <img
+                            src={selectedGuest.dokumentasi}
+                            alt="Dokumentasi"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="modal-footer">
+                  <button
+                    className="btn-close"
+                    onClick={() => setSelectedGuest(null)}
+                  >
+                    Tutup
+                  </button>
+
+                  <button
+                    className="btn-edit"
+                    onClick={() =>
+                      navigate(`/pages/EditGuestForm/${selectedGuest.id}`)
+                    }
+                  >
+                    Edit
+                  </button>
+
+                  {(!selectedGuest.status ||
+                    selectedGuest.status === "Belum Diproses") && (
+                    <button
+                      className="btn-follow-up"
+                      onClick={() => startProcessing(selectedGuest.id)}
+                    >
+                      Mulai Proses
+                    </button>
                   )}
-                </tbody>
-              </table>
-            </div>
-          )}
 
-          {filteredGuests.length > 5 && (
-            <div className="show-more">
-              <button onClick={() => setShowAll(!showAll)}>
-                {showAll ? "Sembunyikan" : "Lihat Semua"}
-              </button>
+                  {selectedGuest.status === "Diproses" && (
+                    <button
+                      className="btn-follow-up"
+                      onClick={() =>
+                        navigate(`/pages/FollowUpForm/${selectedGuest.id}`)
+                      }
+                    >
+                      Tindak Lanjut
+                    </button>
+                  )}
+
+                  {selectedGuest.status === "Diproses" && (
+                    <button
+                      className="btn-complete"
+                      onClick={() => markAsCompleted(selectedGuest.id)}
+                    >
+                      Tandai Selesai
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </div>
       </div>
-
-      {/* Detail Modal */}
-      {selectedGuest && (
-        <div className="modal-backdrop">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>Detail Tamu</h3>
-              <button
-                className="close-btn"
-                onClick={() => setSelectedGuest(null)}
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="guest-details">
-              <div className="detail-status">
-                {getStatusBadge(selectedGuest)}
-              </div>
-
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <div className="detail-label">Nama</div>
-                  <div className="detail-value">{selectedGuest.nama}</div>
-                </div>
-
-                <div className="detail-item">
-                  <div className="detail-label">Email</div>
-                  <div className="detail-value">{selectedGuest.email}</div>
-                </div>
-
-                <div className="detail-item">
-                  <div className="detail-label">No HP</div>
-                  <div className="detail-value">{selectedGuest.no_hp}</div>
-                </div>
-
-                <div className="detail-item">
-                  <div className="detail-label">Tanggal</div>
-                  <div className="detail-value">
-                    {selectedGuest.tanggal_kedatangan}
-                  </div>
-                </div>
-
-                <div className="detail-item full-width">
-                  <div className="detail-label">Keperluan</div>
-                  <div className="detail-value">{selectedGuest.keperluan}</div>
-                </div>
-
-                <div className="detail-item full-width">
-                  <div className="detail-label">Alamat</div>
-                  <div className="detail-value">{selectedGuest.alamat}</div>
-                </div>
-
-                <div className="detail-item full-width">
-                  <div className="detail-label">Pekerjaan</div>
-                  <div className="detail-value">{selectedGuest.pekerjaan}</div>
-                </div>
-
-                {selectedGuest.isi_pertemuan && (
-                  <div className="detail-item full-width">
-                    <div className="detail-label">Hasil Pertemuan</div>
-                    <div className="detail-value">
-                      {selectedGuest.isi_pertemuan}
-                    </div>
-                  </div>
-                )}
-
-                {selectedGuest.dokumentasi && (
-                  <div className="detail-item full-width">
-                    <div className="detail-label">Dokumentasi</div>
-                    <div className="detail-value image-container">
-                      <img src={selectedGuest.dokumentasi} alt="Dokumentasi" />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <button
-                className="btn-close"
-                onClick={() => setSelectedGuest(null)}
-              >
-                Tutup
-              </button>
-
-              <button
-                className="btn-edit"
-                onClick={() =>
-                  navigate(`/pages/EditGuestForm/${selectedGuest.id}`)
-                }
-              >
-                Edit
-              </button>
-
-              {(!selectedGuest.status ||
-                selectedGuest.status === "Belum Diproses") && (
-                <button
-                  className="btn-follow-up"
-                  onClick={() => startProcessing(selectedGuest.id)}
-                >
-                  Mulai Proses
-                </button>
-              )}
-
-              {selectedGuest.status === "Diproses" && (
-                <button
-                  className="btn-follow-up"
-                  onClick={() =>
-                    navigate(`/pages/FollowUpForm/${selectedGuest.id}`)
-                  }
-                >
-                  Tindak Lanjut
-                </button>
-              )}
-
-              {selectedGuest.status === "Diproses" && (
-                <button
-                  className="btn-complete"
-                  onClick={() => markAsCompleted(selectedGuest.id)}
-                >
-                  Tandai Selesai
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
