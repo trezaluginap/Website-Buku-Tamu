@@ -39,7 +39,7 @@ const FormTamu = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch("http://localhost:5000/api/guests", {
+      const response = await fetch("http://localhost:5000/api/tamu", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,7 +105,13 @@ const FormTamu = () => {
           <div className="form-content">
             <div className="form-group">
               <label className="required">Nama Lengkap</label>
-              <input type="text" name="nama_lengkap" required onChange={handleChange} placeholder="Masukkan nama lengkap" />
+              <input
+                type="text"
+                name="nama_lengkap"
+                required
+                onChange={handleChange}
+                placeholder="Masukkan nama lengkap"
+              />
             </div>
 
             <div className="form-group">
@@ -182,17 +188,15 @@ const FormTamu = () => {
             {keperluan === "mitra_statistik" && (
               <div className="subform">
                 <h3 className="subform-title">Detail Kegiatan Mitra Statistik</h3>
-                <div className="form-content">
-                  <div className="form-group full-width">
-                    <label className="required">Tujuan Kunjungan</label>
-                    <textarea
-                      name="tujuan_kunjungan"
-                      required
-                      onChange={handleChange}
-                      placeholder="Jelaskan tujuan kunjungan Anda"
-                      rows="3"
-                    ></textarea>
-                  </div>
+                <div className="form-group full-width">
+                  <label className="required">Tujuan Kunjungan</label>
+                  <textarea
+                    name="tujuan_kunjungan"
+                    required
+                    onChange={handleChange}
+                    placeholder="Jelaskan tujuan kunjungan Anda"
+                    rows="3"
+                  ></textarea>
                 </div>
               </div>
             )}
@@ -200,27 +204,25 @@ const FormTamu = () => {
             {keperluan === "konsultasi" && (
               <div className="subform">
                 <h3 className="subform-title">Detail Konsultasi Statistik</h3>
-                <div className="form-content">
-                  <div className="form-group full-width">
-                    <label className="required">Topik Konsultasi</label>
-                    <input
-                      type="text"
-                      name="topik_konsultasi"
-                      required
-                      onChange={handleChange}
-                      placeholder="Masukkan topik konsultasi"
-                    />
-                  </div>
-                  <div className="form-group full-width">
-                    <label className="required">Deskripsi Kebutuhan</label>
-                    <textarea
-                      name="deskripsi_kebutuhan"
-                      required
-                      onChange={handleChange}
-                      placeholder="Jelaskan kebutuhan konsultasi Anda secara detail"
-                      rows="4"
-                    ></textarea>
-                  </div>
+                <div className="form-group full-width">
+                  <label className="required">Topik Konsultasi</label>
+                  <input
+                    type="text"
+                    name="topik_konsultasi"
+                    required
+                    onChange={handleChange}
+                    placeholder="Masukkan topik konsultasi"
+                  />
+                </div>
+                <div className="form-group full-width">
+                  <label className="required">Deskripsi Kebutuhan</label>
+                  <textarea
+                    name="deskripsi_kebutuhan"
+                    required
+                    onChange={handleChange}
+                    placeholder="Jelaskan kebutuhan konsultasi Anda secara detail"
+                    rows="4"
+                  ></textarea>
                 </div>
               </div>
             )}
@@ -228,17 +230,15 @@ const FormTamu = () => {
             {keperluan === "tamu_umum" && (
               <div className="subform">
                 <h3 className="subform-title">Detail Kunjungan</h3>
-                <div className="form-content">
-                  <div className="form-group full-width">
-                    <label className="required">Tujuan Kunjungan</label>
-                    <textarea
-                      name="tujuan_kunjungan"
-                      required
-                      onChange={handleChange}
-                      placeholder="Jelaskan tujuan kunjungan Anda"
-                      rows="3"
-                    ></textarea>
-                  </div>
+                <div className="form-group full-width">
+                  <label className="required">Tujuan Kunjungan</label>
+                  <textarea
+                    name="tujuan_kunjungan"
+                    required
+                    onChange={handleChange}
+                    placeholder="Jelaskan tujuan kunjungan Anda"
+                    rows="3"
+                  ></textarea>
                 </div>
               </div>
             )}
@@ -246,7 +246,9 @@ const FormTamu = () => {
             <div className="button-group">
               <button type="button" onClick={goToPrevStep} className="secondary-button">Kembali</button>
               <button type="reset" className="secondary-button">Reset</button>
-              <button type="submit" disabled={isSubmitting}>{isSubmitting ? "Mengirim..." : "Kirim"}</button>
+              <button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Mengirim..." : "Kirim"}
+              </button>
             </div>
           </div>
         )}
