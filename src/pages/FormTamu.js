@@ -9,18 +9,15 @@ const FormTamu = () => {
   const [formStep, setFormStep] = useState(1);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  
   const today = new Date();
   const currentDate = today.toISOString().split("T")[0];
 
-  
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
       tanggal_kedatangan: currentDate,
     }));
 
-    
     const timer = setTimeout(() => {
       setIsLoaded(true);
     }, 100);
@@ -43,23 +40,20 @@ const FormTamu = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(
-        "https://67d524cbd2c7857431ef80e1.mockapi.io/Guest",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch("http://localhost:5000/api/tamu", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
       if (response.ok) {
         alert("Data berhasil dikirim!");
         e.target.reset();
         setKeperluan("");
         setFormData({
-          tanggal_kedatangan: currentDate, 
+          tanggal_kedatangan: currentDate,
         });
         setFormStep(1);
       } else {
@@ -85,7 +79,6 @@ const FormTamu = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Get current day name in Indonesian
   const getDayName = () => {
     const days = [
       "Minggu",
@@ -99,7 +92,6 @@ const FormTamu = () => {
     return days[today.getDay()];
   };
 
-  // Format date to Indonesian format
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
@@ -125,7 +117,7 @@ const FormTamu = () => {
               <label className="required">Nama Lengkap</label>
               <input
                 type="text"
-                name="nama"
+                name="nama_lengkap"
                 required
                 onChange={handleChange}
                 placeholder="Masukkan nama lengkap"
@@ -173,10 +165,10 @@ const FormTamu = () => {
             </div>
 
             <div className="form-group">
-              <label className="required">Tanggal Kedatangan</label>
+              <label className="required">Tanggal Kehadiran</label>
               <input
                 type="text"
-                name="tanggal_kedatangan"
+                name="tanggal_kehadiran"
                 value={formatDate(currentDate)}
                 readOnly
                 className="date-fixed"
@@ -219,7 +211,7 @@ const FormTamu = () => {
                 required
               >
                 <option value="">Pilih keperluan</option>
-                <option value="mitra_statistik">
+                <option value="Mitra_Statistik">
                   Kegiatan Mitra Statistik
                 </option>
                 <option value="konsultasi">Konsultasi Statistik</option>
@@ -237,72 +229,6 @@ const FormTamu = () => {
                 <option value="lina">Lina Kartini</option>
               </select>
             </div>
-
-            {keperluan === "mitra_statistik" && (
-              <div className="subform">
-                <h3 className="subform-title">
-                  Detail Kegiatan Mitra Statistik
-                </h3>
-                <div className="form-content">
-                  <div className="form-group full-width">
-                    <label className="required">Tujuan Kunjungan</label>
-                    <textarea
-                      name="tujuan_kunjungan"
-                      required
-                      onChange={handleChange}
-                      placeholder="Jelaskan tujuan kunjungan Anda"
-                      rows="3"
-                    ></textarea>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {keperluan === "konsultasi" && (
-              <div className="subform">
-                <h3 className="subform-title">Detail Konsultasi Statistik</h3>
-                <div className="form-content">
-                  <div className="form-group full-width">
-                    <label className="required">Topik Konsultasi</label>
-                    <input
-                      type="text"
-                      name="topik_konsultasi"
-                      required
-                      onChange={handleChange}
-                      placeholder="Masukkan topik konsultasi"
-                    />
-                  </div>
-                  <div className="form-group full-width">
-                    <label className="required">Deskripsi Kebutuhan</label>
-                    <textarea
-                      name="deskripsi_kebutuhan"
-                      required
-                      onChange={handleChange}
-                      placeholder="Jelaskan kebutuhan konsultasi Anda secara detail"
-                      rows="4"
-                    ></textarea>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {keperluan === "tamu_umum" && (
-              <div className="subform">
-                <h3 className="subform-title">Detail Kunjungan</h3>
-                <div className="form-content">
-                  <div className="form-group full-width">
-                    <label className="required">Tujuan Kunjungan</label>
-                    <textarea
-                      name="tujuan_kunjungan"
-                      required
-                      onChange={handleChange}
-                      placeholder="Jelaskan tujuan kunjungan Anda"
-                      rows="3"
-                    ></textarea>
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div className="button-group">
               <button

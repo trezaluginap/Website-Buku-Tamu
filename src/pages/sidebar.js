@@ -1,24 +1,61 @@
-// src/pages/Sidebar.js
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+// src/components/Sidebar.js
+import React, { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import "../styles/sidebar.css";
 import BPSLogo from "../assets/BPS.png";
 
-const Sidebar = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+const Sidebar = ({ isOpen, toggleSidebar }) => {
+  const location = useLocation();
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  // Handle keyboard events for accessibility
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && isOpen) {
+        toggleSidebar();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, toggleSidebar]);
+
+  // Handle body scroll when sidebar is open on mobile
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      if (isOpen) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "auto";
+      }
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen]);
+
+  // Menu items data for easier management
+  const menuItems = [
+    { path: "/admin", icon: "📊", label: "Dashboard" },
+    { path: "/pages/UserManagement", icon: "👥", label: "Kelola Pengguna" },
+    { path: "/pages/PrintPDF", icon: "📄", label: "Cetak PDF" },
+  ];
 
   return (
     <>
-      <div className={`sidebar ${isSidebarOpen ? "open" : "closed"}`}>
+      <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
         <div className="sidebar-header">
           <div className="sidebar-logo">
             <img src={BPSLogo} alt="BPS Logo" />
+            <span className="sidebar-logo-text">BPS Admin</span>
           </div>
-          <button className="sidebar-toggle" onClick={toggleSidebar}>
+          <button
+            className="sidebar-toggle"
+            onClick={toggleSidebar}
+            aria-label="Toggle sidebar"
+          >
             <div className="hamburger">
               <span></span>
               <span></span>
@@ -26,30 +63,45 @@ const Sidebar = () => {
             </div>
           </button>
         </div>
+
         <div className="sidebar-menu">
-          <Link to="/admin" className="sidebar-item active">
-            📊 Dashboard
-          </Link>
-          <Link to="/pages/UserManagement" className="sidebar-item">
-            👥 Kelola Pengguna
-          </Link>
-          <Link to="/pages/PrintPDF" className="sidebar-item">
-            📄 Cetak PDF
-          </Link>
+          {menuItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`sidebar-item ${
+                location.pathname === item.path ? "active" : ""
+              }`}
+            >
+              <span className="sidebar-item-icon">{item.icon}</span>
+              <span className="sidebar-item-text">{item.label}</span>
+            </Link>
+          ))}
+
           <Link to="/logout" className="sidebar-item logout">
-            🚪 Keluar
+            <span className="sidebar-item-icon">🚪</span>
+            <span className="sidebar-item-text">Keluar</span>
           </Link>
         </div>
       </div>
-      {!isSidebarOpen && (
-        <button className="sidebar-toggle-collapsed" onClick={toggleSidebar}>
-          <div className="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </button>
-      )}
+
+      <div
+        className={`toggle-button-container ${isOpen ? "sidebar-open" : ""}`}
+      >
+        {!isOpen && (
+          <button
+            className="sidebar-toggle"
+            onClick={toggleSidebar}
+            aria-label="Open sidebar"
+          >
+            <div className="hamburger">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </button>
+        )}
+      </div>
     </>
   );
 };

@@ -12,16 +12,87 @@ const UserManagement = () => {
       username: "bps3272",
       password: "admin",
     },
+    {
+      id: 2,
+      name: "Staff Admin",
+      nip: "87654321",
+      username: "staff3272",
+      password: "staff123",
+    },
+    {
+      id: 3,
+      name: "Manager",
+      nip: "98765432",
+      username: "manager3272",
+      password: "manager123",
+    },
   ]);
 
   // State for the currently selected user (for editing)
   const [selectedUser, setSelectedUser] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    nip: "",
+    username: "",
+    password: "",
+  });
 
   // Function to handle the edit button click
   const handleEdit = (user) => {
     setSelectedUser(user);
-    // In a real app, you might open a modal or form here
-    console.log("Editing user:", user);
+    setFormData({
+      name: user.name,
+      nip: user.nip,
+      username: user.username,
+      password: user.password,
+    });
+    setShowModal(true);
+  };
+
+  // Function to handle the add new user button click
+  const handleAddNew = () => {
+    setSelectedUser(null);
+    setFormData({
+      name: "",
+      nip: "",
+      username: "",
+      password: "",
+    });
+    setShowModal(true);
+  };
+
+  // Function to handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  // Function to handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (selectedUser) {
+      // Update existing user
+      setUsers(
+        users.map((user) =>
+          user.id === selectedUser.id ? { ...user, ...formData } : user
+        )
+      );
+    } else {
+      // Add new user
+      const newUser = {
+        id:
+          users.length > 0 ? Math.max(...users.map((user) => user.id)) + 1 : 1,
+        ...formData,
+      };
+      setUsers([...users, newUser]);
+    }
+
+    setShowModal(false);
   };
 
   // Function to handle the delete button click
@@ -31,16 +102,37 @@ const UserManagement = () => {
     }
   };
 
+  // Function to close the modal
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
   return (
     <div className="content-container">
-      <div className="page-header">
-        <h1 className="page-title">AKU</h1>
-        <h2 className="page-subtitle">Aplikasi Buku Tamu</h2>
-        <div className="user-info">Anda Login Sebagai: Nip:3272</div>
+      <div className="dashboard-header">
+        <div className="app-info">
+          <h1 className="app-title">AKU</h1>
+          <h2 className="app-subtitle">Aplikasi Buku Tamu</h2>
+        </div>
+        <div className="user-badge">
+          <div className="user-avatar">
+            <span>SA</span>
+          </div>
+          <div className="user-details">
+            <span className="user-role">Super Admin</span>
+            <span className="user-nip">NIP: 3272</span>
+          </div>
+        </div>
       </div>
 
-      <div className="content-area">
-        <div className="section-title">Kelola User</div>
+      <div className="content-card">
+        <div className="card-header">
+          <h3 className="section-title">Kelola User</h3>
+          <button className="add-button" onClick={handleAddNew}>
+            <span className="add-icon">+</span>
+            Tambah User
+          </button>
+        </div>
 
         <div className="table-container">
           <table className="data-table">
@@ -55,38 +147,113 @@ const UserManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map((user, index) => (
-                <tr key={user.id}>
-                  <td>{index + 1}</td>
-                  <td>{user.name}</td>
-                  <td>{user.nip}</td>
-                  <td>{user.username}</td>
-                  <td>{user.password}</td>
-                  <td className="action-buttons">
-                    <button
-                      className="edit-button"
-                      onClick={() => handleEdit(user)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="delete-button"
-                      onClick={() => handleDelete(user.id)}
-                    >
-                      Hapus
-                    </button>
+              {users.length > 0 ? (
+                users.map((user, index) => (
+                  <tr key={user.id}>
+                    <td>{index + 1}</td>
+                    <td>{user.name}</td>
+                    <td>{user.nip}</td>
+                    <td>{user.username}</td>
+                    <td>{"•".repeat(user.password.length)}</td>
+                    <td className="action-buttons">
+                      <button
+                        className="edit-button"
+                        onClick={() => handleEdit(user)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="delete-button"
+                        onClick={() => handleDelete(user.id)}
+                      >
+                        Hapus
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="empty-table">
+                    Tidak ada data pengguna
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
-
-        {/* Add User Button - Could expand to show a form */}
-        <div className="button-container">
-          <button className="add-button">Tambah User</button>
-        </div>
       </div>
+
+      {/* Modal for adding/editing users */}
+      {showModal && (
+        <div className="modal-backdrop">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>{selectedUser ? "Edit User" : "Tambah User Baru"}</h3>
+              <button className="close-button" onClick={closeModal}>
+                ×
+              </button>
+            </div>
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="name">Nama Pegawai</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="nip">NIP</label>
+                <input
+                  type="text"
+                  id="nip"
+                  name="nip"
+                  value={formData.nip}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="username">Username</label>
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-actions">
+                <button
+                  type="button"
+                  className="cancel-button"
+                  onClick={closeModal}
+                >
+                  Batal
+                </button>
+                <button type="submit" className="submit-button">
+                  {selectedUser ? "Perbarui" : "Simpan"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
