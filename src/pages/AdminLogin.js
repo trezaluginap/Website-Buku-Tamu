@@ -12,7 +12,7 @@ const AdminLogin = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setErrorMsg(""); // reset pesan error
+    setErrorMsg(""); // Reset pesan error
 
     if (!email || !password) {
       setErrorMsg("Email dan password wajib diisi!");
@@ -24,7 +24,9 @@ const AdminLogin = () => {
     try {
       const response = await fetch("http://localhost:5000/api/admin-login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ email, password }),
       });
 
@@ -36,6 +38,10 @@ const AdminLogin = () => {
       }
 
       if (response.ok) {
+        // ✅ Simpan data admin ke localStorage
+        localStorage.setItem("adminData", JSON.stringify(data.admin));
+
+        // ✅ Arahkan ke dashboard admin
         navigate("/admin");
       } else {
         setErrorMsg(data.error || "Email atau password salah!");
