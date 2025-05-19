@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "../Styles.css";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState("");
+  const [namaPengguna, setNamaPengguna] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -12,10 +12,10 @@ const AdminLogin = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setErrorMsg(""); // Reset pesan error
+    setErrorMsg("");
 
-    if (!email || !password) {
-      setErrorMsg("Email dan password wajib diisi!");
+    if (!namaPengguna || !password) {
+      setErrorMsg("Nama pengguna dan password wajib diisi!");
       return;
     }
 
@@ -24,10 +24,8 @@ const AdminLogin = () => {
     try {
       const response = await fetch("http://localhost:5000/api/admin-login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nama_pengguna: namaPengguna, password }),
       });
 
       const contentType = response.headers.get("content-type");
@@ -38,13 +36,10 @@ const AdminLogin = () => {
       }
 
       if (response.ok) {
-        // ✅ Simpan data admin ke localStorage
-        localStorage.setItem("adminData", JSON.stringify(data.admin));
-
-        // ✅ Arahkan ke dashboard admin
+        // Redirect ke halaman admin
         navigate("/admin");
       } else {
-        setErrorMsg(data.error || "Email atau password salah!");
+        setErrorMsg(data.error || "Nama pengguna atau password salah!");
       }
     } catch (error) {
       console.error("Gagal login:", error);
@@ -59,12 +54,12 @@ const AdminLogin = () => {
       <h2>Login Admin</h2>
       <form onSubmit={handleLogin}>
         <div className="form-group">
-          <label>Email:</label>
+          <label>Nama Pengguna:</label>
           <input
-            type="email"
-            placeholder="Masukkan email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            placeholder="Masukkan nama pengguna"
+            value={namaPengguna}
+            onChange={(e) => setNamaPengguna(e.target.value)}
             required
           />
         </div>

@@ -109,8 +109,8 @@ const UserManagement = () => {
             <span>SA</span>
           </div>
           <div className="user-details">
-            <span className="user-role">Super Admin</span>
-            <span className="user-nip">NIP: 3272</span>
+            <span className="user-role">Faisal</span>
+            <span className="user-nip">NIP: 12345678</span>
           </div>
         </div>
       </div>

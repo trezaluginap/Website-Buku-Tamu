@@ -61,7 +61,7 @@ const AdminDashboard = () => {
 
   // Sort guests by date (newest first)
   const sortedGuests = [...filteredGuests].sort((a, b) => {
-    return new Date(b.tanggal_kedatangan) - new Date(a.tanggal_kedatangan);
+    return new Date(b.tanggal_kehadiran) - new Date(a.tanggal_kehadiran);
   });
 
   // Get displayed guests based on showAll state
@@ -74,11 +74,11 @@ const AdminDashboard = () => {
   const weekStartStr = weekStart.toISOString().split("T")[0];
 
   const todayGuests = guests.filter(
-    (g) => g.tanggal_kedatangan === today
+    (g) => g.tanggal_kehadiran === today
   ).length;
 
   const weeklyGuests = guests.filter(
-    (g) => g.tanggal_kedatangan >= weekStartStr
+    (g) => g.tanggal_kehadiran >= weekStartStr
   ).length;
 
   const unprocessedGuests = guests.filter(
@@ -310,9 +310,9 @@ const AdminDashboard = () => {
                       {displayedGuests.length > 0 ? (
                         displayedGuests.map((guest) => (
                           <tr key={guest.id}>
-                            <td>{guest.nama}</td>
+                            <td>{guest.nama_lengkap}</td>
                             <td className="purpose-cell">{guest.keperluan}</td>
-                            <td>{guest.tanggal_kedatangan}</td>
+                            <td>{guest.tanggal_kehadiran}</td>
                             <td>{getStatusBadge(guest)}</td>
                             <td className="actions-cell">
                               <button
@@ -384,7 +384,7 @@ const AdminDashboard = () => {
                   <div className="detail-grid">
                     <div className="detail-item">
                       <div className="detail-label">Nama</div>
-                      <div className="detail-value">{selectedGuest.nama}</div>
+                      <div className="detail-value">{selectedGuest.nama_lengkap}</div>
                     </div>
 
                     <div className="detail-item">
@@ -400,7 +400,7 @@ const AdminDashboard = () => {
                     <div className="detail-item">
                       <div className="detail-label">Tanggal</div>
                       <div className="detail-value">
-                        {selectedGuest.tanggal_kedatangan}
+                        {selectedGuest.tanggal_kehadiran}
                       </div>
                     </div>
 
