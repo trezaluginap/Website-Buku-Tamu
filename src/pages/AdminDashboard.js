@@ -169,16 +169,6 @@ const AdminDashboard = () => {
                 <h1>Dashboard Admin</h1>
               </div>
               <div className="action-buttons">
-                <button
-                  className="refresh-btn"
-                  onClick={fetchGuests}
-                  title="Refresh Data"
-                  aria-label="Refresh data"
-                >
-                  <span role="img" aria-hidden="true">
-                    ↻
-                  </span>
-                </button>
               </div>
             </div>
           </header>
