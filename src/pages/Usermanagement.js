@@ -1,34 +1,10 @@
-// src/pages/UserManagement.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/userManagement.css";
 
-const UserManagement = () => {
-  // Sample user data - in a real application, this would come from an API or database
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      name: "superadmin",
-      nip: "12345678",
-      username: "bps3272",
-      password: "admin",
-    },
-    {
-      id: 2,
-      name: "Staff Admin",
-      nip: "87654321",
-      username: "staff3272",
-      password: "staff123",
-    },
-    {
-      id: 3,
-      name: "Manager",
-      nip: "98765432",
-      username: "manager3272",
-      password: "manager123",
-    },
-  ]);
+const API_URL = "http://localhost:5000/api/users";
 
-  // State for the currently selected user (for editing)
+const UserManagement = () => {
+  const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -38,7 +14,22 @@ const UserManagement = () => {
     password: "",
   });
 
-  // Function to handle the edit button click
+  // Ambil data users dari API
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error("❌ Gagal memuat data user:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  // Klik Edit
   const handleEdit = (user) => {
     setSelectedUser(user);
     setFormData({
@@ -50,7 +41,7 @@ const UserManagement = () => {
     setShowModal(true);
   };
 
-  // Function to handle the add new user button click
+  // Klik Tambah
   const handleAddNew = () => {
     setSelectedUser(null);
     setFormData({
@@ -62,50 +53,53 @@ const UserManagement = () => {
     setShowModal(true);
   };
 
-  // Function to handle form input changes
+  // Input Form
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
   };
 
-  // Function to handle form submission
-  const handleSubmit = (e) => {
+  // Submit Form
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (selectedUser) {
-      // Update existing user
-      setUsers(
-        users.map((user) =>
-          user.id === selectedUser.id ? { ...user, ...formData } : user
-        )
-      );
-    } else {
-      // Add new user
-      const newUser = {
-        id:
-          users.length > 0 ? Math.max(...users.map((user) => user.id)) + 1 : 1,
-        ...formData,
-      };
-      setUsers([...users, newUser]);
-    }
+    try {
+      if (selectedUser) {
+        // Update user
+        await fetch(`${API_URL}/${selectedUser.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+      } else {
+        // Tambah user baru
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+      }
 
-    setShowModal(false);
+      fetchUsers(); // Refresh data
+      setShowModal(false);
+    } catch (error) {
+      console.error("❌ Gagal menyimpan data:", error);
+    }
   };
 
-  // Function to handle the delete button click
-  const handleDelete = (userId) => {
+  // Hapus User
+  const handleDelete = async (userId) => {
     if (window.confirm("Apakah Anda yakin ingin menghapus pengguna ini?")) {
-      setUsers(users.filter((user) => user.id !== userId));
+      try {
+        await fetch(`${API_URL}/${userId}`, { method: "DELETE" });
+        fetchUsers();
+      } catch (error) {
+        console.error("❌ Gagal menghapus pengguna:", error);
+      }
     }
   };
 
-  // Function to close the modal
-  const closeModal = () => {
-    setShowModal(false);
-  };
+  const closeModal = () => setShowModal(false);
 
   return (
     <div className="content-container">
@@ -129,8 +123,7 @@ const UserManagement = () => {
         <div className="card-header">
           <h3 className="section-title">Kelola User</h3>
           <button className="add-button" onClick={handleAddNew}>
-            <span className="add-icon">+</span>
-            Tambah User
+            <span className="add-icon">+</span> Tambah User
           </button>
         </div>
 
@@ -183,7 +176,6 @@ const UserManagement = () => {
         </div>
       </div>
 
-      {/* Modal for adding/editing users */}
       {showModal && (
         <div className="modal-backdrop">
           <div className="modal-content">

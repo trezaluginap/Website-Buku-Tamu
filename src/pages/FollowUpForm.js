@@ -19,13 +19,23 @@ const FollowUpForm = () => {
   useEffect(() => {
     setIsLoading(true);
     axios
-      .get(`https://67d524cbd2c7857431ef80e1.mockapi.io/Guest/${id}`)
+      .get(`http://localhost:5000/api/tamu/${id}`)
       .then((res) => {
-        setData((prev) => ({ ...prev, ...res.data }));
+        console.log("Data yang diterima:", res.data);
+        // Pastikan data yang diterima memiliki struktur yang sesuai
+        setData((prev) => ({
+          ...prev,
+          ...res.data,
+          // Pastikan semua field yang diperlukan ada
+          diterima_oleh: res.data.diterima_oleh || "",
+          isi_pertemuan: res.data.isi_pertemuan || "",
+          status: res.data.status || "Selesai",
+          dokumentasi: res.data.dokumentasi || "",
+        }));
         setIsLoading(false);
       })
       .catch((err) => {
-        console.error(err);
+        console.error("Error saat mengambil data:", err);
         setError("Gagal memuat data tamu");
         setIsLoading(false);
       });
@@ -38,7 +48,29 @@ const FollowUpForm = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setData({ ...data, dokumentasi: URL.createObjectURL(file) }); // Simulasi upload
+      // Jika API Anda mendukung upload file, gunakan FormData
+      /* 
+      const formData = new FormData();
+      formData.append('dokumentasi', file);
+      
+      axios.post(`http://localhost:5000/api/tamu/${id}/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(response => {
+        // Asumsikan server mengembalikan URL file yang diupload
+        setData({ ...data, dokumentasi: response.data.fileUrl });
+      }).catch(err => {
+        console.error("Error saat upload file:", err);
+        setError("Gagal mengupload file");
+      });
+      */
+
+      // Untuk sementara gunakan object URL untuk preview saja
+      setData({ ...data, dokumentasi: URL.createObjectURL(file) });
+
+      // Simpan file untuk dikirim nanti jika perlu
+      setData((prev) => ({ ...prev, dokumentasiFile: file }));
     }
   };
 
@@ -46,17 +78,41 @@ const FollowUpForm = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    // Membuat objek data yang akan dikirim
+    const dataToSend = {
+      diterima_oleh: data.diterima_oleh,
+      isi_pertemuan: data.isi_pertemuan,
+      status: data.status,
+      // Jangan kirim dokumentasi kalau masih dalam format URL objek
+      dokumentasi:
+        typeof data.dokumentasi === "string" &&
+        !data.dokumentasi.startsWith("blob:")
+          ? data.dokumentasi
+          : "",
+      perlu_tindak_lanjut: false,
+    };
+
+    console.log("Data yang dikirim:", dataToSend);
+
     axios
-      .put(`https://67d524cbd2c7857431ef80e1.mockapi.io/Guest/${id}`, {
-        ...data,
-        perlu_tindak_lanjut: false,
-      })
-      .then(() => {
+      .put(`http://localhost:5000/api/tamu/${id}`, dataToSend)
+      .then((response) => {
+        console.log("Respons dari server:", response.data);
         navigate("/admin");
       })
       .catch((err) => {
-        console.error(err);
-        setError("Gagal menyimpan data");
+        console.error("Error saat menyimpan:", err);
+        if (err.response) {
+          // Server merespons dengan status error
+          console.error("Respons error:", err.response.data);
+          setError(
+            `Gagal menyimpan data: ${
+              err.response.data.message || err.response.statusText
+            }`
+          );
+        } else {
+          setError("Gagal menyimpan data: Tidak dapat terhubung ke server");
+        }
         setIsLoading(false);
       });
   };

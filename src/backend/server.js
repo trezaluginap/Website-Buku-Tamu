@@ -2,6 +2,7 @@
 const express = require("express");
 const cors = require("cors");
 const tamuRoutes = require("./routes/tamu");
+const usersRoutes = require("./routes/users"); // Tambahkan ini
 const db = require("./config/db");
 
 const app = express();
@@ -92,6 +93,7 @@ app.get("/api/schema/tamu", (req, res) => {
 
 // Endpoint utama aplikasi
 app.use("/api/tamu", tamuRoutes);
+app.use("/api/users", usersRoutes); // Tambahkan ini
 
 // Jalankan server
 app.listen(port, () => {

@@ -424,97 +424,158 @@ body {
   color: var(--danger);
 }
 
-/* Guest Details */
-.guest-details {
-  padding: 1.5rem;
+/* CSS untuk Modal Guest Detail dengan Scrolling */
+
+/* Backdrop modal (latar belakang gelap) */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
-.detail-status {
-  margin-bottom: 1.5rem;
-}
-.detail-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-}
-.detail-item {
+
+/* Konten utama modal */
+.modal-content {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh; /* Maksimal tinggi modal 90% dari tinggi viewport */
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-}
-.detail-item.full-width {
-  grid-column: 1 / -1;
-}
-.detail-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--gray);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.detail-value {
-  font-size: 1rem;
-  color: var(--gray-dark);
-}
-.image-container {
-  margin-top: 0.5rem;
-}
-.image-container img {
-  max-width: 100%;
-  border-radius: var(--border-radius-sm);
+  overflow: hidden; /* Penting untuk memastikan anak elemen tidak keluar dari parent */
 }
 
-/* Modal Footer */
+/* Header modal */
+.modal-header {
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Container untuk area yang bisa di-scroll */
+.guest-details-container {
+  flex: 1;
+  overflow-y: auto; /* Ini yang memungkinkan scrolling */
+  padding: 0 16px;
+  max-height: calc(90vh - 130px); /* Tinggi maksimal dikurangi header dan footer */
+}
+
+/* Detail tamu */
+.guest-details {
+  padding: 2px 0;
+}
+
+/* Footer modal tetap di bawah */
 .modal-footer {
+  padding: 16px;
+  border-top: 1px solid #eee;
   display: flex;
   justify-content: flex-end;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  border-top: 1px solid var(--gray-light);
-}
-.modal-footer button {
-  padding: 0.5rem 1rem;
-  border-radius: var(--border-radius-sm);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition);
-}
-.btn-close {
-  background-color: var(--gray-light);
-  color: var(--gray-dark);
-  border: none;
-}
-.btn-close:hover {
-  background-color: var(--gray);
-  color: var(--white);
-}
-.btn-edit {
-  background-color: var(--primary-light);
-  color: var(--primary);
-  border: none;
-}
-.btn-edit:hover {
-  background-color: var(--primary);
-  color: var(--white);
-}
-.btn-follow-up {
-  background-color: var(--warning);
-  color: var(--gray-dark);
-  border: none;
-}
-.btn-follow-up:hover {
-  background-color: #ffb74d;
-}
-.btn-complete {
-  background-color: var(--success);
-  color: var(--white);
-  border: none;
-}
-.btn-complete:hover {
-  background-color: #00b894;
+  gap: 10px;
 }
 
-/* Sidebar Styling */
+/* Status badge */
+.detail-status {
+  margin-bottom: 16px;
+}
+
+/* Grid layout untuk detail */
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+/* Item detail full width */
+.full-width {
+  grid-column: span 2;
+}
+
+/* Label dan value untuk detail */
+.detail-label {
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #666;
+}
+
+.detail-value {
+  word-break: break-word;
+}
+
+/* Kontainer gambar */
+.image-container img {
+  max-width: 100%;
+  height: auto;
+  margin-top: 8px;
+  border-radius: 4px;
+}
+
+/* Button styles */
+.modal-footer button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-close {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.btn-edit {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-follow-up {
+  background-color: #f39c12;
+  color: white;
+}
+
+.btn-complete {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+}
+
+/* Media query untuk layar kecil */
+@media (max-width: 600px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .full-width {
+    grid-column: span 1;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+  }
+  
+  .modal-footer button {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}/* Sidebar Styling */
 @media (max-width: 992px) {
   .main-content.sidebar-open {
     margin-left: 0;

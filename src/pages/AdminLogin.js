@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "../Styles.css";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -14,18 +14,19 @@ const AdminLogin = () => {
     e.preventDefault();
     setErrorMsg(""); // reset pesan error
 
-    if (!email || !password) {
-      setErrorMsg("Email dan password wajib diisi!");
+    if (!username || !password) {
+      setErrorMsg("Username dan password wajib diisi!");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/admin-login", {
+      // Panggil API untuk login dengan data dari kelola user
+      const response = await fetch("http://localhost:5000/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
 
       const contentType = response.headers.get("content-type");
@@ -36,9 +37,11 @@ const AdminLogin = () => {
       }
 
       if (response.ok) {
+        // Simpan data user yang login ke localStorage jika diperlukan
+        localStorage.setItem("currentUser", JSON.stringify(data.user));
         navigate("/admin");
       } else {
-        setErrorMsg(data.error || "Email atau password salah!");
+        setErrorMsg(data.error || "Username atau password salah!");
       }
     } catch (error) {
       console.error("Gagal login:", error);
@@ -53,12 +56,12 @@ const AdminLogin = () => {
       <h2>Login Admin</h2>
       <form onSubmit={handleLogin}>
         <div className="form-group">
-          <label>Email:</label>
+          <label>Username:</label>
           <input
-            type="email"
-            placeholder="Masukkan email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            placeholder="Masukkan username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
           />
         </div>
