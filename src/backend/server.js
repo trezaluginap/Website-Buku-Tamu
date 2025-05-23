@@ -1,11 +1,9 @@
 const express = require("express");
 const cors = require("cors");
-<<<<<<< HEAD
 const tamuRoutes = require("./routes/tamu");
 const usersRoutes = require("./routes/users"); // Tambahkan ini
-=======
+
 const bcrypt = require("bcrypt");
->>>>>>> f74ae546af1f493659d29907adc263cf5906835e
 const db = require("./config/db");
 
 const app = express();
