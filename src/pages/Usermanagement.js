@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState, useEffect } from "react";
 import "../styles/userManagement.css";
 
@@ -5,6 +6,36 @@ const API_URL = "http://localhost:5000/api/users";
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
+=======
+import React, { useState } from "react";
+import "../styles/userManagement.css";
+
+const UserManagement = () => {
+  const [users, setUsers] = useState([
+    {
+      id: 1,
+      name: "faisal",
+      nip: "12345678",
+      username: "bps3272",
+      password: "admin",
+    },
+    {
+      id: 2,
+      name: "Staff Admin",
+      nip: "87654321",
+      username: "staff3272",
+      password: "staff123",
+    },
+    {
+      id: 3,
+      name: "Manager",
+      nip: "98765432",
+      username: "manager3272",
+      password: "manager123",
+    },
+  ]);
+
+>>>>>>> f74ae546af1f493659d29907adc263cf5906835e
   const [selectedUser, setSelectedUser] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -14,6 +45,7 @@ const UserManagement = () => {
     password: "",
   });
 
+<<<<<<< HEAD
   // Ambil data users dari API
   const fetchUsers = async () => {
     try {
@@ -30,6 +62,8 @@ const UserManagement = () => {
   }, []);
 
   // Klik Edit
+=======
+>>>>>>> f74ae546af1f493659d29907adc263cf5906835e
   const handleEdit = (user) => {
     setSelectedUser(user);
     setFormData({
@@ -41,7 +75,10 @@ const UserManagement = () => {
     setShowModal(true);
   };
 
+<<<<<<< HEAD
   // Klik Tambah
+=======
+>>>>>>> f74ae546af1f493659d29907adc263cf5906835e
   const handleAddNew = () => {
     setSelectedUser(null);
     setFormData({
@@ -53,12 +90,16 @@ const UserManagement = () => {
     setShowModal(true);
   };
 
+<<<<<<< HEAD
   // Input Form
+=======
+>>>>>>> f74ae546af1f493659d29907adc263cf5906835e
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+<<<<<<< HEAD
   // Submit Form
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -79,6 +120,26 @@ const UserManagement = () => {
           body: JSON.stringify(formData),
         });
       }
+=======
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (selectedUser) {
+      // Update existing user
+      setUsers(
+        users.map((user) =>
+          user.id === selectedUser.id ? { ...user, ...formData } : user
+        )
+      );
+    } else {
+      // Add new user
+      const newUser = {
+        id: users.length > 0 ? Math.max(...users.map((user) => user.id)) + 1 : 1,
+        ...formData,
+      };
+      setUsers([...users, newUser]);
+    }
+>>>>>>> f74ae546af1f493659d29907adc263cf5906835e
 
       fetchUsers(); // Refresh data
       setShowModal(false);
@@ -87,8 +148,12 @@ const UserManagement = () => {
     }
   };
 
+<<<<<<< HEAD
   // Hapus User
   const handleDelete = async (userId) => {
+=======
+  const handleDelete = (userId) => {
+>>>>>>> f74ae546af1f493659d29907adc263cf5906835e
     if (window.confirm("Apakah Anda yakin ingin menghapus pengguna ini?")) {
       try {
         await fetch(`${API_URL}/${userId}`, { method: "DELETE" });
@@ -99,7 +164,13 @@ const UserManagement = () => {
     }
   };
 
+<<<<<<< HEAD
   const closeModal = () => setShowModal(false);
+=======
+  const closeModal = () => {
+    setShowModal(false);
+  };
+>>>>>>> f74ae546af1f493659d29907adc263cf5906835e
 
   return (
     <div className="content-container">
@@ -113,8 +184,8 @@ const UserManagement = () => {
             <span>SA</span>
           </div>
           <div className="user-details">
-            <span className="user-role">Super Admin</span>
-            <span className="user-nip">NIP: 3272</span>
+            <span className="user-role">Faisal</span>
+            <span className="user-nip">NIP: 12345678</span>
           </div>
         </div>
       </div>

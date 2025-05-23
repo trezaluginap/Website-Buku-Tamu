@@ -1,8 +1,11 @@
-// server.js - Endpoint Diagnostik dan Validasi
 const express = require("express");
 const cors = require("cors");
+<<<<<<< HEAD
 const tamuRoutes = require("./routes/tamu");
 const usersRoutes = require("./routes/users"); // Tambahkan ini
+=======
+const bcrypt = require("bcrypt");
+>>>>>>> f74ae546af1f493659d29907adc263cf5906835e
 const db = require("./config/db");
 
 const app = express();
@@ -10,14 +13,12 @@ const port = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: "1mb" })); // body parser untuk JSON dengan batas ukuran
-app.use(express.urlencoded({ extended: true, limit: "1mb" })); // untuk form data
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
-// Logging middleware untuk mencatat request
+// Logging middleware
 app.use((req, res, next) => {
-  console.log(
-    `📥 ${new Date().toISOString()} - ${req.method} ${req.originalUrl}`
-  );
+  console.log(`📥 ${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
   next();
 });
 
@@ -27,10 +28,9 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Terjadi kesalahan pada server" });
 });
 
-// Endpoint untuk mengecek status server dan database
+// Endpoint status server & koneksi database
 app.get("/api/status", async (req, res) => {
   try {
-    // Cek koneksi database
     await db.checkConnection();
     res.json({
       status: "online",
@@ -50,7 +50,7 @@ app.get("/api/status", async (req, res) => {
   }
 });
 
-// Endpoint untuk validasi skema tabel
+// Validasi skema tabel tamu
 app.get("/api/schema/tamu", (req, res) => {
   db.query("DESCRIBE tamu", (err, results) => {
     if (err) {
@@ -60,7 +60,6 @@ app.get("/api/schema/tamu", (req, res) => {
 
     console.log("✅ Skema tabel tamu:", results);
 
-    // Periksa struktur yang diharapkan
     const requiredColumns = [
       "id",
       "nama_lengkap",
@@ -75,12 +74,9 @@ app.get("/api/schema/tamu", (req, res) => {
       "tanggal_kehadiran",
     ];
 
-    const missingColumns = [];
-    requiredColumns.forEach((col) => {
-      if (!results.some((r) => r.Field === col)) {
-        missingColumns.push(col);
-      }
-    });
+    const missingColumns = requiredColumns.filter(
+      (col) => !results.some((r) => r.Field === col)
+    );
 
     res.json({
       table: "tamu",
@@ -91,7 +87,96 @@ app.get("/api/schema/tamu", (req, res) => {
   });
 });
 
-// Endpoint utama aplikasi
+// Endpoint login admin
+app.post("/api/admin-login", (req, res) => {
+  const { nama_pengguna, password } = req.body;
+
+  if (!nama_pengguna || !password) {
+    return res.status(400).json({ error: "Data wajib tidak lengkap" });
+  }
+
+  db.query("SELECT * FROM admins WHERE nama_pengguna = ?", [nama_pengguna], async (err, results) => {
+    if (err) {
+      console.error("❌ Gagal mengambil data admin:", err);
+      return res.status(500).json({ error: "Terjadi kesalahan server" });
+    }
+
+    if (results.length === 0) {
+      return res.status(401).json({ error: "Admin tidak ditemukan" });
+    }
+
+    const admin = results[0];
+
+    const isMatch = password === admin.password; // Jika pakai bcrypt: await bcrypt.compare(password, admin.password)
+
+    if (!isMatch) {
+      return res.status(401).json({ error: "Password salah" });
+    }
+
+    db.query(
+      "INSERT INTO admin_logins (nama_pengguna) VALUES (?)",
+      [nama_pengguna],
+      (err) => {
+        if (err) {
+          console.error("❌ Gagal menyimpan log login:", err);
+        }
+      }
+    );
+
+    res.json({ message: "Login berhasil", admin: { id: admin.id, nama_pengguna: admin.nama_pengguna } });
+  });
+});
+
+// ✅ Endpoint untuk menyimpan data tamu
+app.post("/api/tamu", (req, res) => {
+  const {
+    nama_lengkap,
+    jenis_kelamin,
+    email,
+    no_hp,
+    pekerjaan,
+    alamat,
+    keperluan,
+    staff,
+    dituju,
+    tanggal_kehadiran
+  } = req.body;
+
+  if (!nama_lengkap || !jenis_kelamin || !tanggal_kehadiran) {
+    return res.status(400).json({ error: "Data wajib tidak lengkap" });
+  }
+
+  const sql = `
+    INSERT INTO tamu 
+    (nama_lengkap, jenis_kelamin, email, no_hp, pekerjaan, alamat, keperluan, staff, dituju, tanggal_kehadiran)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [
+    nama_lengkap,
+    jenis_kelamin,
+    email || null,
+    no_hp || null,
+    pekerjaan || null,
+    alamat || null,
+    keperluan || null,
+    staff || null,
+    dituju || null,
+    tanggal_kehadiran
+  ];
+
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error("❌ Gagal menyimpan data tamu:", err);
+      return res.status(500).json({ error: "Gagal menyimpan data tamu" });
+    }
+
+    res.status(201).json({ message: "Data tamu berhasil disimpan", id: result.insertId });
+  });
+});
+
+// Endpoint utama aplikasi tamu (kalau kamu pakai routes/tamu.js)
+const tamuRoutes = require("./routes/tamu");
 app.use("/api/tamu", tamuRoutes);
 app.use("/api/users", usersRoutes); // Tambahkan ini
 

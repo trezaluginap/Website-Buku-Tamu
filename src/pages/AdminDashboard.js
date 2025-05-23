@@ -73,6 +73,7 @@ const AdminDashboard = () => {
   };
 
   // Sort guests by date (newest first)
+<<<<<<< HEAD
   const getSortedGuests = () => {
     const filteredGuests = getFilteredGuests();
     return [...filteredGuests].sort((a, b) => {
@@ -84,6 +85,50 @@ const AdminDashboard = () => {
   const getDisplayedGuests = () => {
     const sortedGuests = getSortedGuests();
     return showAll ? sortedGuests : sortedGuests.slice(0, 5);
+=======
+  const sortedGuests = [...filteredGuests].sort((a, b) => {
+    return new Date(b.tanggal_kehadiran) - new Date(a.tanggal_kehadiran);
+  });
+
+  // Get displayed guests based on showAll state
+  const displayedGuests = showAll ? sortedGuests : sortedGuests.slice(0, 5);
+
+  // Calculate statistics
+  const today = new Date().toISOString().split("T")[0];
+  const weekStart = new Date();
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+  const weekStartStr = weekStart.toISOString().split("T")[0];
+
+  const todayGuests = guests.filter(
+    (g) => g.tanggal_kehadiran === today
+  ).length;
+
+  const weeklyGuests = guests.filter(
+    (g) => g.tanggal_kehadiran >= weekStartStr
+  ).length;
+
+  const unprocessedGuests = guests.filter(
+    (g) => g.status === "Belum Diproses" || !g.status
+  ).length;
+
+  const completedGuests = guests.filter((g) => g.status === "Selesai").length;
+
+  // Start processing a guest - diubah untuk menggunakan endpoint lokal
+  const startProcessing = (guestId) => {
+    const updatedGuest = guests.find((g) => g.id === guestId);
+    if (!updatedGuest) return;
+
+    axios
+      .put(`http://localhost:5000/api/tamu/${guestId}`, {
+        ...updatedGuest,
+        status: "Diproses",
+      })
+      .then(() => {
+        fetchGuests(); // Refresh data
+        setSelectedGuest(null); // Close modal
+      })
+      .catch((err) => console.error("Error updating guest:", err));
+>>>>>>> f74ae546af1f493659d29907adc263cf5906835e
   };
 
   // Statistics calculations
@@ -196,6 +241,7 @@ const AdminDashboard = () => {
                 <h1>Dashboard Admin</h1>
               </div>
               <div className="action-buttons">
+<<<<<<< HEAD
                 <button
                   className="refresh-btn"
                   onClick={fetchGuests}
@@ -207,6 +253,8 @@ const AdminDashboard = () => {
                     ↻
                   </span>
                 </button>
+=======
+>>>>>>> f74ae546af1f493659d29907adc263cf5906835e
               </div>
             </div>
           </header>
@@ -367,6 +415,7 @@ const AdminDashboard = () => {
 
           {/* Guest Detail Modal */}
           {selectedGuest && (
+<<<<<<< HEAD
             <GuestDetailModal
               guest={selectedGuest}
               onClose={() => setSelectedGuest(null)}
@@ -378,6 +427,144 @@ const AdminDashboard = () => {
               }
               getStatusBadge={getStatusBadge}
             />
+=======
+            <div
+              className="modal-backdrop"
+              role="dialog"
+              aria-labelledby="modal-title"
+            >
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h3 id="modal-title">Detail Tamu</h3>
+                  <button
+                    className="close-btn"
+                    onClick={() => setSelectedGuest(null)}
+                    aria-label="Close modal"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div className="guest-details">
+                  <div className="detail-status">
+                    {getStatusBadge(selectedGuest)}
+                  </div>
+
+                  <div className="detail-grid">
+                    <div className="detail-item">
+                      <div className="detail-label">Nama</div>
+                      <div className="detail-value">{selectedGuest.nama_lengkap}</div>
+                    </div>
+
+                    <div className="detail-item">
+                      <div className="detail-label">Email</div>
+                      <div className="detail-value">{selectedGuest.email}</div>
+                    </div>
+
+                    <div className="detail-item">
+                      <div className="detail-label">No HP</div>
+                      <div className="detail-value">{selectedGuest.no_hp}</div>
+                    </div>
+
+                    <div className="detail-item">
+                      <div className="detail-label">Tanggal</div>
+                      <div className="detail-value">
+                        {selectedGuest.tanggal_kehadiran}
+                      </div>
+                    </div>
+
+                    <div className="detail-item full-width">
+                      <div className="detail-label">Keperluan</div>
+                      <div className="detail-value">
+                        {selectedGuest.keperluan}
+                      </div>
+                    </div>
+
+                    <div className="detail-item full-width">
+                      <div className="detail-label">Alamat</div>
+                      <div className="detail-value">{selectedGuest.alamat}</div>
+                    </div>
+
+                    <div className="detail-item full-width">
+                      <div className="detail-label">Pekerjaan</div>
+                      <div className="detail-value">
+                        {selectedGuest.pekerjaan}
+                      </div>
+                    </div>
+
+                    {selectedGuest.isi_pertemuan && (
+                      <div className="detail-item full-width">
+                        <div className="detail-label">Hasil Pertemuan</div>
+                        <div className="detail-value">
+                          {selectedGuest.isi_pertemuan}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedGuest.dokumentasi && (
+                      <div className="detail-item full-width">
+                        <div className="detail-label">Dokumentasi</div>
+                        <div className="detail-value image-container">
+                          <img
+                            src={selectedGuest.dokumentasi}
+                            alt={`Dokumentasi untuk ${selectedGuest.nama}`}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="modal-footer">
+                  <button
+                    className="btn-close"
+                    onClick={() => setSelectedGuest(null)}
+                  >
+                    Tutup
+                  </button>
+
+                  <button
+                    className="btn-edit"
+                    onClick={() =>
+                      navigate(`/pages/EditGuestForm/${selectedGuest.id}`)
+                    }
+                  >
+                    Edit
+                  </button>
+
+                  {(!selectedGuest.status ||
+                    selectedGuest.status === "Belum Diproses") && (
+                    <button
+                      className="btn-follow-up"
+                      onClick={() => startProcessing(selectedGuest.id)}
+                    >
+                      Mulai Proses
+                    </button>
+                  )}
+
+                  {selectedGuest.status === "Diproses" && (
+                    <button
+                      className="btn-follow-up"
+                      onClick={() =>
+                        navigate(`/pages/FollowUpForm/${selectedGuest.id}`)
+                      }
+                    >
+                      Tindak Lanjut
+                    </button>
+                  )}
+
+                  {selectedGuest.status === "Diproses" && (
+                    <button
+                      className="btn-complete"
+                      onClick={() => markAsCompleted(selectedGuest.id)}
+                    >
+                      Tandai Selesai
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+>>>>>>> f74ae546af1f493659d29907adc263cf5906835e
           )}
         </div>
       </main>

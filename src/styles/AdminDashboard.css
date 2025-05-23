@@ -67,29 +67,6 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-.action-buttons {
-  display: flex;
-  gap: 0.75rem;
-}
-.refresh-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: var(--primary-light);
-  color: var(--primary);
-  border: none;
-  font-size: 1.25rem;
-  cursor: pointer;
-  transition: var(--transition);
-}
-.refresh-btn:hover {
-  background-color: var(--primary);
-  color: var(--white);
-  transform: rotate(45deg);
-}
 
 /* Main Content */
 .main-content {
@@ -424,6 +401,7 @@ body {
   color: var(--danger);
 }
 
+<<<<<<< HEAD
 /* CSS untuk Modal Guest Detail dengan Scrolling */
 
 /* Backdrop modal (latar belakang gelap) */
@@ -438,6 +416,11 @@ body {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+=======
+/* Guest Details */
+.guest-details {
+  padding: 5px ;
+>>>>>>> f74ae546af1f493659d29907adc263cf5906835e
 }
 
 /* Konten utama modal */

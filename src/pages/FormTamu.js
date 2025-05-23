@@ -35,8 +35,7 @@ const FormTamu = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!window.confirm("Apakah Anda yakin ingin mengirim formulir ini?"))
-      return;
+    if (!window.confirm("Apakah Anda yakin ingin mengirim formulir ini?")) return;
 
     setIsSubmitting(true);
     try {
@@ -80,15 +79,7 @@ const FormTamu = () => {
   };
 
   const getDayName = () => {
-    const days = [
-      "Minggu",
-      "Senin",
-      "Selasa",
-      "Rabu",
-      "Kamis",
-      "Jumat",
-      "Sabtu",
-    ];
+    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
     return days[today.getDay()];
   };
 
@@ -106,8 +97,7 @@ const FormTamu = () => {
           </div>
           <h2>Buku Tamu Digital</h2>
           <p className="form-description">
-            Silakan lengkapi formulir di bawah ini untuk melakukan registrasi
-            kunjungan pada {getDayName()}, {formatDate(currentDate)}
+            Silakan lengkapi formulir di bawah ini untuk melakukan registrasi kunjungan pada {getDayName()}, {formatDate(currentDate)}
           </p>
         </div>
 
@@ -135,64 +125,31 @@ const FormTamu = () => {
 
             <div className="form-group">
               <label>Email</label>
-              <input
-                type="email"
-                name="email"
-                onChange={handleChange}
-                placeholder="contoh@email.com"
-              />
+              <input type="email" name="email" onChange={handleChange} placeholder="contoh@email.com" />
             </div>
 
             <div className="form-group">
               <label className="required">No HP</label>
-              <input
-                type="text"
-                name="no_hp"
-                required
-                onChange={handleChange}
-                placeholder="08xxxxxxxxxx"
-              />
+              <input type="text" name="no_hp" required onChange={handleChange} placeholder="08xxxxxxxxxx" />
             </div>
 
             <div className="form-group">
               <label>Pekerjaan</label>
-              <input
-                type="text"
-                name="pekerjaan"
-                onChange={handleChange}
-                placeholder="Masukkan pekerjaan"
-              />
+              <input type="text" name="pekerjaan" onChange={handleChange} placeholder="Masukkan pekerjaan" />
             </div>
 
             <div className="form-group">
-              <label className="required">Tanggal Kehadiran</label>
-              <input
-                type="text"
-                name="tanggal_kehadiran"
-                value={formatDate(currentDate)}
-                readOnly
-                className="date-fixed"
-              />
+              <label className="required">Tanggal Kedatangan</label>
+              <input type="text" name="tanggal_kedatangan" value={formatDate(currentDate)} readOnly className="date-fixed" />
             </div>
 
             <div className="form-group full-width">
               <label className="required">Alamat</label>
-              <textarea
-                name="alamat"
-                required
-                onChange={handleChange}
-                placeholder="Masukkan alamat lengkap"
-              ></textarea>
+              <textarea name="alamat" required onChange={handleChange} placeholder="Masukkan alamat lengkap"></textarea>
             </div>
 
             <div className="button-group">
-              <button
-                onClick={goToNextStep}
-                className="next-button"
-                type="button"
-              >
-                Lanjutkan
-              </button>
+              <button onClick={goToNextStep} className="next-button" type="button">Lanjutkan</button>
             </div>
           </div>
         )}
@@ -211,9 +168,7 @@ const FormTamu = () => {
                 required
               >
                 <option value="">Pilih keperluan</option>
-                <option value="Mitra_Statistik">
-                  Kegiatan Mitra Statistik
-                </option>
+                <option value="mitra_statistik">Kegiatan Mitra Statistik</option>
                 <option value="konsultasi">Konsultasi Statistik</option>
                 <option value="tamu_umum">Tamu Umum</option>
               </select>
@@ -230,17 +185,67 @@ const FormTamu = () => {
               </select>
             </div>
 
+            {keperluan === "mitra_statistik" && (
+              <div className="subform">
+                <h3 className="subform-title">Detail Kegiatan Mitra Statistik</h3>
+                <div className="form-group full-width">
+                  <label className="required">Tujuan Kunjungan</label>
+                  <textarea
+                    name="tujuan_kunjungan"
+                    required
+                    onChange={handleChange}
+                    placeholder="Jelaskan tujuan kunjungan Anda"
+                    rows="3"
+                  ></textarea>
+                </div>
+              </div>
+            )}
+
+            {keperluan === "konsultasi" && (
+              <div className="subform">
+                <h3 className="subform-title">Detail Konsultasi Statistik</h3>
+                <div className="form-group full-width">
+                  <label className="required">Topik Konsultasi</label>
+                  <input
+                    type="text"
+                    name="topik_konsultasi"
+                    required
+                    onChange={handleChange}
+                    placeholder="Masukkan topik konsultasi"
+                  />
+                </div>
+                <div className="form-group full-width">
+                  <label className="required">Deskripsi Kebutuhan</label>
+                  <textarea
+                    name="deskripsi_kebutuhan"
+                    required
+                    onChange={handleChange}
+                    placeholder="Jelaskan kebutuhan konsultasi Anda secara detail"
+                    rows="4"
+                  ></textarea>
+                </div>
+              </div>
+            )}
+
+            {keperluan === "tamu_umum" && (
+              <div className="subform">
+                <h3 className="subform-title">Detail Kunjungan</h3>
+                <div className="form-group full-width">
+                  <label className="required">Tujuan Kunjungan</label>
+                  <textarea
+                    name="tujuan_kunjungan"
+                    required
+                    onChange={handleChange}
+                    placeholder="Jelaskan tujuan kunjungan Anda"
+                    rows="3"
+                  ></textarea>
+                </div>
+              </div>
+            )}
+
             <div className="button-group">
-              <button
-                type="button"
-                onClick={goToPrevStep}
-                className="secondary-button"
-              >
-                Kembali
-              </button>
-              <button type="reset" className="secondary-button">
-                Reset
-              </button>
+              <button type="button" onClick={goToPrevStep} className="secondary-button">Kembali</button>
+              <button type="reset" className="secondary-button">Reset</button>
               <button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Mengirim..." : "Kirim"}
               </button>

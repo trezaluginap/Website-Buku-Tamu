@@ -6,8 +6,8 @@ import FormTamu from "./pages/FormTamu";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import GuestDetail from "./components/GuestDetail";
-import EditGuestForm from "./pages/EditGuestForm"; // ✅ Tambahan halaman edit
-import FollowUpForm from "./pages/FollowUpForm"; // ✅ Tambahan halaman tindak lanjut
+import EditGuestForm from "./pages/EditGuestForm"; 
+import FollowUpForm from "./pages/FollowUpForm"; 
 import { GuestContext } from "./context/GuestContext";
 import FormBukuTamu from './components/FormBukuTamu';
 import UserManagement from "./pages/Usermanagement";
