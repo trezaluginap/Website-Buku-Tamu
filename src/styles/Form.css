@@ -1,343 +1,283 @@
-/* Updated Styles.css for FormTamu */
 
-/* Variables */
+
 :root {
-  --primary-color: #4a6eb5;
-  --primary-dark: #3a5a94;
-  --secondary-color: #6dc0ea;
-  --accent-color: #ff7f50;
-  --success-color: #4caf50;
-  --error-color: #f44336;
-  --light-color: #f5f9fc;
-  --dark-color: #2c3e50;
-  --gray-color: #7f8c8d;
-  --light-gray: #ecf0f1;
-  --border-radius: 12px;
-  --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-  --transition: all 0.3s ease;
+  --ftms-primary-color: #2C5282; /* Biru corporate */
+  --ftms-primary-dark: #2A4365;
+  --ftms-secondary-color: #38A169; /* Hijau */
+  --ftms-bg-light: #F7FAFC;
+  --ftms-bg-card: #FFFFFF;
+  --ftms-text-dark: #1A202C;
+  --ftms-text-medium: #4A5568;
+  --ftms-text-light: #A0AEC0;
+  --ftms-text-on-primary: #FFFFFF;
+  --ftms-border-color: #E2E8F0;
+  --ftms-border-focus: var(--ftms-primary-color);
+  --ftms-error-color: #C53030;
+  --ftms-border-radius-md: 6px;
+  --ftms-border-radius-lg: 8px;
+  --ftms-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --ftms-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --ftms-font-sans: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --ftms-input-height: 42px;
+  --ftms-transition: all 0.2s ease-in-out;
 }
 
-/* Base Styles */
+/* Global & Body untuk Scrolling */
+html {
+  height: 100%;
+  overflow-y: scroll; /* Selalu tampilkan scrollbar untuk mencegah layout shift */
+  font-family: var(--ftms-font-sans);
+  background-color: var(--ftms-bg-light); /* Background untuk seluruh halaman */
+  color: var(--ftms-text-dark);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
-  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
-  color: var(--dark-color);
+  min-height: 100%;
   margin: 0;
-  padding: 0;
-  min-height: 100vh;
+  padding: 0; /* Mungkin perlu padding jika ada navbar fixed */
+  line-height: 1.6;
 }
 
-/* Container */
-.container {
-  max-width: 1000px;
-  margin: 40px auto;
-  padding: 20px 0;
+/* Kontainer Utama Form */
+.form-tamu-ms-container {
+  width: 100%;
+  max-width: 800px; /* Lebar maksimal form */
+  margin: 2rem auto; /* Tengah dan beri jarak atas/bawah */
+  padding: 0 1rem; /* Padding untuk layar kecil */
+  box-sizing: border-box;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+.form-tamu-ms-container.loaded {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-/* Form */
-form {
-  background-color: white;
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
-  overflow: hidden;
-  position: relative;
+#guestRegistrationMultiStepForm { /* ID form */
+  background-color: var(--ftms-bg-card);
+  border-radius: var(--ftms-border-radius-lg);
+  box-shadow: var(--ftms-shadow-lg);
+  overflow: hidden; /* Agar border-radius header dan footer rapi */
 }
 
-/* Form Header */
-.form-header {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-  color: white;
-  padding: 40px;
+/* Header Form */
+.form-tamu-ms-header {
+  background-color: var(--ftms-primary-color);
+  color: var(--ftms-text-on-primary);
+  padding: 2rem 2.5rem;
   text-align: center;
-  position: relative;
-  overflow: hidden;
 }
-
-.form-header:after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
-  opacity: 0.4;
+.form-tamu-ms-logo-container { margin-bottom: 0.75rem; }
+.form-tamu-ms-logo { width: 60px; height: auto; }
+.form-tamu-ms-header h2 {
+  font-size: 1.75rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
 }
-
-.form-logo {
-  width: 120px;
-  height: auto;
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.2));
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-  0% { transform: translatey(0px); }
-  50% { transform: translatey(-10px); }
-  100% { transform: translatey(0px); }
-}
-
-.form-header h2 {
-  font-size: 2.5rem;
-  margin: 15px 0 10px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.form-description {
-  font-size: 1.1rem;
-  max-width: 600px;
+.form-tamu-ms-description {
+  font-size: 0.95rem;
+  max-width: 550px;
   margin: 0 auto;
-  opacity: 0.9;
+  opacity: 0.85;
 }
 
-/* Form Content */
-.form-content {
-  padding: 40px;
+/* Konten Form per Step */
+.form-tamu-ms-content {
+  padding: 2rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* Jarak antar section atau elemen di dalam content */
+}
+
+.form-tamu-ms-section {
+  padding-bottom: 1.5rem;
+  /* border-bottom: 1px solid var(--ftms-border-color); */
+}
+.form-tamu-ms-section:last-child { border-bottom: none; }
+
+.form-tamu-ms-section-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ftms-primary-dark);
+  margin: 0 0 1.25rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--ftms-secondary-color);
+  display: inline-block;
+}
+
+.form-tamu-ms-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.25rem;
 }
 
-@media (max-width: 768px) {
-  .form-content {
-    grid-template-columns: 1fr;
-  }
+.form-tamu-ms-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
 }
-
-/* Form Group */
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group.full-width {
+.form-tamu-ms-group.full-span {
   grid-column: 1 / -1;
 }
 
-/* Labels */
-label {
-  display: block;
-  margin-bottom: 8px;
+.form-tamu-ms-group label {
+  font-size: 0.875rem;
   font-weight: 500;
-  color: var(--dark-color);
-  transition: var(--transition);
+  color: var(--ftms-text-medium);
 }
-
-label.required:after {
+.form-tamu-ms-group label.required::after {
   content: " *";
-  color: var(--accent-color);
+  color: var(--ftms-error-color);
 }
 
-/* Inputs */
 input[type="text"],
 input[type="email"],
-input[type="number"],
-input[type="date"],
+input[type="tel"],
+input[type="number"], /* Untuk no_hp jika tetap number */
 select,
 textarea {
   width: 100%;
-  padding: 12px 15px;
-  border: 2px solid var(--light-gray);
-  border-radius: var(--border-radius);
-  font-size: 1rem;
+  height: var(--ftms-input-height);
+  padding: 0 0.75rem;
+  border: 1px solid var(--ftms-border-color);
+  border-radius: var(--ftms-border-radius-md);
+  font-size: 0.9rem;
   font-family: inherit;
-  transition: var(--transition);
+  transition: var(--ftms-transition);
+  background-color: #fff;
+  color: var(--ftms-text-dark);
   box-sizing: border-box;
-  background-color: white;
+}
+textarea {
+  height: auto;
+  min-height: 80px;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  resize: vertical;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: var(--secondary-color);
-  box-shadow: 0 0 0 3px rgba(109, 192, 234, 0.2);
+  border-color: var(--ftms-border-focus);
+  box-shadow: 0 0 0 2px rgba(44, 82, 130, 0.2); /* Warna dari primary color */
 }
 
-input[type="date"] {
-  padding: 10px 15px;
+input.date-fixed {
+  background-color: #edf2f7; /* Abu-abu terang */
+  cursor: not-allowed;
 }
 
 select {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232c3e50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23A0AEC0' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 15px center;
-  padding-right: 40px;
+  background-position: right 0.75rem center;
+  background-size: 1em;
+  padding-right: 2.5rem;
 }
 
-textarea {
-  min-height: 100px;
-  resize: vertical;
+/* Sub-form Section Styling */
+.form-tamu-ms-sub-section {
+  background-color: #f9fafb; /* Sedikit beda */
+  border: 1px solid #f3f4f6;
+  border-left: 3px solid var(--ftms-secondary-color);
+  padding: 1.25rem;
+  border-radius: var(--ftms-border-radius-md);
+  margin-top: 1.25rem;
+  display: flex; /* Menggunakan flex untuk layout sub-section */
+  flex-direction: column;
+  gap: 1.25rem; /* Jarak antar group di dalam sub-section */
 }
-
-input[type="file"] {
-  padding: 10px;
+.form-tamu-ms-sub-section.active { /* Animasi bisa ditambahkan di sini jika diinginkan */
+    /* Misal: animation: fadeIn 0.3s ease-out; */
 }
-
-/* Subform */
-.subform {
-  grid-column: 1 / -1;
-  background-color: var(--light-color);
-  border-radius: var(--border-radius);
-  padding: 25px;
-  margin: 10px 0 20px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-  transition: var(--transition);
-}
-
-.subform:before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 5px;
-  background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
-  border-radius: 5px 0 0 5px;
-}
-
-.subform-title {
-  margin-top: 0;
-  color: var(--primary-dark);
-  font-size: 1.3rem;
-  margin-bottom: 20px;
-  padding-left: 10px;
-}
-
-/* Buttons */
-.button-group {
-  grid-column: 1 / -1;
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 20px;
-}
-
-button {
-  padding: 12px 25px;
-  border: none;
-  border-radius: var(--border-radius);
+.form-tamu-ms-sub-section h4 {
   font-size: 1rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-  min-width: 140px;
+  color: var(--ftms-primary-dark);
+  margin: 0 0 0.5rem 0; /* Kurangi margin bottom */
+}
+
+/* Tombol Aksi Form */
+.form-tamu-ms-actions {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  justify-content: flex-end; /* Tombol ke kanan by default */
+  gap: 0.75rem;
+  padding: 1.5rem 2.5rem;
+  border-top: 1px solid var(--ftms-border-color);
+  background-color: #fdfdfe;
+}
+.form-tamu-ms-actions.space-between {
+    justify-content: space-between; /* Untuk step 2, tombol kembali di kiri */
 }
 
-button[type="submit"] {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-  color: white;
-  box-shadow: 0 4px 10px rgba(74, 110, 181, 0.3);
-}
-
-button[type="submit"]:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(74, 110, 181, 0.4);
-}
-
-button[type="submit"]:active {
-  transform: translateY(0);
-}
-
-button.secondary-button {
-  background-color: white;
-  color: var(--dark-color);
-  border: 2px solid var(--light-gray);
-}
-
-button.secondary-button:hover {
-  background-color: var(--light-gray);
-}
-
-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.form-content {
-  animation: fadeIn 0.5s ease-out;
-}
-
-/* Input Focus Animations */
-input:focus::placeholder,
-textarea:focus::placeholder {
-  transform: translateY(-15px);
-  opacity: 0;
-  transition: var(--transition);
-}
-
-/* Custom Input Styling */
-input[type="date"]::-webkit-calendar-picker-indicator {
-  color: rgba(0, 0, 0, 0);
-  opacity: 1;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232c3e50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E");
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-/* Hover Effects */
-.form-group:hover label {
-  color: var(--primary-color);
-}
-
-/* Responsive Design */
-@media (max-width: 576px) {
-  .form-content {
-    padding: 25px;
-  }
-  
-  .form-header {
-    padding: 25px;
-  }
-  
-  .form-header h2 {
-    font-size: 2rem;
-  }
-  
-  .button-group {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  button {
-    width: 100%;
-  }
-}
-
-/* Add these styles to your existing CSS file */
-
-/* Fixed Date Input Styling */
-input.date-fixed {
-  background-color: var(--light-color);
-  color: var(--dark-color);
+.btn {
+  padding: 0.65rem 1.5rem;
+  border-radius: var(--ftms-border-radius-md);
+  font-size: 0.9rem;
   font-weight: 500;
-  border: 2px solid var(--light-gray);
+  cursor: pointer;
+  transition: var(--ftms-transition);
+  border: 1px solid transparent;
+  line-height: 1.5;
+}
+.btn:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
-  opacity: 0.8;
 }
 
-input.date-fixed:focus {
-  border-color: var(--light-gray);
-  box-shadow: none;
+.btn-primary {
+  background-color: var(--ftms-primary-color);
+  color: var(--ftms-text-on-primary);
+}
+.btn-primary:hover:not(:disabled) { background-color: var(--ftms-primary-dark); }
+
+.btn-secondary { /* Tombol reset */
+  background-color: #e2e8f0;
+  color: var(--ftms-text-medium);
+}
+.btn-secondary:hover:not(:disabled) { background-color: #cbd5e0; }
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--ftms-primary-color);
+  border-color: var(--ftms-primary-color);
+}
+.btn-outline:hover:not(:disabled) {
+  background-color: rgba(44, 82, 130, 0.05); /* Hover halus */
+  color: var(--ftms-primary-dark);
+  border-color: var(--ftms-primary-dark);
 }
 
-/* You might also want to add a visual indicator that the field is fixed */
-.form-group label + input.date-fixed {
-  padding-left: 35px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232c3e50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: 12px center;
+
+/* Responsive */
+@media (max-width: 768px) {
+  .form-tamu-ms-container { margin: 1.5rem auto; padding: 0 0.75rem; }
+  .form-tamu-ms-header { padding: 1.5rem; }
+  .form-tamu-ms-header h2 { font-size: 1.5rem; }
+  .form-tamu-ms-content { padding: 1.5rem; }
+  .form-tamu-ms-actions { padding: 1.25rem 1.5rem; }
+  .form-tamu-ms-grid { grid-template-columns: 1fr; } /* Semua input full width di mobile */
+}
+
+@media (max-width: 480px) {
+  .form-tamu-ms-actions {
+    flex-direction: column; /* Tombol bertumpuk */
+  }
+  .form-tamu-ms-actions.space-between {
+    align-items: stretch; /* Agar tombol kembali dan grup kanan sama lebarnya */
+  }
+  .form-tamu-ms-actions.space-between > div { /* Wrapper tombol kanan */
+    display: flex;
+    flex-direction: column; /* Tombol reset dan submit juga bertumpuk */
+    gap: 0.75rem;
+  }
+  .btn { width: 100%; }
 }

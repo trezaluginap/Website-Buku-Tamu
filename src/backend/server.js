@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const tamuRoutes = require("./routes/tamu");
-const usersRoutes = require("./routes/users"); // Tambahkan ini
+const usersRoutes = require("./routes/users");
 
 const bcrypt = require("bcrypt");
 const db = require("./config/db");
@@ -16,7 +16,9 @@ app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
 // Logging middleware
 app.use((req, res, next) => {
-  console.log(`📥 ${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
+  console.log(
+    `📥 ${new Date().toISOString()} - ${req.method} ${req.originalUrl}`
+  );
   next();
 });
 
@@ -85,7 +87,53 @@ app.get("/api/schema/tamu", (req, res) => {
   });
 });
 
-// Endpoint login admin
+// Endpoint login untuk integrasi dengan data users dari kelola user
+app.post("/api/login", (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ error: "Username dan password wajib diisi" });
+  }
+
+  db.query(
+    "SELECT * FROM users WHERE username = ?",
+    [username],
+    async (err, results) => {
+      if (err) {
+        console.error("❌ Gagal mengambil data user:", err);
+        return res.status(500).json({ error: "Terjadi kesalahan server" });
+      }
+
+      if (results.length === 0) {
+        return res.status(401).json({ error: "Username tidak ditemukan" });
+      }
+
+      const user = results[0];
+
+      // Verifikasi password
+      // Jika menggunakan bcrypt: const isMatch = await bcrypt.compare(password, user.password);
+      const isMatch = password === user.password;
+
+      if (!isMatch) {
+        return res.status(401).json({ error: "Password salah" });
+      }
+
+      // Login berhasil
+      res.json({
+        message: "Login berhasil",
+        user: {
+          id: user.id,
+          name: user.name,
+          nip: user.nip,
+          username: user.username,
+          // Jangan kirim password ke frontend
+        },
+      });
+    }
+  );
+});
+
+// Endpoint login admin (yang lama, jika masih diperlukan)
 app.post("/api/admin-login", (req, res) => {
   const { nama_pengguna, password } = req.body;
 
@@ -93,36 +141,43 @@ app.post("/api/admin-login", (req, res) => {
     return res.status(400).json({ error: "Data wajib tidak lengkap" });
   }
 
-  db.query("SELECT * FROM admins WHERE nama_pengguna = ?", [nama_pengguna], async (err, results) => {
-    if (err) {
-      console.error("❌ Gagal mengambil data admin:", err);
-      return res.status(500).json({ error: "Terjadi kesalahan server" });
-    }
-
-    if (results.length === 0) {
-      return res.status(401).json({ error: "Admin tidak ditemukan" });
-    }
-
-    const admin = results[0];
-
-    const isMatch = password === admin.password; // Jika pakai bcrypt: await bcrypt.compare(password, admin.password)
-
-    if (!isMatch) {
-      return res.status(401).json({ error: "Password salah" });
-    }
-
-    db.query(
-      "INSERT INTO admin_logins (nama_pengguna) VALUES (?)",
-      [nama_pengguna],
-      (err) => {
-        if (err) {
-          console.error("❌ Gagal menyimpan log login:", err);
-        }
+  db.query(
+    "SELECT * FROM admins WHERE nama_pengguna = ?",
+    [nama_pengguna],
+    async (err, results) => {
+      if (err) {
+        console.error("❌ Gagal mengambil data admin:", err);
+        return res.status(500).json({ error: "Terjadi kesalahan server" });
       }
-    );
 
-    res.json({ message: "Login berhasil", admin: { id: admin.id, nama_pengguna: admin.nama_pengguna } });
-  });
+      if (results.length === 0) {
+        return res.status(401).json({ error: "Admin tidak ditemukan" });
+      }
+
+      const admin = results[0];
+
+      const isMatch = password === admin.password; // Jika pakai bcrypt: await bcrypt.compare(password, admin.password)
+
+      if (!isMatch) {
+        return res.status(401).json({ error: "Password salah" });
+      }
+
+      db.query(
+        "INSERT INTO admin_logins (nama_pengguna) VALUES (?)",
+        [nama_pengguna],
+        (err) => {
+          if (err) {
+            console.error("❌ Gagal menyimpan log login:", err);
+          }
+        }
+      );
+
+      res.json({
+        message: "Login berhasil",
+        admin: { id: admin.id, nama_pengguna: admin.nama_pengguna },
+      });
+    }
+  );
 });
 
 // ✅ Endpoint untuk menyimpan data tamu
@@ -137,7 +192,7 @@ app.post("/api/tamu", (req, res) => {
     keperluan,
     staff,
     dituju,
-    tanggal_kehadiran
+    tanggal_kehadiran,
   } = req.body;
 
   if (!nama_lengkap || !jenis_kelamin || !tanggal_kehadiran) {
@@ -160,7 +215,7 @@ app.post("/api/tamu", (req, res) => {
     keperluan || null,
     staff || null,
     dituju || null,
-    tanggal_kehadiran
+    tanggal_kehadiran,
   ];
 
   db.query(sql, values, (err, result) => {
@@ -169,14 +224,15 @@ app.post("/api/tamu", (req, res) => {
       return res.status(500).json({ error: "Gagal menyimpan data tamu" });
     }
 
-    res.status(201).json({ message: "Data tamu berhasil disimpan", id: result.insertId });
+    res
+      .status(201)
+      .json({ message: "Data tamu berhasil disimpan", id: result.insertId });
   });
 });
 
-// Endpoint utama aplikasi tamu (kalau kamu pakai routes/tamu.js)
-const tamuRoutes = require("./routes/tamu");
+// Routes
 app.use("/api/tamu", tamuRoutes);
-app.use("/api/users", usersRoutes); // Tambahkan ini
+app.use("/api/users", usersRoutes);
 
 // Jalankan server
 app.listen(port, () => {
