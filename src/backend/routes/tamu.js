@@ -1,13 +1,8 @@
-<<<<<<< HEAD
-=======
-// routes/tamu.js
-
->>>>>>> f74ae546af1f493659d29907adc263cf5906835e
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
 
-// Endpoint untuk menyimpan data tamu
+// ✅ POST /api/tamu - Simpan data tamu
 router.post("/", (req, res) => {
   const {
     nama_lengkap,
@@ -21,7 +16,6 @@ router.post("/", (req, res) => {
     dituju,
   } = req.body;
 
-  // Validasi data yang wajib
   if (!nama_lengkap || !jenis_kelamin || !keperluan || !staff || !dituju) {
     return res.status(400).json({ error: "Data wajib tidak lengkap." });
   }
@@ -36,11 +30,7 @@ router.post("/", (req, res) => {
     nama_lengkap,
     jenis_kelamin,
     email || null,
-<<<<<<< HEAD
-    no_hp,
-=======
     no_hp || null,
->>>>>>> f74ae546af1f493659d29907adc263cf5906835e
     pekerjaan || null,
     alamat || null,
     keperluan,
@@ -51,7 +41,6 @@ router.post("/", (req, res) => {
   db.query(sql, values, (err, result) => {
     if (err) {
       console.error("❌ Gagal menyimpan data tamu:", err);
-<<<<<<< HEAD
 
       if (err.code === "ER_DUP_ENTRY") {
         return res.status(409).json({
@@ -75,16 +64,13 @@ router.post("/", (req, res) => {
         detail:
           process.env.NODE_ENV === "development" ? err.message : undefined,
       });
-=======
-      return res.status(500).json({ error: "Gagal menyimpan data tamu." });
->>>>>>> f74ae546af1f493659d29907adc263cf5906835e
     }
 
     res.status(201).json({ message: "Data tamu berhasil disimpan!" });
   });
 });
 
-// PUT /api/tamu/:id - Update data tamu
+// ✅ PUT /api/tamu/:id - Update data tamu
 router.put("/:id", (req, res) => {
   const id = req.params.id;
   const {
@@ -142,7 +128,7 @@ router.put("/:id", (req, res) => {
   });
 });
 
-// DELETE /api/tamu/:id - Hapus data tamu
+// ✅ DELETE /api/tamu/:id - Hapus data tamu
 router.delete("/:id", (req, res) => {
   const id = req.params.id;
 
@@ -155,6 +141,20 @@ router.delete("/:id", (req, res) => {
     }
 
     res.json({ message: "Data tamu berhasil dihapus" });
+  });
+});
+
+// ✅ GET /api/tamu - Ambil semua data tamu (untuk dashboard admin)
+router.get("/", (req, res) => {
+  const sql = "SELECT * FROM tamu ORDER BY tanggal_kehadiran DESC";
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("❌ Gagal mengambil data tamu:", err);
+      return res.status(500).json({ error: "Gagal mengambil data tamu" });
+    }
+
+    res.json({ tamu: results });
   });
 });
 

@@ -20,7 +20,7 @@ const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // API base URL
-  const API_BASE_URL = "http://localhost:5000/api";
+  const API_BASE_URL = "http://localhost:3000/api";
 
   // Toggle sidebar state
   const toggleSidebar = useCallback(() => {
@@ -196,17 +196,6 @@ const AdminDashboard = () => {
                 <h1>Dashboard Admin</h1>
               </div>
               <div className="action-buttons">
-                <button
-                  className="refresh-btn"
-                  onClick={fetchGuests}
-                  title="Refresh Data"
-                  aria-label="Refresh data"
-                  disabled={isLoading}
-                >
-                  <span role="img" aria-hidden="true">
-                    ↻
-                  </span>
-                </button>
               </div>
             </div>
           </header>

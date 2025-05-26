@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const tamuRoutes = require("./routes/tamu");
-const usersRoutes = require("./routes/users"); // Tambahkan ini
+const usersRoutes = require("./routes/users");
 
 const bcrypt = require("bcrypt");
 const db = require("./config/db");
@@ -26,7 +26,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Terjadi kesalahan pada server" });
 });
 
-// Endpoint status server & koneksi database
+// Status check
 app.get("/api/status", async (req, res) => {
   try {
     await db.checkConnection();
@@ -48,7 +48,7 @@ app.get("/api/status", async (req, res) => {
   }
 });
 
-// Validasi skema tabel tamu
+// Schema check for tamu
 app.get("/api/schema/tamu", (req, res) => {
   db.query("DESCRIBE tamu", (err, results) => {
     if (err) {
@@ -56,20 +56,9 @@ app.get("/api/schema/tamu", (req, res) => {
       return res.status(500).json({ error: "Gagal mendapatkan skema tabel" });
     }
 
-    console.log("✅ Skema tabel tamu:", results);
-
     const requiredColumns = [
-      "id",
-      "nama_lengkap",
-      "jenis_kelamin",
-      "email",
-      "no_hp",
-      "pekerjaan",
-      "alamat",
-      "keperluan",
-      "staff",
-      "dituju",
-      "tanggal_kehadiran",
+      "id", "nama_lengkap", "jenis_kelamin", "email", "no_hp",
+      "pekerjaan", "alamat", "keperluan", "staff", "dituju", "tanggal_kehadiran"
     ];
 
     const missingColumns = requiredColumns.filter(
@@ -85,7 +74,7 @@ app.get("/api/schema/tamu", (req, res) => {
   });
 });
 
-// Endpoint login admin
+// ✅ ADMIN LOGIN
 app.post("/api/admin-login", (req, res) => {
   const { nama_pengguna, password } = req.body;
 
@@ -105,27 +94,37 @@ app.post("/api/admin-login", (req, res) => {
 
     const admin = results[0];
 
-    const isMatch = password === admin.password; // Jika pakai bcrypt: await bcrypt.compare(password, admin.password)
+    const isMatch = password === admin.password;
 
     if (!isMatch) {
       return res.status(401).json({ error: "Password salah" });
     }
 
-    db.query(
-      "INSERT INTO admin_logins (nama_pengguna) VALUES (?)",
-      [nama_pengguna],
-      (err) => {
-        if (err) {
-          console.error("❌ Gagal menyimpan log login:", err);
+    // ✅ Simpan log login
+    if (admin.id) {
+      db.query(
+        "INSERT INTO admin_logins (admin_id) VALUES (?)",
+        [admin.id],
+        (err, result) => {
+          if (err) {
+            console.error("❌ Gagal menyimpan log login:", err);
+          } else {
+            console.log("✅ Log login disimpan:", result.insertId);
+          }
         }
-      }
-    );
+      );
+    } else {
+      console.warn("⚠️ admin.id tidak tersedia, log login tidak disimpan");
+    }
 
-    res.json({ message: "Login berhasil", admin: { id: admin.id, nama_pengguna: admin.nama_pengguna } });
+    res.json({
+      message: "Login berhasil",
+      admin: { id: admin.id, nama_pengguna: admin.nama_pengguna },
+    });
   });
 });
 
-// ✅ Endpoint untuk menyimpan data tamu
+// ✅ TAMBAH DATA TAMU
 app.post("/api/tamu", (req, res) => {
   const {
     nama_lengkap,
@@ -173,10 +172,9 @@ app.post("/api/tamu", (req, res) => {
   });
 });
 
-// Endpoint utama aplikasi tamu (kalau kamu pakai routes/tamu.js)
-const tamuRoutes = require("./routes/tamu");
+// ✅ Gunakan route tambahan
 app.use("/api/tamu", tamuRoutes);
-app.use("/api/users", usersRoutes); // Tambahkan ini
+app.use("/api/users", usersRoutes);
 
 // Jalankan server
 app.listen(port, () => {
@@ -185,7 +183,7 @@ app.listen(port, () => {
   console.log(`📋 Schema validation: http://localhost:${port}/api/schema/tamu`);
 });
 
-// Tangani proses keluar dengan baik
+// Tangani proses keluar
 process.on("SIGINT", () => {
   console.log("🛑 Menghentikan server...");
   db.end((err) => {
