@@ -1,39 +1,31 @@
-// src/components/GuestDetailModal.js
+// src/pages/GuestDetailModal.js // (Sebelumnya Anda menyebut src/components/, pastikan path konsisten)
 import React, { useEffect } from "react";
 import PropTypes from "prop-types";
-import "../styles/GuestDetailModal.css";
+import "../styles/GuestDetailModal.css"; // Pastikan path CSS ini ada dan benar
 
 const GuestDetailModal = ({
   guest,
   onClose,
-  onStartProcessing,
-  onMarkCompleted,
+  // onStartProcessing, // Tidak digunakan di JSX Anda, tapi bisa dibiarkan jika untuk masa depan
+  // onMarkCompleted,  // Tidak digunakan di JSX Anda, tapi bisa dibiarkan jika untuk masa depan
   onNavigateToEdit,
   onNavigateToFollowUp,
-  getStatusBadge,
+  getStatusBadge, // Ini akan diterima dari AdminDashboard
 }) => {
-  // Handle keyboard and click events
   useEffect(() => {
     const handleEscKey = (e) => {
       if (e.key === "Escape") {
         onClose();
       }
     };
-
     const handleClickOutside = (e) => {
       if (e.target.classList.contains("modal-backdrop")) {
         onClose();
       }
     };
-
-    // Add event listeners
     window.addEventListener("keydown", handleEscKey);
     window.addEventListener("click", handleClickOutside);
-
-    // Prevent body scroll when modal is open
     document.body.style.overflow = "hidden";
-
-    // Cleanup
     return () => {
       window.removeEventListener("keydown", handleEscKey);
       window.removeEventListener("click", handleClickOutside);
@@ -41,26 +33,67 @@ const GuestDetailModal = ({
     };
   }, [onClose]);
 
-  // Handle action buttons
-  const handleStartProcessing = () => {
-    onStartProcessing(guest.id);
+  if (!guest) return null; // Pastikan ada pengecekan jika guest null
+
+  const handleEdit = () => onNavigateToEdit(guest.id);
+  const handleFollowUp = () => onNavigateToFollowUp(guest.id);
+
+  const renderDocumentation = () => {
+    if (!guest.dokumentasi) return null;
+    return (
+      <div className="detail-item full-width">
+        <div className="detail-label">Dokumentasi</div>
+        <div className="detail-value image-container">
+          <img
+            src={guest.dokumentasi}
+            alt={`Dokumentasi untuk ${guest.nama_lengkap}`}
+            className="documentation-image"
+            onError={(e) => {
+              e.target.style.display = "none";
+              // Pastikan elemen berikutnya ada sebelum mengakses style
+              if (e.target.nextSibling) {
+                e.target.nextSibling.style.display = "block";
+              }
+            }}
+          />
+          <div className="image-error" style={{ display: "none" }}>
+            Gambar tidak dapat dimuat
+          </div>
+        </div>
+      </div>
+    );
   };
 
-  const handleMarkCompleted = () => {
-    onMarkCompleted(guest.id);
+  const renderMeetingResult = () => {
+    if (!guest.isi_pertemuan) return null;
+    return (
+      <div className="detail-item full-width">
+        <div className="detail-label">Hasil Pertemuan</div>
+        <div className="detail-value">{guest.isi_pertemuan}</div>
+      </div>
+    );
   };
 
-  const handleEdit = () => {
-    onNavigateToEdit(guest.id);
-  };
-
-  const handleFollowUp = () => {
-    onNavigateToFollowUp(guest.id);
-  };
-
-  // Check if guest is unprocessed
-  const isUnprocessed = !guest.status || guest.status === "Belum Diproses";
-  const isProcessing = guest.status === "Diproses";
+  const renderActionButtons = () => (
+    <>
+      <button className="btn btn-primary" onClick={handleEdit} type="button">
+        Edit Data
+      </button>
+      <button className="btn btn-info" onClick={handleFollowUp} type="button">
+        Tindak Lanjut
+      </button>
+      {/* Tombol Aksi Selesai/Proses bisa ditambahkan di sini jika diperlukan di modal */}
+      {/* {(!guest.status || guest.status === "Belum Diproses") && (
+          <button onClick={() => onStartProcessing(guest.id)} className="btn btn-success">Mulai Proses</button>
+      )}
+      {guest.status === "Diproses" && (
+          <button onClick={() => onMarkCompleted(guest.id)} className="btn btn-warning">Tandai Selesai</button>
+      )} */}
+      <button className="btn btn-secondary" onClick={onClose} type="button">
+        Tutup
+      </button>
+    </>
+  );
 
   return (
     <div
@@ -70,153 +103,94 @@ const GuestDetailModal = ({
       aria-modal="true"
     >
       <div className="modal-content">
-        {/* Modal Header */}
         <div className="modal-header">
-          <h3 id="modal-title">Detail Tamu</h3>
+          <h3 id="modal-title" className="modal-title-text">
+            Detail Tamu
+          </h3>{" "}
+          {/* Tambahkan kelas untuk styling jika perlu */}
           <button
             className="close-btn"
             onClick={onClose}
             aria-label="Close modal"
             type="button"
           >
-            ×
+            &times; {/* Karakter HTML untuk tanda silang */}
           </button>
         </div>
-
-        {/* Modal Body */}
         <div className="modal-body">
           <div className="guest-details">
-            {/* Status Badge */}
-            <div className="detail-status">{getStatusBadge(guest)}</div>
-
-            {/* Guest Information Grid */}
+            {/* Status Badge - Memanggil fungsi dari prop */}
+            {typeof getStatusBadge === "function" ? (
+              <div className="detail-status">{getStatusBadge(guest)}</div>
+            ) : (
+              <div className="detail-status">
+                <span className="status-badge status-pending">
+                  {guest.status || "Belum Diproses"}
+                </span>
+              </div>
+            )}
             <div className="detail-grid">
               <div className="detail-item">
                 <div className="detail-label">Nama</div>
                 <div className="detail-value">{guest.nama_lengkap || "-"}</div>
               </div>
-
               <div className="detail-item">
                 <div className="detail-label">Email</div>
                 <div className="detail-value">{guest.email || "-"}</div>
               </div>
-
               <div className="detail-item">
                 <div className="detail-label">No HP</div>
                 <div className="detail-value">{guest.no_hp || "-"}</div>
               </div>
-
               <div className="detail-item">
                 <div className="detail-label">Tanggal</div>
                 <div className="detail-value">
-                  {guest.tanggal_kehadiran || "-"}
+                  {guest.tanggal_kehadiran
+                    ? formatDate(guest.tanggal_kehadiran)
+                    : "-"}
                 </div>
-              </div>
-
+              </div>{" "}
+              {/* Panggil formatDate jika ada */}
               <div className="detail-item full-width">
                 <div className="detail-label">Keperluan</div>
                 <div className="detail-value">{guest.keperluan || "-"}</div>
               </div>
-
               <div className="detail-item full-width">
                 <div className="detail-label">Alamat</div>
                 <div className="detail-value">{guest.alamat || "-"}</div>
               </div>
-
               <div className="detail-item full-width">
                 <div className="detail-label">Pekerjaan</div>
                 <div className="detail-value">{guest.pekerjaan || "-"}</div>
               </div>
-
-              {/* Conditional fields */}
-              {guest.isi_pertemuan && (
-                <div className="detail-item full-width">
-                  <div className="detail-label">Hasil Pertemuan</div>
-                  <div className="detail-value">{guest.isi_pertemuan}</div>
-                </div>
-              )}
-
-              {guest.dokumentasi && (
-                <div className="detail-item full-width">
-                  <div className="detail-label">Dokumentasi</div>
-                  <div className="detail-value image-container">
-                    <img
-                      src={guest.dokumentasi}
-                      alt={`Dokumentasi untuk ${guest.nama_lengkap}`}
-                      className="documentation-image"
-                      onError={(e) => {
-                        e.target.style.display = "none";
-                        e.target.nextSibling.style.display = "block";
-                      }}
-                    />
-                    <div className="image-error" style={{ display: "none" }}>
-                      Gambar tidak dapat dimuat
-                    </div>
-                  </div>
-                </div>
-              )}
+              {renderMeetingResult()}
+              {renderDocumentation()}
             </div>
           </div>
         </div>
-
-        {/* Modal Footer */}
         <div className="modal-footer">
-          <div className="modal-actions">
-            {/* Close Button */}
-            <button
-              className="btn btn-secondary"
-              onClick={onClose}
-              type="button"
-            >
-              Tutup
-            </button>
-
-            {/* Edit Button */}
-            <button
-              className="btn btn-primary"
-              onClick={handleEdit}
-              type="button"
-            >
-              Edit
-            </button>
-
-            {/* Conditional Action Buttons */}
-            {isUnprocessed && (
-              <button
-                className="btn btn-warning"
-                onClick={handleStartProcessing}
-                type="button"
-              >
-                Mulai Proses
-              </button>
-            )}
-
-            {isProcessing && (
-              <>
-                <button
-                  className="btn btn-info"
-                  onClick={handleFollowUp}
-                  type="button"
-                >
-                  Tindak Lanjut
-                </button>
-                <button
-                  className="btn btn-success"
-                  onClick={handleMarkCompleted}
-                  type="button"
-                >
-                  Tandai Selesai
-                </button>
-              </>
-            )}
-          </div>
+          <div className="modal-actions">{renderActionButtons()}</div>
         </div>
       </div>
     </div>
   );
 };
 
-// PropTypes for type checking
+// Fungsi formatDate sederhana jika tidak ingin impor dari AdminDashboard
+// Sebaiknya ini diutilitas terpisah atau dikirim sebagai prop juga jika formatnya kompleks
+const formatDate = (dateString) => {
+  if (!dateString) return "N/A";
+  try {
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  } catch (e) {
+    return "Tanggal Tidak Valid";
+  }
+};
+
 GuestDetailModal.propTypes = {
   guest: PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
@@ -232,11 +206,12 @@ GuestDetailModal.propTypes = {
     dokumentasi: PropTypes.string,
   }).isRequired,
   onClose: PropTypes.func.isRequired,
-  onStartProcessing: PropTypes.func.isRequired,
-  onMarkCompleted: PropTypes.func.isRequired,
   onNavigateToEdit: PropTypes.func.isRequired,
   onNavigateToFollowUp: PropTypes.func.isRequired,
-  getStatusBadge: PropTypes.func.isRequired,
+  getStatusBadge: PropTypes.func.isRequired, // Ini sudah ada di propTypes Anda
+  // Tambahkan onStartProcessing dan onMarkCompleted ke propTypes jika akan digunakan di modal
+  onStartProcessing: PropTypes.func,
+  onMarkCompleted: PropTypes.func,
 };
 
 export default GuestDetailModal;

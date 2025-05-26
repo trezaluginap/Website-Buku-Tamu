@@ -1,32 +1,34 @@
 const express = require("express");
 const cors = require("cors");
+const bcrypt = require("bcrypt");
+
 const tamuRoutes = require("./routes/tamu");
 const usersRoutes = require("./routes/users");
-
-const bcrypt = require("bcrypt");
 const db = require("./config/db");
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Middleware
+/* ======================= MIDDLEWARE ======================= */
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
-// Logging middleware
+// Logging setiap request
 app.use((req, res, next) => {
   console.log(`📥 ${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
   next();
 });
 
-// Error handling middleware
+// Error handling
 app.use((err, req, res, next) => {
   console.error("❌ Server error:", err);
   res.status(500).json({ error: "Terjadi kesalahan pada server" });
 });
 
-// Status check
+/* ======================= ENDPOINT UMUM ======================= */
+
+// Cek status server dan koneksi database
 app.get("/api/status", async (req, res) => {
   try {
     await db.checkConnection();
@@ -48,7 +50,7 @@ app.get("/api/status", async (req, res) => {
   }
 });
 
-// Schema check for tamu
+// Cek struktur tabel tamu
 app.get("/api/schema/tamu", (req, res) => {
   db.query("DESCRIBE tamu", (err, results) => {
     if (err) {
@@ -74,7 +76,44 @@ app.get("/api/schema/tamu", (req, res) => {
   });
 });
 
-// ✅ ADMIN LOGIN
+/* ======================= LOGIN USER ======================= */
+app.post("/api/login", (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ error: "Username dan password wajib diisi" });
+  }
+
+  db.query("SELECT * FROM users WHERE username = ?", [username], async (err, results) => {
+    if (err) {
+      console.error("❌ Gagal mengambil data user:", err);
+      return res.status(500).json({ error: "Terjadi kesalahan server" });
+    }
+
+    if (results.length === 0) {
+      return res.status(401).json({ error: "Username tidak ditemukan" });
+    }
+
+    const user = results[0];
+    const isMatch = password === user.password; // Gunakan bcrypt jika perlu
+
+    if (!isMatch) {
+      return res.status(401).json({ error: "Password salah" });
+    }
+
+    res.json({
+      message: "Login berhasil",
+      user: {
+        id: user.id,
+        name: user.name,
+        nip: user.nip,
+        username: user.username,
+      },
+    });
+  });
+});
+
+/* ======================= LOGIN ADMIN ======================= */
 app.post("/api/admin-login", (req, res) => {
   const { nama_pengguna, password } = req.body;
 
@@ -93,14 +132,13 @@ app.post("/api/admin-login", (req, res) => {
     }
 
     const admin = results[0];
-
-    const isMatch = password === admin.password;
+    const isMatch = password === admin.password; // Gunakan bcrypt jika disimpan dalam bentuk hash
 
     if (!isMatch) {
       return res.status(401).json({ error: "Password salah" });
     }
 
-    // ✅ Simpan log login
+    // Simpan log login admin
     if (admin.id) {
       db.query(
         "INSERT INTO admin_logins (admin_id) VALUES (?)",
@@ -113,8 +151,6 @@ app.post("/api/admin-login", (req, res) => {
           }
         }
       );
-    } else {
-      console.warn("⚠️ admin.id tidak tersedia, log login tidak disimpan");
     }
 
     res.json({
@@ -124,7 +160,7 @@ app.post("/api/admin-login", (req, res) => {
   });
 });
 
-// ✅ TAMBAH DATA TAMU
+/* ======================= TAMBAH DATA TAMU ======================= */
 app.post("/api/tamu", (req, res) => {
   const {
     nama_lengkap,
@@ -136,7 +172,7 @@ app.post("/api/tamu", (req, res) => {
     keperluan,
     staff,
     dituju,
-    tanggal_kehadiran
+    tanggal_kehadiran,
   } = req.body;
 
   if (!nama_lengkap || !jenis_kelamin || !tanggal_kehadiran) {
@@ -159,7 +195,7 @@ app.post("/api/tamu", (req, res) => {
     keperluan || null,
     staff || null,
     dituju || null,
-    tanggal_kehadiran
+    tanggal_kehadiran,
   ];
 
   db.query(sql, values, (err, result) => {
@@ -168,22 +204,25 @@ app.post("/api/tamu", (req, res) => {
       return res.status(500).json({ error: "Gagal menyimpan data tamu" });
     }
 
-    res.status(201).json({ message: "Data tamu berhasil disimpan", id: result.insertId });
+    res.status(201).json({
+      message: "Data tamu berhasil disimpan",
+      id: result.insertId,
+    });
   });
 });
 
-// ✅ Gunakan route tambahan
+/* ======================= ROUTES TAMBAHAN ======================= */
 app.use("/api/tamu", tamuRoutes);
 app.use("/api/users", usersRoutes);
 
-// Jalankan server
+/* ======================= JALANKAN SERVER ======================= */
 app.listen(port, () => {
   console.log(`✅ Server berjalan di http://localhost:${port}`);
   console.log(`📊 Status endpoint: http://localhost:${port}/api/status`);
   console.log(`📋 Schema validation: http://localhost:${port}/api/schema/tamu`);
 });
 
-// Tangani proses keluar
+/* ======================= HANDLE SIGINT ======================= */
 process.on("SIGINT", () => {
   console.log("🛑 Menghentikan server...");
   db.end((err) => {
