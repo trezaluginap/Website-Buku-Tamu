@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Login.css";
-import LoginPict from "../assets/LoginPict.jpg";
+import Tamu from "../assets/Tamu2.png";  
 import BPSLogo from "../assets/BPS.png";
 // Change the import to use the named export
 import { QRCodeSVG } from "qrcode.react";
@@ -22,9 +22,10 @@ const Login = () => {
       {/* Left: Illustration */}
       <div className="login-image">
         <div className="login-image-overlay">
-          <img src={LoginPict} alt="Login Illustration" />
+          <img src={Tamu} alt="Login Illustration" />
           <div className="login-image-text">
-            <h2>Sistem Informasi Tamu BPS</h2>
+            <h2>BUKU TAMU</h2>
+            <h2>Sistem Informasi Tamu Badan Pusat Statistik</h2>
             <p>
               Platform digital untuk memudahkan pendataan dan pelayanan tamu di
               Badan Pusat Statistik

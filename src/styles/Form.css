@@ -1,9 +1,7 @@
-
-
 :root {
-  --ftms-primary-color: #2C5282; /* Biru corporate */
+  --ftms-primary-color: #2C5282;
   --ftms-primary-dark: #2A4365;
-  --ftms-secondary-color: #38A169; /* Hijau */
+  --ftms-secondary-color: #38A169;
   --ftms-bg-light: #F7FAFC;
   --ftms-bg-card: #FFFFFF;
   --ftms-text-dark: #1A202C;
@@ -22,12 +20,11 @@
   --ftms-transition: all 0.2s ease-in-out;
 }
 
-/* Global & Body untuk Scrolling */
 html {
   height: 100%;
-  overflow-y: scroll; /* Selalu tampilkan scrollbar untuk mencegah layout shift */
+  overflow-y: scroll;
   font-family: var(--ftms-font-sans);
-  background-color: var(--ftms-bg-light); /* Background untuk seluruh halaman */
+  background-color: #FF0000; /* GANTI JADI MERAH */
   color: var(--ftms-text-dark);
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
@@ -37,16 +34,17 @@ html {
 body {
   min-height: 100%;
   margin: 0;
-  padding: 0; /* Mungkin perlu padding jika ada navbar fixed */
+  padding: 0;
   line-height: 1.6;
+    background-color: #FF0000; /* tambahkan ini */
+
 }
 
-/* Kontainer Utama Form */
 .form-tamu-ms-container {
   width: 100%;
-  max-width: 800px; /* Lebar maksimal form */
-  margin: 2rem auto; /* Tengah dan beri jarak atas/bawah */
-  padding: 0 1rem; /* Padding untuk layar kecil */
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
   box-sizing: border-box;
   opacity: 0;
   transform: translateY(15px);
@@ -57,14 +55,13 @@ body {
   transform: translateY(0);
 }
 
-#guestRegistrationMultiStepForm { /* ID form */
+#guestRegistrationMultiStepForm {
   background-color: var(--ftms-bg-card);
   border-radius: var(--ftms-border-radius-lg);
   box-shadow: var(--ftms-shadow-lg);
-  overflow: hidden; /* Agar border-radius header dan footer rapi */
+  overflow: hidden;
 }
 
-/* Header Form */
 .form-tamu-ms-header {
   background-color: var(--ftms-primary-color);
   color: var(--ftms-text-on-primary);
@@ -85,17 +82,15 @@ body {
   opacity: 0.85;
 }
 
-/* Konten Form per Step */
 .form-tamu-ms-content {
   padding: 2rem 2.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* Jarak antar section atau elemen di dalam content */
+  gap: 1.5rem;
 }
 
 .form-tamu-ms-section {
   padding-bottom: 1.5rem;
-  /* border-bottom: 1px solid var(--ftms-border-color); */
 }
 .form-tamu-ms-section:last-child { border-bottom: none; }
 
@@ -137,7 +132,7 @@ body {
 input[type="text"],
 input[type="email"],
 input[type="tel"],
-input[type="number"], /* Untuk no_hp jika tetap number */
+input[type="number"],
 select,
 textarea {
   width: 100%;
@@ -165,11 +160,11 @@ select:focus,
 textarea:focus {
   outline: none;
   border-color: var(--ftms-border-focus);
-  box-shadow: 0 0 0 2px rgba(44, 82, 130, 0.2); /* Warna dari primary color */
+  box-shadow: 0 0 0 2px rgba(44, 82, 130, 0.2);
 }
 
 input.date-fixed {
-  background-color: #edf2f7; /* Abu-abu terang */
+  background-color: #edf2f7;
   cursor: not-allowed;
 }
 
@@ -183,39 +178,35 @@ select {
   padding-right: 2.5rem;
 }
 
-/* Sub-form Section Styling */
 .form-tamu-ms-sub-section {
-  background-color: #f9fafb; /* Sedikit beda */
+  background-color: #f9fafb;
   border: 1px solid #f3f4f6;
   border-left: 3px solid var(--ftms-secondary-color);
   padding: 1.25rem;
   border-radius: var(--ftms-border-radius-md);
   margin-top: 1.25rem;
-  display: flex; /* Menggunakan flex untuk layout sub-section */
+  display: flex;
   flex-direction: column;
-  gap: 1.25rem; /* Jarak antar group di dalam sub-section */
+  gap: 1.25rem;
 }
-.form-tamu-ms-sub-section.active { /* Animasi bisa ditambahkan di sini jika diinginkan */
-    /* Misal: animation: fadeIn 0.3s ease-out; */
-}
+.form-tamu-ms-sub-section.active {}
 .form-tamu-ms-sub-section h4 {
   font-size: 1rem;
   font-weight: 600;
   color: var(--ftms-primary-dark);
-  margin: 0 0 0.5rem 0; /* Kurangi margin bottom */
+  margin: 0 0 0.5rem 0;
 }
 
-/* Tombol Aksi Form */
 .form-tamu-ms-actions {
   display: flex;
-  justify-content: flex-end; /* Tombol ke kanan by default */
+  justify-content: flex-end;
   gap: 0.75rem;
   padding: 1.5rem 2.5rem;
   border-top: 1px solid var(--ftms-border-color);
   background-color: #fdfdfe;
 }
 .form-tamu-ms-actions.space-between {
-    justify-content: space-between; /* Untuk step 2, tombol kembali di kiri */
+  justify-content: space-between;
 }
 
 .btn {
@@ -239,7 +230,7 @@ select {
 }
 .btn-primary:hover:not(:disabled) { background-color: var(--ftms-primary-dark); }
 
-.btn-secondary { /* Tombol reset */
+.btn-secondary {
   background-color: #e2e8f0;
   color: var(--ftms-text-medium);
 }
@@ -251,32 +242,30 @@ select {
   border-color: var(--ftms-primary-color);
 }
 .btn-outline:hover:not(:disabled) {
-  background-color: rgba(44, 82, 130, 0.05); /* Hover halus */
+  background-color: rgba(44, 82, 130, 0.05);
   color: var(--ftms-primary-dark);
   border-color: var(--ftms-primary-dark);
 }
 
-
-/* Responsive */
 @media (max-width: 768px) {
   .form-tamu-ms-container { margin: 1.5rem auto; padding: 0 0.75rem; }
   .form-tamu-ms-header { padding: 1.5rem; }
   .form-tamu-ms-header h2 { font-size: 1.5rem; }
   .form-tamu-ms-content { padding: 1.5rem; }
   .form-tamu-ms-actions { padding: 1.25rem 1.5rem; }
-  .form-tamu-ms-grid { grid-template-columns: 1fr; } /* Semua input full width di mobile */
+  .form-tamu-ms-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {
   .form-tamu-ms-actions {
-    flex-direction: column; /* Tombol bertumpuk */
+    flex-direction: column;
   }
   .form-tamu-ms-actions.space-between {
-    align-items: stretch; /* Agar tombol kembali dan grup kanan sama lebarnya */
+    align-items: stretch;
   }
-  .form-tamu-ms-actions.space-between > div { /* Wrapper tombol kanan */
+  .form-tamu-ms-actions.space-between > div {
     display: flex;
-    flex-direction: column; /* Tombol reset dan submit juga bertumpuk */
+    flex-direction: column;
     gap: 0.75rem;
   }
   .btn { width: 100%; }

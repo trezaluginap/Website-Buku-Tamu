@@ -685,7 +685,7 @@ const AdminDashboard = () => {
                   <table className="data-table">
                     <thead>
                       <tr>
-                        <th data-label="#">#</th>
+                        <th data-label="#">No</th>
                         <th data-label="Nama & Instansi">Nama & Instansi</th>
                         <th data-label="Keperluan">Keperluan</th>
                         <th data-label="Tanggal">Tanggal</th>

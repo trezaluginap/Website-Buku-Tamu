@@ -3,24 +3,23 @@
 .admin-container {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Untuk menjaga konten tetap di tengah secara horizontal */
-  justify-content: flex-start; /* Mengubah ini agar konten mulai dari atas */
+  align-items: center; 
+  justify-content: flex-start; 
   min-height: 100vh;
-  background-color: #f0f2f5; /* Warna latar belakang halaman */
-  padding-top: 8vh; /* Tambahkan padding atas untuk jarak dari tepi layar, sesuaikan nilainya (misal: 5vh, 50px, dll.) */
+  background-color:  #e6f0fa; 
+  padding-top: 8vh; 
   padding-left: 20px;
   padding-right: 20px;
-  padding-bottom: 20px; /* Padding bawah bisa tetap atau disesuaikan */
+  padding-bottom: 20px;
   box-sizing: border-box;
 }
 
 .login-logo {
-  display: block; /* Membuat gambar menjadi block element agar margin auto bekerja */
-  width: 120px; /* Sesuaikan lebar logo Anda */
-  height: auto; /* Menjaga rasio aspek logo */
-  margin: 0 auto 20px auto; /* Tengah secara horizontal, jarak bawah 20px */
-  /* Contoh lain jika ingin border atau efek: */
-  /* border-radius: 50%; */ /* Jika ingin logo bulat */
+  display: block;
+  width: 120px;
+  height: auto; 
+  margin: 0 auto 20px auto;
+  border-radius: 50%; 
 }
 
 .admin-container h2 {
