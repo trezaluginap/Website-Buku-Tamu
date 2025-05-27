@@ -1,90 +1,69 @@
-// src/pages/FormTamu.js (Versi Multi-Step Disesuaikan)
+// src/pages/FormTamu.js (Versi Multi-Step Disesuaikan & Dipercantik)
 import React, { useState, useEffect, useCallback } from "react";
-import "../styles/Form.css"; // Gunakan CSS baru/terpisah untuk form ini
+import "../styles/Form.css"; // Pastikan Anda menyesuaikan CSS ini
 import BPSLogo from "../assets/BPS.png";
 
 const FormTamu = () => {
-  const today = new Date();
-  // Menggunakan ISOString lengkap untuk tanggal_kehadiran internal
-  const initialTimestamp = today.toISOString();
-
   const initialFormData = {
     nama_lengkap: "",
     jenis_kelamin: "",
     email: "",
     no_hp: "",
     pekerjaan: "",
-    tanggal_kehadiran: initialTimestamp, // Simpan full ISO string
+    tanggal_kehadiran: new Date().toISOString(), // Langsung set di sini untuk initial state
     alamat: "",
-    keperluan: "", // Keperluan utama akan disimpan di sini
+    keperluan: "",
     dituju: "",
-    tujuan_kunjungan: "", // Untuk mitra & tamu umum
-    topik_konsultasi: "", // Untuk konsultasi
-    deskripsi_kebutuhan: "", // Untuk konsultasi
-    // status: "Belum Diproses" // Status akan ditambahkan saat submit
+    tujuan_kunjungan: "",
+    topik_konsultasi: "",
+    deskripsi_kebutuhan: "",
   };
 
   const [formData, setFormData] = useState(initialFormData);
-  // const [keperluan, setKeperluan] = useState(""); // selectedKeperluan untuk UI logic
-  const [selectedKeperluanUI, setSelectedKeperluanUI] = useState(""); // Untuk kontrol tampilan sub-form
+  const [selectedKeperluanUI, setSelectedKeperluanUI] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formStep, setFormStep] = useState(1);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false); // Untuk animasi fade-in
+  const totalSteps = 2; // Total langkah dalam formulir
 
   useEffect(() => {
-    // Set tanggal_kehadiran dengan timestamp saat ini ketika komponen pertama kali dimuat
-    // dan pastikan formData diinisialisasi dengan benar
-    setFormData((prev) => ({
-      ...initialFormData, // Selalu mulai dari initial form data bersih
-      tanggal_kehadiran: new Date().toISOString(), // Update dengan waktu terkini saat mount
-    }));
-
+    // Memberi sedikit delay untuk animasi fade-in saat komponen dimuat
     const timer = setTimeout(() => {
       setIsLoaded(true);
     }, 100);
-
     return () => clearTimeout(timer);
-  }, []); // Hanya dijalankan sekali saat mount
+  }, []);
 
   const handleChange = useCallback((e) => {
-    const { name, value, files } = e.target;
+    const { name, value } = e.target; // Hapus `files` karena tidak ada upload file di sini
 
     if (name === "keperluan") {
-      setSelectedKeperluanUI(value); // Update UI state untuk keperluan
-      // Juga update formData.keperluan
+      setSelectedKeperluanUI(value);
       setFormData((prev) => ({
         ...prev,
         keperluan: value,
         // Reset field terkait saat keperluan utama berubah
-        tujuan_kunjungan:
-          value === "mitra_statistik" || value === "tamu_umum"
-            ? prev.tujuan_kunjungan
-            : "",
-        topik_konsultasi:
-          value === "konsultasi_statistik" ? prev.topik_konsultasi : "",
-        deskripsi_kebutuhan:
-          value === "konsultasi_statistik" ? prev.deskripsi_kebutuhan : "",
+        tujuan_kunjungan: "", // Selalu reset saat keperluan utama berubah
+        topik_konsultasi: "",
+        deskripsi_kebutuhan: "",
       }));
     } else {
       setFormData((prev) => ({
         ...prev,
-        [name]: files ? files[0].name : value, // Hati-hati dengan file handling ini jika untuk upload sebenarnya
+        [name]: value,
       }));
     }
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!window.confirm("Apakah Anda yakin ingin mengirim formulir ini?"))
-      return;
+    if (!window.confirm("Apakah Anda yakin ingin mengirim formulir ini?")) return;
 
     setIsSubmitting(true);
     try {
-      // Pastikan payload menggunakan timestamp terkini saat submit
-      // dan status ditambahkan di sini
       const payload = {
         ...formData,
-        tanggal_kehadiran: new Date().toISOString(), // Waktu presisi saat submit
+        tanggal_kehadiran: new Date().toISOString(), // Pastikan timestamp terkini
         status: "Belum Diproses",
       };
       console.log("Mengirim data (multi-step):", payload);
@@ -104,21 +83,17 @@ const FormTamu = () => {
             result.status || "Belum Diproses"
           }`
         );
-        // Reset form secara keseluruhan
-        e.target.reset(); // Reset field HTML (jika ada yg tidak terkontrol state)
-        setSelectedKeperluanUI("");
+        // Reset form ke kondisi awal
         setFormData({
-          // Reset state formData ke kondisi awal dengan timestamp baru
           ...initialFormData,
           tanggal_kehadiran: new Date().toISOString(),
         });
+        setSelectedKeperluanUI("");
         setFormStep(1); // Kembali ke step 1
       } else {
-        const errorData = await response
-          .json()
-          .catch(() => ({
-            message: "Gagal mengirim data dan membaca detail error.",
-          }));
+        const errorData = await response.json().catch(() => ({
+          message: "Gagal mengirim data dan membaca detail error.",
+        }));
         alert(
           `Gagal mengirim data. ${errorData.message || response.statusText}`
         );
@@ -134,26 +109,24 @@ const FormTamu = () => {
 
   const goToNextStep = (e) => {
     e.preventDefault();
-    // Validasi sederhana sebelum lanjut (opsional, bisa diperluas)
+    // Validasi sederhana untuk Step 1
     if (
       !formData.nama_lengkap ||
       !formData.jenis_kelamin ||
       !formData.no_hp ||
       !formData.alamat
     ) {
-      alert(
-        "Mohon lengkapi semua field yang wajib diisi di Informasi Pribadi."
-      );
+      alert("Mohon lengkapi semua field yang wajib diisi di Informasi Pribadi.");
       return;
     }
     setFormStep(2);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "smooth" }); // Scroll ke atas
   };
 
   const goToPrevStep = (e) => {
     e.preventDefault();
     setFormStep(1);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "smooth" }); // Scroll ke atas
   };
 
   const getDayName = () => {
@@ -166,43 +139,56 @@ const FormTamu = () => {
       "Jumat",
       "Sabtu",
     ];
-    return days[new Date().getDay()]; // Gunakan tanggal saat ini untuk nama hari
+    return days[new Date().getDay()];
   };
 
-  // Format tanggal untuk tampilan di header (DD/MM/YYYY)
   const formatDateForDisplay = (isoString) => {
     if (!isoString) return "";
     const date = new Date(isoString);
     const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Bulan adalah 0-indexed
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
   };
 
   return (
-    // Ganti class .container menjadi .form-tamu-ms-container untuk CSS yang lebih spesifik
-    <div className={`form-tamu-ms-container ${isLoaded ? "loaded" : ""}`}>
-      <form onSubmit={handleSubmit} id="guestRegistrationMultiStepForm">
-        <div className="form-tamu-ms-header">
-          <div className="form-tamu-ms-logo-container">
-            <img src={BPSLogo} alt="BPS Logo" className="form-tamu-ms-logo" />
+    <div className={`form-container ${isLoaded ? "loaded" : ""}`}>
+      <form onSubmit={handleSubmit} className="guest-registration-form">
+        <div className="form-header">
+          <div className="logo-container">
+            <img src={BPSLogo} alt="BPS Logo" className="bps-logo" />
           </div>
           <h2>Buku Tamu Digital</h2>
-          <p className="form-tamu-ms-description">
+          <p className="form-description">
             Registrasi kunjungan untuk hari {getDayName()},{" "}
-            {/* Tampilkan tanggal hari ini untuk header */}
             {formatDateForDisplay(new Date().toISOString())}. Mohon lengkapi
             semua field.
           </p>
         </div>
 
+        {/* Progress Bar */}
+        <div className="progress-bar-container">
+          <div
+            className="progress-bar-fill"
+            style={{ width: `${(formStep / totalSteps) * 100}%` }}
+          ></div>
+          <div className="progress-step-indicator">
+            <span className={`step-dot ${formStep >= 1 ? "active" : ""}`}></span>
+            <span className={`step-dot ${formStep >= 2 ? "active" : ""}`}></span>
+          </div>
+          <div className="progress-labels">
+            <span>Informasi Pribadi</span>
+            <span>Detail Kunjungan</span>
+          </div>
+        </div>
+
         {/* Konten Step 1 */}
         {formStep === 1 && (
-          <div className="form-tamu-ms-content">
-            <div className="form-tamu-ms-section">
-              <h3 className="form-tamu-ms-section-title">Informasi Pribadi</h3>
-              <div className="form-tamu-ms-grid">
-                <div className="form-tamu-ms-group">
+          <div className="form-content active-step">
+            <div className="form-section">
+              <h3 className="section-title">Informasi Pribadi</h3>
+              <div className="form-grid">
+                <div className="form-group">
                   <label htmlFor="nama_lengkap" className="required">
                     Nama Lengkap
                   </label>
@@ -210,20 +196,20 @@ const FormTamu = () => {
                     id="nama_lengkap"
                     type="text"
                     name="nama_lengkap"
-                    value={formData.nama_lengkap || ""}
+                    value={formData.nama_lengkap}
                     required
                     onChange={handleChange}
-                    placeholder="Masukkan nama lengkap"
+                    placeholder="Masukkan nama lengkap Anda"
                   />
                 </div>
-                <div className="form-tamu-ms-group">
+                <div className="form-group">
                   <label htmlFor="jenis_kelamin" className="required">
                     Jenis Kelamin
                   </label>
                   <select
                     id="jenis_kelamin"
                     name="jenis_kelamin"
-                    value={formData.jenis_kelamin || ""}
+                    value={formData.jenis_kelamin}
                     required
                     onChange={handleChange}
                   >
@@ -232,18 +218,18 @@ const FormTamu = () => {
                     <option value="Perempuan">Perempuan</option>
                   </select>
                 </div>
-                <div className="form-tamu-ms-group">
+                <div className="form-group">
                   <label htmlFor="email">Email</label>
                   <input
                     id="email"
                     type="email"
                     name="email"
-                    value={formData.email || ""}
+                    value={formData.email}
                     onChange={handleChange}
-                    placeholder="contoh@email.com"
+                    placeholder="contoh@email.com (opsional)"
                   />
                 </div>
-                <div className="form-tamu-ms-group">
+                <div className="form-group">
                   <label htmlFor="no_hp" className="required">
                     No HP
                   </label>
@@ -251,7 +237,7 @@ const FormTamu = () => {
                     id="no_hp"
                     type="tel"
                     name="no_hp"
-                    value={formData.no_hp || ""}
+                    value={formData.no_hp}
                     pattern="^08[0-9]{8,12}$"
                     title="Format: 08xxxxxxxxxx (10-14 digit)"
                     required
@@ -259,18 +245,18 @@ const FormTamu = () => {
                     placeholder="08xxxxxxxxxx"
                   />
                 </div>
-                <div className="form-tamu-ms-group">
+                <div className="form-group">
                   <label htmlFor="pekerjaan">Pekerjaan / Instansi</label>
                   <input
                     id="pekerjaan"
                     type="text"
                     name="pekerjaan"
-                    value={formData.pekerjaan || ""}
+                    value={formData.pekerjaan}
                     onChange={handleChange}
                     placeholder="Mahasiswa, PNS, Swasta, dll."
                   />
                 </div>
-                <div className="form-tamu-ms-group">
+                <div className="form-group">
                   <label htmlFor="tanggal_kehadiran_display">
                     Tanggal Kedatangan
                   </label>
@@ -282,23 +268,23 @@ const FormTamu = () => {
                     className="date-fixed"
                   />
                 </div>
-                <div className="form-tamu-ms-group full-span">
+                <div className="form-group full-span">
                   <label htmlFor="alamat" className="required">
                     Alamat
                   </label>
                   <textarea
                     id="alamat"
                     name="alamat"
-                    value={formData.alamat || ""}
+                    value={formData.alamat}
                     required
                     onChange={handleChange}
-                    placeholder="Masukkan alamat lengkap"
+                    placeholder="Masukkan alamat lengkap Anda"
                     rows="3"
                   ></textarea>
                 </div>
               </div>
             </div>
-            <div className="form-tamu-ms-actions">
+            <div className="form-actions">
               <button
                 onClick={goToNextStep}
                 className="btn btn-primary"
@@ -312,41 +298,36 @@ const FormTamu = () => {
 
         {/* Konten Step 2 */}
         {formStep === 2 && (
-          <div className="form-tamu-ms-content">
-            <div className="form-tamu-ms-section">
-              <h3 className="form-tamu-ms-section-title">Detail Kunjungan</h3>
-              <div className="form-tamu-ms-grid">
-                <div className="form-tamu-ms-group">
+          <div className="form-content active-step">
+            <div className="form-section">
+              <h3 className="section-title">Detail Kunjungan</h3>
+              <div className="form-grid">
+                <div className="form-group">
                   <label htmlFor="keperluan" className="required">
                     Keperluan Utama
                   </label>
                   <select
                     id="keperluan"
                     name="keperluan"
-                    value={formData.keperluan || ""}
+                    value={formData.keperluan}
                     onChange={handleChange}
                     required
                   >
                     <option value="">Pilih keperluan</option>
-                    <option value="mitra_statistik">
-                      Kegiatan Mitra Statistik
-                    </option>
-                    <option value="konsultasi_statistik">
-                      Konsultasi Statistik
-                    </option>{" "}
-                    {/* Value ini harus sama dengan yang di AdminDashboard */}
+                    <option value="mitra_statistik">Kegiatan Mitra Statistik</option>
+                    <option value="konsultasi_statistik">Konsultasi Statistik</option>
                     <option value="tamu_umum">Tamu Umum Lainnya</option>
                   </select>
                 </div>
-                <div className="form-tamu-ms-group">
+                <div className="form-group">
                   <label htmlFor="dituju">
-                    Ingin Bertemu / Dituju (Seksi/Staff)
+                    Bertemu Dengan (Seksi/Staff)
                   </label>
                   <input
                     id="dituju"
                     type="text"
                     name="dituju"
-                    value={formData.dituju || ""}
+                    value={formData.dituju}
                     onChange={handleChange}
                     placeholder="Nama staff atau Seksi"
                   />
@@ -355,19 +336,16 @@ const FormTamu = () => {
 
               {/* Sub-form untuk Mitra Statistik */}
               {selectedKeperluanUI === "mitra_statistik" && (
-                <div className="form-tamu-ms-sub-section active">
+                <div className="form-sub-section active">
                   <h4>Detail Kegiatan Mitra Statistik</h4>
-                  <div className="form-tamu-ms-group full-span">
-                    <label
-                      htmlFor="tujuan_kunjungan_mitra"
-                      className="required"
-                    >
+                  <div className="form-group full-span">
+                    <label htmlFor="tujuan_kunjungan_mitra" className="required">
                       Tujuan Kunjungan Mitra
                     </label>
                     <textarea
                       id="tujuan_kunjungan_mitra"
                       name="tujuan_kunjungan"
-                      value={formData.tujuan_kunjungan || ""}
+                      value={formData.tujuan_kunjungan}
                       required={selectedKeperluanUI === "mitra_statistik"}
                       onChange={handleChange}
                       placeholder="Jelaskan tujuan spesifik kegiatan mitra"
@@ -379,9 +357,9 @@ const FormTamu = () => {
 
               {/* Sub-form untuk Konsultasi Statistik */}
               {selectedKeperluanUI === "konsultasi_statistik" && (
-                <div className="form-tamu-ms-sub-section active">
+                <div className="form-sub-section active">
                   <h4>Detail Konsultasi Statistik</h4>
-                  <div className="form-tamu-ms-group">
+                  <div className="form-group">
                     <label htmlFor="topik_konsultasi" className="required">
                       Topik Konsultasi
                     </label>
@@ -389,22 +367,20 @@ const FormTamu = () => {
                       id="topik_konsultasi"
                       type="text"
                       name="topik_konsultasi"
-                      value={formData.topik_konsultasi || ""}
+                      value={formData.topik_konsultasi}
                       required={selectedKeperluanUI === "konsultasi_statistik"}
                       onChange={handleChange}
                       placeholder="Contoh: Data PDRB, Inflasi"
                     />
                   </div>
-                  <div className="form-tamu-ms-group full-span">
-                    {" "}
-                    {/* full-span agar textarea lebar */}
+                  <div className="form-group full-span">
                     <label htmlFor="deskripsi_kebutuhan" className="required">
                       Deskripsi Kebutuhan Data/Konsultasi
                     </label>
                     <textarea
                       id="deskripsi_kebutuhan"
                       name="deskripsi_kebutuhan"
-                      value={formData.deskripsi_kebutuhan || ""}
+                      value={formData.deskripsi_kebutuhan}
                       required={selectedKeperluanUI === "konsultasi_statistik"}
                       onChange={handleChange}
                       placeholder="Jelaskan detail kebutuhan data atau materi konsultasi Anda"
@@ -416,16 +392,16 @@ const FormTamu = () => {
 
               {/* Sub-form untuk Tamu Umum */}
               {selectedKeperluanUI === "tamu_umum" && (
-                <div className="form-tamu-ms-sub-section active">
+                <div className="form-sub-section active">
                   <h4>Detail Kunjungan Umum</h4>
-                  <div className="form-tamu-ms-group full-span">
+                  <div className="form-group full-span">
                     <label htmlFor="tujuan_kunjungan_umum" className="required">
                       Tujuan Kunjungan Umum
                     </label>
                     <textarea
                       id="tujuan_kunjungan_umum"
                       name="tujuan_kunjungan"
-                      value={formData.tujuan_kunjungan || ""}
+                      value={formData.tujuan_kunjungan}
                       required={selectedKeperluanUI === "tamu_umum"}
                       onChange={handleChange}
                       placeholder="Jelaskan tujuan kunjungan umum Anda"
@@ -436,7 +412,7 @@ const FormTamu = () => {
               )}
             </div>
 
-            <div className="form-tamu-ms-actions space-between">
+            <div className="form-actions space-between">
               <button
                 type="button"
                 onClick={goToPrevStep}
@@ -444,15 +420,12 @@ const FormTamu = () => {
               >
                 Kembali
               </button>
-              <div>
-                {" "}
-                {/* Wrapper untuk tombol reset dan submit agar sejajar */}
+              <div className="action-right">
                 <button
-                  type="reset"
+                  type="button" // Ganti ke type="button" agar tidak submit form saat reset
                   className="btn btn-secondary"
                   onClick={() => {
                     if (window.confirm("Reset semua isian di step ini?")) {
-                      // Reset hanya field yang relevan dengan step 2 atau keperluan
                       setFormData((prev) => ({
                         ...prev,
                         keperluan: "",
