@@ -381,20 +381,6 @@ const FormTamu = () => {
               {selectedKeperluanUI === "konsultasi_statistik" && (
                 <div className="form-tamu-ms-sub-section active">
                   <h4>Detail Konsultasi Statistik</h4>
-                  <div className="form-tamu-ms-group">
-                    <label htmlFor="topik_konsultasi" className="required">
-                      Topik Konsultasi
-                    </label>
-                    <input
-                      id="topik_konsultasi"
-                      type="text"
-                      name="topik_konsultasi"
-                      value={formData.topik_konsultasi || ""}
-                      required={selectedKeperluanUI === "konsultasi_statistik"}
-                      onChange={handleChange}
-                      placeholder="Contoh: Data PDRB, Inflasi"
-                    />
-                  </div>
                   <div className="form-tamu-ms-group full-span">
                     {" "}
                     {/* full-span agar textarea lebar */}

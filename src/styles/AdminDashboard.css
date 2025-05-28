@@ -549,3 +549,39 @@
   font-size: 0.875rem; /* Sedikit lebih besar di modal */
   padding: calc(var(--spacing-unit)*1) calc(var(--spacing-unit)*3);
 }
+
+/* Tambahkan ke AdminDashboard.css atau file CSS utama Anda */
+
+.cell-datetime { /* Untuk kolom Waktu Kunjungan */
+  line-height: 1.4;
+}
+
+.cell-status-proses { /* Untuk kolom Status & Proses */
+  line-height: 1.4;
+}
+
+.datetime-entry {
+  display: block; /* Setiap entri waktu jadi baris baru */
+  font-size: 0.8rem; /* Ukuran font lebih kecil untuk detail waktu */
+  color: var(--color-gray-500); /* Warna lebih soft */
+}
+
+.datetime-entry.subtle { /* Untuk jam_submit_data yang mungkin kurang penting dari tanggal utama */
+  color: var(--color-gray-400);
+}
+
+.datetime-entry.small { /* Untuk jam_diterima dan jam_selesai_tindak_lanjut */
+    font-size: 0.75rem;
+    margin-top: 0.2rem;
+}
+
+.datetime-label {
+  font-weight: var(--font-weight-medium);
+  margin-right: 0.3em;
+  color: var(--color-gray-600); /* Label sedikit lebih jelas */
+}
+
+.guest-primary-info .priority-indicator { /* Atur margin jika ada priority indicator */
+    margin-left: 0.5em;
+    vertical-align: middle; /* Coba align dengan nama */
+}
