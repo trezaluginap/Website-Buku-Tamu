@@ -70,18 +70,19 @@ const FollowUpForm = () => {
     tujuan_kunjungan: "",
     topik_konsultasi: "",
     deskripsi_kebutuhan: "",
-    diterima_oleh: "",
-    isi_pertemuan: "",
-    dokumentasi: "",
+    diterima_oleh: "", // Sebenarnya field ini lebih cocok di followUpData atau data terpisah
+    isi_pertemuan: "",   // Sama seperti di atas
+    dokumentasi: "",     // Sama seperti di atas
+    // jam_tindak_lanjut tidak perlu di sini karena akan diisi saat submit
   };
 
   const [guestData, setGuestData] = useState(initialGuestData);
   const [followUpData, setFollowUpData] = useState({
     diterima_oleh: "",
     isi_pertemuan: "",
-    status: "Selesai", 
-    dokumentasi: "",
-    dokumentasiFile: null,
+    status: "Selesai",
+    dokumentasi: "", // Ini akan menjadi URL preview atau path dari server
+    dokumentasiFile: null, // Ini untuk file yang diupload
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -112,9 +113,14 @@ const FollowUpForm = () => {
 
         if (data && typeof data === "object") {
           const fetchedGuest = {};
+          // Mengisi guestData dengan data dari API, menggunakan initialGuestData sebagai template
           for (const key in initialGuestData) {
-            fetchedGuest[key] = data[key] || "";
+            // Khusus untuk field yang seharusnya ada di guestData
+             if (key !== 'diterima_oleh' && key !== 'isi_pertemuan' && key !== 'dokumentasi') {
+                fetchedGuest[key] = data[key] || initialGuestData[key];
+             }
           }
+
           if (data.tanggal_kehadiran) {
             try {
               fetchedGuest.tanggal_kehadiran = new Date(data.tanggal_kehadiran)
@@ -130,12 +136,15 @@ const FollowUpForm = () => {
           }
           setGuestData(fetchedGuest);
 
+          // Mengisi followUpData dengan data yang relevan dari API (jika sudah ada follow-up sebelumnya)
           setFollowUpData((prev) => ({
             ...prev,
             diterima_oleh: data.diterima_oleh || "",
             isi_pertemuan: data.isi_pertemuan || "",
-            dokumentasi: data.dokumentasi || "",
-            // status tetap menggunakan default dari form ini atau yang terakhir diubah user di form ini
+            status: data.status_terkini || data.status || "Selesai", // Gunakan status terkini jika ada, atau status awal
+            dokumentasi: data.dokumentasi || "", // Path/URL dokumentasi dari server
+            // jam_tindak_lanjut akan diambil dari guestData jika perlu ditampilkan (misal read-only)
+            // tapi untuk form submit, kita selalu generate yang baru
           }));
         } else {
           console.error(
@@ -173,7 +182,7 @@ const FollowUpForm = () => {
     if (id) {
       fetchGuestData();
     }
-  }, [id]);
+  }, [id]); // Hapus initialGuestData dari dependency array jika tidak berubah
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -188,7 +197,7 @@ const FollowUpForm = () => {
       const fileURL = URL.createObjectURL(file);
       setFollowUpData((prev) => ({
         ...prev,
-        dokumentasi: fileURL, // Untuk preview
+        dokumentasi: fileURL, // Untuk preview di sisi klien
         dokumentasiFile: file, // File asli untuk diupload
       }));
       if (error) setError("");
@@ -211,54 +220,66 @@ const FollowUpForm = () => {
     setError("");
     setSuccess("");
 
+    // Dapatkan waktu saat ini dalam format ISO string (UTC)
+    // Backend Anda dapat mengkonversi ini ke zona waktu lokal jika perlu
+    const jamTindakLanjut = new Date().toISOString();
+
+    // Persiapkan payload. Gabungkan data tamu yang relevan (jika perlu dikirim ulang)
+    // dengan data tindak lanjut dari form, dan tambahkan jam_tindak_lanjut.
+    // Anda mungkin tidak perlu mengirim semua guestData, hanya field yang relevan untuk update.
+    // Asumsi: backend akan meng-update record tamu yang ada berdasarkan ID di URL.
     const payloadToSend = {
-      ...guestData,
+      // Anda bisa selektif field mana dari guestData yang mau dikirim jika hanya sebagian yg relevan
+      // nama_lengkap: guestData.nama_lengkap, // Contoh jika backend memerlukan ini
+      // keperluan: guestData.keperluan, // Contoh
+      
       diterima_oleh: followUpData.diterima_oleh,
       isi_pertemuan: followUpData.isi_pertemuan,
-      status: followUpData.status,
+      status: followUpData.status, // Status baru dari form tindak lanjut
+      jam_tindak_lanjut: jamTindakLanjut, // Ini field baru untuk waktu tindak lanjut
+      // dokumentasi dikelola terpisah di bawah jika ada file
     };
-    delete payloadToSend.id; 
+    
+    // Log untuk debugging
+    console.log("FollowUpForm: Submitting data:", payloadToSend);
+    console.log("FollowUpForm: Documentation file:", followUpData.dokumentasiFile);
 
-    let dataForAxios = payloadToSend;
-    let requestConfig = { headers: { "Content-Type": "application/json" } };
+
+    let dataForAxios;
+    let requestConfig = { headers: {} }; // Content-Type akan diatur nanti
 
     if (followUpData.dokumentasiFile) {
       const formData = new FormData();
+      // Tambahkan semua field dari payloadToSend ke FormData
       for (const key in payloadToSend) {
         if (payloadToSend[key] !== undefined && payloadToSend[key] !== null) {
           formData.append(key, payloadToSend[key]);
         }
       }
       formData.append("dokumentasiFile", followUpData.dokumentasiFile);
-      // Jika backend hanya mengharapkan 'dokumentasiFile' dan akan menamai file di server,
-      // maka field 'dokumentasi' (yang berisi URL blob) tidak perlu dikirim jika ada file baru.
-      // Backend harusnya mengabaikan field 'dokumentasi' jika 'dokumentasiFile' ada.
-      // Atau, jika backend tetap membutuhkan field 'dokumentasi' (misal untuk nama file),
-      // Anda mungkin perlu mengirim nama file atau menghapus field 'dokumentasi' jika blob.
-      // Untuk amannya, kita tidak mengirim field 'dokumentasi' jika ada file baru, biarkan backend yg urus.
-      if (formData.has("dokumentasi")) {
-          formData.delete("dokumentasi");
-      }
-
-
+      
       dataForAxios = formData;
-      // Untuk FormData, browser akan set Content-Type otomatis, jadi hapus manual setting
-      delete requestConfig.headers["Content-Type"]; 
+      // Untuk FormData, browser akan set Content-Type secara otomatis (multipart/form-data)
+      // Jadi, kita tidak perlu mengatur header Content-Type secara manual di sini.
       console.log("FollowUpForm: Sending FormData (with file)...");
+      // formData.forEach((value, key) => console.log(key, value)); // Untuk debug FormData
     } else {
-      // Jika tidak ada file baru, kita kirim URL dokumentasi yang sudah ada (jika ada)
-      // atau null jika tidak ada.
-      // Pastikan ini bukan URL blob jika tidak ada file baru yang diupload.
-      if (
-        followUpData.dokumentasi &&
-        followUpData.dokumentasi.startsWith("blob:")
-      ) {
-        // Jika ini adalah preview blob tapi tidak ada file yg diupload, kirim dokumentasi lama atau null
-        payloadToSend.dokumentasi = guestData.dokumentasi || null;
-      } else {
-        payloadToSend.dokumentasi = followUpData.dokumentasi || null;
+      // Jika tidak ada file baru, kirim data sebagai JSON
+      // Jika ada URL dokumentasi lama yang ingin dipertahankan dan tidak diubah, kirim itu.
+      // Jika followUpData.dokumentasi adalah blob URL dari file yang batal diupload, jangan kirim.
+      if (followUpData.dokumentasi && !followUpData.dokumentasi.startsWith("blob:")) {
+         payloadToSend.dokumentasi = followUpData.dokumentasi; // Kirim path dokumentasi lama jika ada dan bukan blob
+      } else if (!followUpData.dokumentasi && guestData.dokumentasi) {
+         // Jika tidak ada input dokumentasi baru, dan ada dokumentasi lama di guestData,
+         // backend mungkin akan mempertahankannya, atau Anda bisa mengirim null/kosong untuk menghapusnya.
+         // Untuk kasus ini, kita tidak mengirim field 'dokumentasi' jika tidak ada file baru
+         // dan tidak ada URL valid di followUpData.dokumentasi.
+         // Biarkan backend yang menentukan bagaimana menangani field 'dokumentasi' yang tidak ada di payload.
       }
+
+
       dataForAxios = payloadToSend;
+      requestConfig.headers["Content-Type"] = "application/json";
       console.log("FollowUpForm: Sending JSON data:", dataForAxios);
     }
 
@@ -271,15 +292,18 @@ const FollowUpForm = () => {
       console.log("FollowUpForm: Update response data:", response.data);
       if (response.status === 200 || response.status === 201) {
         setSuccess("Tindak lanjut berhasil disimpan!");
-        // Update guestData lokal dengan data terbaru dari server jika ada
-        if(response.data && response.data.guest) {
-            setGuestData(prev => ({...prev, ...response.data.guest}));
-            setFollowUpData(prev => ({ // Reset followUpData field yang relevan
+        
+        // Update state lokal dengan data terbaru dari server (jika dikembalikan)
+        // Pastikan backend mengembalikan data tamu yang sudah terupdate, termasuk jam_tindak_lanjut
+        if(response.data && (response.data.guest || response.data.data) ) { // Sesuaikan dengan struktur respons backend Anda
+            const updatedGuestData = response.data.guest || response.data.data;
+            setGuestData(prev => ({...prev, ...updatedGuestData}));
+            setFollowUpData(prev => ({ 
                 ...prev,
-                diterima_oleh: response.data.guest.diterima_oleh || "",
-                isi_pertemuan: response.data.guest.isi_pertemuan || "",
-                status: response.data.guest.status || "Selesai",
-                dokumentasi: response.data.guest.dokumentasi || "",
+                diterima_oleh: updatedGuestData.diterima_oleh || "",
+                isi_pertemuan: updatedGuestData.isi_pertemuan || "",
+                status: updatedGuestData.status_terkini || updatedGuestData.status || "Selesai",
+                dokumentasi: updatedGuestData.dokumentasi || "",
                 dokumentasiFile: null
             }));
         }
@@ -292,7 +316,7 @@ const FollowUpForm = () => {
     } catch (err) {
       console.error(
         "FollowUpForm: Error saving follow-up:",
-        err.response || err
+        err.response || err.request || err.message 
       );
       if (err.response) {
         setError(
@@ -303,8 +327,11 @@ const FollowUpForm = () => {
             `Error ${err.response.status}`
           }`
         );
-      } else {
-        setError("Gagal menyimpan tindak lanjut. Cek koneksi atau server.");
+      } else if (err.request) {
+        setError("Gagal menyimpan: Tidak ada respons dari server. Cek koneksi atau server.");
+      }
+      else {
+        setError(`Gagal menyimpan tindak lanjut: ${err.message}`);
       }
     } finally {
       setIsSaving(false);
@@ -318,9 +345,11 @@ const FollowUpForm = () => {
   const statusOptions = [
     { value: "Selesai", label: "Selesai" },
     { value: "Perlu Tindak Lanjut", label: "Perlu Tindak Lanjut" },
+    { value: "Diproses", label: "Sedang Diproses" }, // Contoh status tambahan
     { value: "Penjadwalan Berikutnya", label: "Penjadwalan Berikutnya" },
   ];
 
+  // Logika Loading dan Error Display
   if (isLoading) {
     return (
       <div className="dashboard-layout">
@@ -338,6 +367,7 @@ const FollowUpForm = () => {
       </div>
     );
   }
+  // Jika ada error saat fetch awal dan tidak ada data tamu yang bisa ditampilkan
   if (error && !guestData.nama_lengkap && !isLoading) {
     return (
       <div className="dashboard-layout">
@@ -408,14 +438,14 @@ const FollowUpForm = () => {
                   </span>
                 </div>
                 <div className="summary-item">
-                  <span className="summary-label">Tanggal:</span>{" "}
+                  <span className="summary-label">Tanggal Kunjungan:</span>{" "}
                   <span className="summary-value">
                     {guestData.tanggal_kehadiran
                       ? new Date(
-                          guestData.tanggal_kehadiran
+                          guestData.tanggal_kehadiran + "T00:00:00" // Tambahkan T00:00:00 untuk pastikan tanggal benar tanpa offset TZ
                         ).toLocaleDateString("id-ID", {
                           day: "numeric",
-                          month: "short",
+                          month: "long", // 'short' menjadi 'long' untuk lebih jelas
                           year: "numeric",
                         })
                       : "-"}
@@ -424,16 +454,29 @@ const FollowUpForm = () => {
                 <div className="summary-item">
                   <span className="summary-label">Status Awal:</span>{" "}
                   <span className="summary-value">
-                    {guestData.status || "Belum Diproses"}
+                    {guestData.status || "Belum Diproses"} 
                   </span>
                 </div>
+                 {/* Anda bisa menambahkan field jam_tindak_lanjut di sini jika sudah pernah ada */}
+                 {guestData.jam_tindak_lanjut && (
+                    <div className="summary-item">
+                        <span className="summary-label">Terakhir Ditindaklanjuti:</span>{" "}
+                        <span className="summary-value">
+                        {new Date(guestData.jam_tindak_lanjut).toLocaleString("id-ID", {
+                            day: "numeric", month: "long", year: "numeric",
+                            hour: "2-digit", minute: "2-digit"
+                        })}
+                        </span>
+                    </div>
+                 )}
               </div>
             </div>
 
             <form onSubmit={handleSubmit} className="main-form">
+              {/* Pesan Error dan Sukses */}
               {error && !success && (
                 <div className="alert error-alert">
-                  <span className="alert-icon">⚠</span>
+                  <span className="alert-icon">⚠️</span> {/* Emoji lebih umum */}
                   {error}
                 </div>
               )}
@@ -516,12 +559,13 @@ const FollowUpForm = () => {
                     name="dokumentasiFile"
                     accept="image/*"
                     onChange={handleFileChange}
-                    className="file-input-styled"
+                    className="file-input-styled" // Pastikan class ini ada di CSS untuk menyembunyikan input asli
                   />
-                  {followUpData.dokumentasi && ( // Selalu tampilkan preview jika ada URL di followUpData.dokumentasi
+                  {/* Preview untuk file yang baru dipilih (blob URL) atau dokumentasi dari server */}
+                  {followUpData.dokumentasi && (
                     <div className="image-upload-preview">
                       <img
-                        src={followUpData.dokumentasi}
+                        src={followUpData.dokumentasi} // Ini bisa blob URL atau URL dari server
                         alt="Preview Dokumentasi"
                       />
                     </div>
@@ -541,7 +585,7 @@ const FollowUpForm = () => {
                 <button
                   type="submit"
                   className="btn-primary"
-                  disabled={isSaving}
+                  disabled={isSaving || !id} // Disable jika tidak ada ID tamu
                 >
                   {isSaving ? (
                     <>
@@ -554,7 +598,7 @@ const FollowUpForm = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div> 
       </main>
     </div>
   );
