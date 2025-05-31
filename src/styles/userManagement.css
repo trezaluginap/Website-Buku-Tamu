@@ -9,20 +9,26 @@
 
 body {
   font-family: 'Poppins', sans-serif;
-  background-color: #e6f0fa;
-  color: #333;
+  background-color: #ffffff; /* Ubah warna ini menjadi putih */
+  color: #333; /* Warna teks utama agar kontras dengan background putih */
 }
 
+/* --- PERBAIKAN PENTING UNTUK LATAR BELAKANG KONTEN UTAMA --- */
 .content-container {
-  margin-left: 240px;
+  flex-grow: 1;
   padding: 24px;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
+  background-color: #F4F7F6; /* Warna latar belakang terang untuk area konten utama */
   overflow-y: auto;
   transition: margin-left 0.3s ease;
 }
 
-.sidebar.closed + .content-container {
+/* Aturan untuk mengontrol margin-left konten utama */
+.content-container.sidebar-open-active {
+  margin-left: 240px; /* Sesuaikan dengan lebar sidebar yang terbuka */
+}
+
+.content-container.sidebar-closed-active {
   margin-left: 0;
 }
 
@@ -33,7 +39,8 @@ body {
   align-items: center;
   margin-bottom: 32px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1); /* Sesuaikan dengan dark bg */
+  color: #333; /* Pastikan teks di header berwarna gelap untuk kontras */
 }
 
 .app-info {
@@ -42,7 +49,7 @@ body {
 }
 
 .app-title {
-  color: #1e40af;
+  color: #333333; /* Pastikan judul aplikasi gelap */
   font-size: 36px;
   font-weight: 700;
   margin: 0;
@@ -50,7 +57,7 @@ body {
 }
 
 .app-subtitle {
-  color: #3b82f6;
+  color: #60a5fa; /* Pastikan subjudul tetap biru terang */
   font-size: 16px;
   font-weight: 500;
   margin: 0;
@@ -59,7 +66,7 @@ body {
 .user-badge {
   display: flex;
   align-items: center;
-  background-color: white;
+  background-color: white; /* Tetap putih agar kontras */
   padding: 8px 16px;
   border-radius: 50px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -69,7 +76,7 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #1e40af;
+  background-color: #020129;
   color: white;
   display: flex;
   align-items: center;
@@ -96,10 +103,11 @@ body {
 
 /* Content Card */
 .content-card {
-  background-color: white;
+  background-color: white; /* Ini yang membuat setiap card menjadi putih */
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   overflow: hidden;
+  margin-bottom: 24px; /* Added for spacing between cards if multiple */
 }
 
 .card-header {
@@ -107,7 +115,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  background-color: #f8fafc;
+  background-color: #f8fafc; /* Tetap warna ini untuk header kartu */
   border-bottom: 1px solid #e2e8f0;
 }
 
@@ -129,6 +137,7 @@ body {
   border-collapse: separate;
   border-spacing: 0;
   margin-top: 20px;
+  color: #333; /* Pastikan teks tabel gelap */
 }
 
 .data-table th,
@@ -348,6 +357,30 @@ form {
   background-color: #1e3a8a;
 }
 
+/* --- New Styles for Loading and Error Messages --- */
+.loading-message,
+.error-message {
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.loading-message {
+  background-color: #e0f7fa; /* Light blue */
+  color: #00796b; /* Dark cyan */
+  border: 1px solid #b2ebf2;
+}
+
+.error-message {
+  background-color: #ffe0b2; /* Light orange */
+  color: #e65100; /* Dark orange */
+  border: 1px solid #ffcc80;
+}
+
+
 @keyframes slideIn {
   from {
     transform: translateY(-20px);
@@ -361,8 +394,8 @@ form {
 
 /* Responsive Styles */
 @media (max-width: 1024px) {
-  .content-container {
-    margin-left: 0;
+  .content-container.sidebar-open-active {
+    margin-left: 0; /* Di layar yang lebih kecil, sidebar mungkin overlay */
   }
 }
 
@@ -372,37 +405,41 @@ form {
     align-items: flex-start;
     gap: 16px;
   }
-  
+
   .user-badge {
     align-self: flex-end;
   }
-  
+
   .card-header {
     flex-direction: column;
     gap: 16px;
     align-items: flex-start;
   }
-  
+
   .add-button {
     width: 100%;
     justify-content: center;
   }
-  
+
   .data-table th,
   .data-table td {
     padding: 12px 8px;
     font-size: 13px;
   }
-  
+
   .action-buttons {
     flex-direction: column;
     gap: 6px;
   }
-  
+
   .edit-button,
   .delete-button {
     padding: 6px 8px;
     width: 100%;
+  }
+
+  .content-container.sidebar-open-active {
+    margin-left: 0; /* Pastikan konten tidak bergeser di mobile saat sidebar terbuka sebagai overlay */
   }
 }
 
@@ -410,17 +447,17 @@ form {
   .content-container {
     padding: 16px;
   }
-  
+
   .table-container {
     padding: 0 12px 12px;
   }
-  
+
   .data-table th,
   .data-table td {
     padding: 8px 4px;
     font-size: 12px;
   }
-  
+
   .form-group input {
     padding: 10px 12px;
   }

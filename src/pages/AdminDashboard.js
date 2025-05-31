@@ -8,6 +8,7 @@ import Sidebar from "../pages/sidebar"; // Impor Sidebar Anda
 import GuestDetailModal from "./GuestDetailModal"; // Impor Modal Anda (path disesuaikan)
 
 // --- Definisi Komponen Ikon SVG (TETAP SAMA SEPERTI ASLINYA) ---
+// Ikon-ikon ini akan digunakan di berbagai bagian dashboard
 const IconMenu = ({ isOpen = false }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -218,18 +219,18 @@ const AdminDashboard = () => {
   // API base URL - Pastikan port ini sesuai dengan backend Anda (misalnya 5000 atau 3000)
   const API_BASE_URL = "http://localhost:5000/api";
 
+  // Callback untuk membuka/menutup sidebar
   const toggleSidebar = useCallback(() => setIsSidebarOpen((p) => !p), []);
 
+  // Callback untuk mengambil data tamu dari API
   const fetchGuests = useCallback(() => {
     setIsLoading(true);
     setError(null);
     axios
       .get(`${API_BASE_URL}/tamu`)
       .then((res) => {
-        // Pastikan data yang diterima adalah array, jika backend mengirim { tamu: [...] }
-        // Anda mungkin perlu mengubah ini menjadi setGuests(res.data.tamu);
-        // Berdasarkan backend tamu.js yang baru, seharusnya res.data langsung array.
-        setGuests(Array.isArray(res.data) ? res.data : (res.data.tamu || []));
+        // Asumsi res.data adalah array tamu. Jika tidak, sesuaikan di sini.
+        setGuests(Array.isArray(res.data) ? res.data : res.data.tamu || []);
         setIsLoading(false);
       })
       .catch((err) => {
@@ -239,26 +240,29 @@ const AdminDashboard = () => {
       });
   }, [API_BASE_URL]); // API_BASE_URL ditambahkan sebagai dependensi
 
+  // Efek untuk memuat data saat komponen mount dan refresh otomatis setiap 30 detik
   useEffect(() => {
     fetchGuests();
-    const intervalId = setInterval(fetchGuests, 30000);
-    return () => clearInterval(intervalId);
+    const intervalId = setInterval(fetchGuests, 30000); // Refresh setiap 30 detik
+    return () => clearInterval(intervalId); // Bersihkan interval saat komponen unmount
   }, [fetchGuests]);
 
-  // --- FUNGSI formatDate YANG DIPERBARUI ---
+  // --- FUNGSI formatDate YANG DIPERBARUI (TETAP SAMA) ---
+  // Fungsi untuk memformat string tanggal menjadi format yang lebih mudah dibaca
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
 
     let date;
-    const initialDate = new Date(dateString); 
+    const initialDate = new Date(dateString);
 
     if (!isNaN(initialDate.getTime())) {
       date = initialDate;
     } else {
+      // Fallback for non-standard ISO strings (e.g., "YYYY-MM-DD HH:MM:SS")
       const parts = dateString.replace("T", " ").split(/[- :]/);
       if (parts.length >= 3) {
         const year = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1; 
+        const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
         const day = parseInt(parts[2], 10);
         const hours = parts[3] ? parseInt(parts[3], 10) : 0;
         const minutes = parts[4] ? parseInt(parts[4], 10) : 0;
@@ -320,6 +324,7 @@ const AdminDashboard = () => {
     }
   };
 
+  // Fungsi untuk memfilter dan mengurutkan data tamu
   const getFilteredGuests = () => {
     let filtered = guests.filter((guest) => {
       const statusMatch = (() => {
@@ -331,7 +336,7 @@ const AdminDashboard = () => {
           case "processing":
             return guest.status === "Diproses";
           default:
-            return true;
+            return true; // "all" tab
         }
       })();
 
@@ -339,7 +344,7 @@ const AdminDashboard = () => {
       const searchMatch =
         !searchTerm ||
         guest.nama_lengkap?.toLowerCase().includes(searchTermLower) ||
-        guest.instansi?.toLowerCase().includes(searchTermLower) || // 'instansi' bukan 'pekerjaan' untuk search
+        guest.pekerjaan?.toLowerCase().includes(searchTermLower) || // Menggunakan 'pekerjaan' sesuai FormTamu.js
         guest.keperluan?.toLowerCase().includes(searchTermLower) ||
         (guest.topik_konsultasi &&
           guest.topik_konsultasi.toLowerCase().includes(searchTermLower));
@@ -347,53 +352,51 @@ const AdminDashboard = () => {
       return statusMatch && searchMatch;
     });
 
+    // Pengurutan data
     return filtered.sort((a, b) => {
       switch (sortBy) {
         case "newest":
-          const dateB = b.tanggal_kehadiran
-            ? new Date(b.tanggal_kehadiran)
-            : null;
-          const dateA = a.tanggal_kehadiran
-            ? new Date(a.tanggal_kehadiran)
-            : null;
-          if (dateB && dateA) return dateB - dateA;
-          if (dateB) return 1; 
-          if (dateA) return -1; 
+          // Urutkan dari yang terbaru ke terlama
+          const dateB = b.tanggal_kehadiran ? new Date(b.tanggal_kehadiran) : null;
+          const dateA = a.tanggal_kehadiran ? new Date(a.tanggal_kehadiran) : null;
+          if (dateB && dateA) return dateB.getTime() - dateA.getTime();
+          if (dateB) return 1; // B has date, A doesn't, so B comes after A (older)
+          if (dateA) return -1; // A has date, B doesn't, so A comes before B (newer)
           return 0;
         case "oldest":
-          const dateAOld = a.tanggal_kehadiran
-            ? new Date(a.tanggal_kehadiran)
-            : null;
-          const dateBOld = b.tanggal_kehadiran
-            ? new Date(b.tanggal_kehadiran)
-            : null;
-          if (dateAOld && dateBOld) return dateAOld - dateBOld;
+          // Urutkan dari yang terlama ke terbaru
+          const dateAOld = a.tanggal_kehadiran ? new Date(a.tanggal_kehadiran) : null;
+          const dateBOld = b.tanggal_kehadiran ? new Date(b.tanggal_kehadiran) : null;
+          if (dateAOld && dateBOld) return dateAOld.getTime() - dateBOld.getTime();
           if (dateAOld) return 1;
           if (dateBOld) return -1;
           return 0;
         case "name":
+          // Urutkan berdasarkan nama lengkap (alfabetis)
           return (a.nama_lengkap || "").localeCompare(b.nama_lengkap || "");
         case "status":
+          // Urutkan berdasarkan status (Belum Diproses -> Diproses -> Selesai)
           const statusOrder = {
             "Belum Diproses": 0,
-            null: 0, 
             Diproses: 1,
             Selesai: 2,
           };
-          const statusAVal = a.status === null ? "null" : a.status;
-          const statusBVal = b.status === null ? "null" : b.status;
+          const statusAVal = a.status || "Belum Diproses"; // Default jika status null/undefined
+          const statusBVal = b.status || "Belum Diproses";
           return (
             (statusOrder[statusAVal] || 3) - (statusOrder[statusBVal] || 3)
-          ); 
+          );
         default:
-          return 0;
+          return 0; // Tidak ada pengurutan
       }
     });
   };
 
+  // Fungsi untuk mendapatkan statistik ringkasan
   const getStatistics = useCallback(() => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().split("T")[0]; // Tanggal hari ini (YYYY-MM-DD)
     const weekStart = new Date();
+    // Hitung awal minggu (Senin)
     weekStart.setDate(
       weekStart.getDate() -
         weekStart.getDay() +
@@ -418,14 +421,17 @@ const AdminDashboard = () => {
   const statistics = getStatistics();
   const displayedGuests = getFilteredGuests().slice(
     0,
-    showAll ? undefined : 10
+    showAll ? undefined : 10 // Tampilkan 10 atau semua data
   );
 
+  // Fungsi untuk mengupdate status tamu (Diproses/Selesai)
   const updateGuestStatus = useCallback(
     (guestId, newStatus) => {
       const guestToUpdate = guests.find((g) => g.id === guestId);
-      if (!guestToUpdate) return;
-      const previousGuests = [...guests];
+      if (!guestToUpdate) return; // Jika tamu tidak ditemukan, hentikan
+
+      // Optimistic update: Langsung update UI
+      const previousGuests = [...guests]; // Simpan state sebelumnya untuk rollback
       setGuests((prevGuests) =>
         prevGuests.map((g) =>
           g.id === guestId ? { ...g, status: newStatus } : g
@@ -434,36 +440,35 @@ const AdminDashboard = () => {
 
       axios
         .put(`${API_BASE_URL}/tamu/${guestId}`, {
-          // Kirim hanya field yang diupdate jika backend mendukung partial update
-          // atau seluruh objek guest jika backend mengharapkannya.
-          // Berdasarkan backend tamu.js yang baru, ia mengharapkan field yang diizinkan.
-          // Jadi, lebih aman mengirim objek yang relevan.
-          status: newStatus, 
-          // Jika field lain juga bisa diubah dari sini, sertakan:
-          // nama_lengkap: guestToUpdate.nama_lengkap, 
-          // ...dan field lainnya dari guestToUpdate
+          status: newStatus, // Hanya kirim status yang diupdate
         })
-        .then((response) => { // Tambahkan response
-          if (selectedGuest && selectedGuest.id === guestId) {
-            setSelectedGuest((prev) =>
-              prev ? { ...prev, status: newStatus, ...response.data.guest } : null // Update dengan data dari server jika ada
+        .then((response) => {
+          // Jika backend mengembalikan objek guest yang diupdate, gunakan itu
+          if (response.data && response.data.guest) {
+            setGuests((prevGuests) =>
+              prevGuests.map((g) =>
+                g.id === guestId ? { ...g, ...response.data.guest } : g
+              )
             );
+            // Update selectedGuest jika modal sedang terbuka untuk tamu ini
+            if (selectedGuest && selectedGuest.id === guestId) {
+              setSelectedGuest((prev) => ({ ...prev, ...response.data.guest }));
+            }
+          } else {
+            // Jika backend tidak mengembalikan data lengkap, refresh penuh
+            fetchGuests();
           }
-          // fetchGuests(); // Panggil fetchGuests jika ingin memastikan data sinkron penuh.
-                           // Namun, respons PUT seharusnya sudah mengembalikan data terbaru.
-                           // Jika backend tamu.js mengembalikan { guest: updatedGuest }, gunakan itu.
-          setGuests(prevGuests => prevGuests.map(g => g.id === guestId ? {...g, ...response.data.guest} : g ));
-
         })
         .catch((err) => {
           console.error("Error updating guest:", err);
           setError("Gagal mengupdate status tamu.");
-          setGuests(previousGuests); 
+          setGuests(previousGuests); // Rollback jika ada error
         });
     },
-    [guests, selectedGuest, API_BASE_URL] 
+    [guests, selectedGuest, API_BASE_URL, fetchGuests] // Tambahkan fetchGuests ke dependensi
   );
 
+  // Fungsi shorthand untuk memulai proses dan menandai selesai
   const startProcessing = useCallback(
     (guestId) => updateGuestStatus(guestId, "Diproses"),
     [updateGuestStatus]
@@ -473,31 +478,35 @@ const AdminDashboard = () => {
     [updateGuestStatus]
   );
 
+  // Fungsi untuk mendapatkan class CSS badge status
   const getStatusBadgeClass = (status) => {
     if (!status || status === "Belum Diproses") return "unprocessed";
     if (status === "Diproses") return "processing";
     if (status === "Selesai") return "completed";
-    return "pending"; 
+    return "pending"; // Default jika status tidak dikenal
   };
 
+  // Komponen badge status untuk ditampilkan di tabel
   const renderGuestStatusBadge = (guest) => {
     if (!guest) return null;
     const statusValue = guest.status;
-    const statusText = statusValue || "Belum Diproses";
+    const statusText = statusValue || "Belum Diproses"; // Teks default
     const badgeClass = getStatusBadgeClass(statusValue);
     return (
       <span className={`status-badge status-${badgeClass}`}>{statusText}</span>
     );
   };
 
+  // Indikator prioritas (Hari Ini / Mendesak)
   const getPriorityIndicator = (guest) => {
     if (!guest || !guest.tanggal_kehadiran) return null;
     const today = new Date().toISOString().split("T")[0];
-    const isToday = guest.tanggal_kehadiran.startsWith(today); 
+    const isToday = guest.tanggal_kehadiran.startsWith(today);
     const isUrgent =
       guest.keperluan &&
       (guest.keperluan.toLowerCase().includes("mendesak") ||
         guest.keperluan.toLowerCase().includes("urgent"));
+
     if (isToday && (guest.status === "Belum Diproses" || !guest.status))
       return <span className="priority-indicator today">Hari Ini</span>;
     if (isUrgent)
@@ -505,28 +514,16 @@ const AdminDashboard = () => {
     return null;
   };
 
+  // Fungsi untuk memotong teks panjang
   const truncateText = (text, maxLength = 30) => {
-    if (text === null || typeof text === "undefined") return ""; 
-    const stringText = String(text); 
+    if (text === null || typeof text === "undefined") return "";
+    const stringText = String(text);
     return stringText.length > maxLength
       ? stringText.substring(0, maxLength) + "..."
       : stringText;
   };
 
-  const getEmptyStateMessage = () => {
-    if (searchTerm) return `Tidak ada tamu dengan kata kunci "${searchTerm}".`;
-    switch (activeTab) {
-      case "completed":
-        return "Belum ada tamu yang selesai diproses.";
-      case "unprocessed":
-        return "Semua tamu sudah diproses atau sedang dalam proses.";
-      case "processing":
-        return "Tidak ada tamu yang sedang dalam proses.";
-      default:
-        return "Belum ada data tamu yang tercatat.";
-    }
-  };
-
+  // Definisi tab navigasi
   const tabs = [
     { key: "all", label: "Semua", count: guests.length },
     {
@@ -542,36 +539,52 @@ const AdminDashboard = () => {
     { key: "completed", label: "Selesai", count: statistics.completedGuests },
   ];
 
+  // Definisi item statistik untuk kartu ringkasan
   const statItems = [
     {
       id: 1,
       label: "Tamu Hari Ini",
       value: statistics.todayGuests,
       icon: <IconCalendarDays />,
-      color: "blue",
+      color: "blue", // Class color untuk styling
     },
     {
       id: 2,
       label: "Tamu Minggu Ini",
       value: statistics.weeklyGuests,
       icon: <IconChartBar />,
-      color: "green",
+      color: "green", // Class color untuk styling
     },
     {
       id: 3,
       label: "Belum Diproses",
       value: statistics.unprocessedGuests,
       icon: <IconClock />,
-      color: "yellow",
+      color: "yellow", // Class color untuk styling
     },
     {
       id: 4,
       label: "Selesai",
       value: statistics.completedGuests,
       icon: <IconCheckCircle />,
-      color: "teal",
+      color: "teal", // Class color untuk styling
     },
   ];
+
+  // Pesan jika tidak ada data
+  const getEmptyStateMessage = () => {
+    if (searchTerm) return `Tidak ada tamu dengan kata kunci "${searchTerm}".`;
+    switch (activeTab) {
+      case "completed":
+        return "Belum ada tamu yang selesai diproses.";
+      case "unprocessed":
+        return "Semua tamu sudah diproses atau sedang dalam proses.";
+      case "processing":
+        return "Tidak ada tamu yang sedang dalam proses.";
+      default:
+        return "Belum ada data tamu yang tercatat.";
+    }
+  };
 
   return (
     <div
@@ -579,24 +592,31 @@ const AdminDashboard = () => {
         isSidebarOpen ? "sidebar-visible" : "sidebar-collapsed"
       }`}
     >
+      {/* Sidebar Komponen */}
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+
+      {/* Area Konten Utama Dashboard */}
       <main className="main-content-area">
+        {/* Header Dashboard (Sticky) */}
         <header className="dashboard-header-sticky">
           <div className="header-inner">
             <div className="header-left">
+              {/* Tombol Toggle Sidebar */}
               <button
-                className="sidebar-toggle"
+                className="sidebar-toggle btn-icon" // Menambahkan btn-icon
                 onClick={toggleSidebar}
                 aria-label={isSidebarOpen ? "Tutup Sidebar" : "Buka Sidebar"}
               >
                 <IconMenu isOpen={isSidebarOpen} />
               </button>
+              {/* Logo dan Judul Dashboard */}
               <img src={BPSLogo} alt="BPS Logo" className="header-logo" />
               <h1 className="header-title">Admin Buku Tamu</h1>
             </div>
             <div className="header-right">
+              {/* Tombol Refresh Data */}
               <button
-                className={`refresh-action-btn ${
+                className={`refresh-action-btn btn-primary ${ // Menggunakan btn-primary untuk warna biru
                   isLoading ? "is-loading" : ""
                 }`}
                 onClick={fetchGuests}
@@ -609,7 +629,10 @@ const AdminDashboard = () => {
             </div>
           </div>
         </header>
+
+        {/* Wrapper Konten Dashboard */}
         <div className="dashboard-content-wrapper">
+          {/* Bagian Statistik Ringkasan */}
           <section className="stats-grid-container">
             {statItems.map((item) => (
               <div
@@ -624,10 +647,13 @@ const AdminDashboard = () => {
               </div>
             ))}
           </section>
+
+          {/* Panel Data Tamu */}
           <section className="data-panel">
             <div className="panel-header">
               <h2 className="panel-title">Daftar Tamu</h2>
               <div className="controls-group">
+                {/* Input Pencarian */}
                 <div className="search-input-wrapper">
                   <IconSearch />
                   <input
@@ -638,6 +664,7 @@ const AdminDashboard = () => {
                     className="search-field"
                   />
                 </div>
+                {/* Dropdown Pengurutan */}
                 <div className="sort-select-wrapper">
                   <select
                     value={sortBy}
@@ -649,10 +676,12 @@ const AdminDashboard = () => {
                     <option value="name">Nama (A-Z)</option>
                     <option value="status">Status</option>
                   </select>
-                  <IconChevronDown />
+                  <IconChevronDown /> {/* Ikon dropdown */}
                 </div>
               </div>
             </div>
+
+            {/* Navigasi Tab Status */}
             <nav className="tab-navigation">
               {tabs.map((tab) => (
                 <button
@@ -667,20 +696,23 @@ const AdminDashboard = () => {
                 </button>
               ))}
             </nav>
+
+            {/* Kondisi Loading, Error, atau Data */}
             {isLoading ? (
               <div className="loading-state">
-                <div className="spinner"></div>
+                <div className="spinner"></div> {/* Spinner CSS perlu didefinisikan */}
                 <p>Memuat data tamu...</p>
               </div>
             ) : error ? (
               <div className="error-state">
                 <p>{error}</p>
-                <button onClick={fetchGuests} className="retry-button">
+                <button onClick={fetchGuests} className="retry-button btn-primary"> {/* btn-primary */}
                   Coba Lagi
                 </button>
               </div>
             ) : displayedGuests.length > 0 ? (
               <>
+                {/* Tabel Data Tamu */}
                 <div className="table-wrapper">
                   <table className="data-table">
                     <thead>
@@ -698,7 +730,7 @@ const AdminDashboard = () => {
                     <tbody>
                       {displayedGuests.map((guest, index) => (
                         <tr
-                          key={guest.id} 
+                          key={guest.id}
                           className={`guest-status-row-${getStatusBadgeClass(
                             guest.status
                           )}`}
@@ -715,18 +747,16 @@ const AdminDashboard = () => {
                                 {guest.nama_lengkap || "-"}
                               </span>
                               {getPriorityIndicator(guest)}
-                              {guest.instansi && (
+                              {guest.pekerjaan && ( // Menggunakan 'pekerjaan'
                                 <span className="guest-company-text">
-                                  {truncateText(guest.instansi, 25)}
+                                  {truncateText(guest.pekerjaan, 25)}
                                 </span>
                               )}
                             </div>
                           </td>
                           <td data-label="Keperluan" className="cell-purpose">
                             {guest.keperluan &&
-                            guest.keperluan
-                              .toLowerCase()
-                              .includes("konsultasi") &&
+                            guest.keperluan.toLowerCase().includes("konsultasi") &&
                             guest.topik_konsultasi
                               ? `${truncateText(
                                   guest.keperluan,
@@ -745,27 +775,30 @@ const AdminDashboard = () => {
                           </td>
                           <td data-label="Aksi" className="cell-actions">
                             <div className="action-buttons-group">
+                              {/* Tombol Lihat Detail */}
                               <button
                                 onClick={() => setSelectedGuest(guest)}
-                                className="action-button"
+                                className="action-button btn-blue-icon" // Class baru untuk tombol ikon biru
                                 title="Lihat Detail"
                               >
                                 <IconEye />
                               </button>
+                              {/* Tombol Mulai Proses */}
                               {(!guest.status ||
                                 guest.status === "Belum Diproses") && (
                                 <button
                                   onClick={() => startProcessing(guest.id)}
-                                  className="action-button"
+                                  className="action-button btn-blue-icon" // Class baru untuk tombol ikon biru
                                   title="Mulai Proses"
                                 >
                                   <IconPlay />
                                 </button>
                               )}
+                              {/* Tombol Tandai Selesai */}
                               {guest.status === "Diproses" && (
                                 <button
                                   onClick={() => markAsCompleted(guest.id)}
-                                  className="action-button"
+                                  className="action-button btn-blue-icon" // Class baru untuk tombol ikon biru
                                   title="Tandai Selesai"
                                 >
                                   <IconCheck />
@@ -778,44 +811,44 @@ const AdminDashboard = () => {
                     </tbody>
                   </table>
                 </div>
-                {getFilteredGuests().length > 10 &&
-                  !showAll && ( 
-                    <div className="pagination-footer">
-                      <p className="results-count-info">
-                        Menampilkan {displayedGuests.length} dari{" "}
-                        {getFilteredGuests().length} tamu
-                      </p>
-                      <button
-                        onClick={() => setShowAll(true)} 
-                        className="show-all-button"
-                      >
-                        {`Tampilkan Semua (${getFilteredGuests().length})`}
-                      </button>
-                    </div>
-                  )}
-                {showAll &&
-                  getFilteredGuests().length > 10 && ( 
-                    <div className="pagination-footer">
-                      <p className="results-count-info">
-                        Menampilkan semua {getFilteredGuests().length} tamu
-                      </p>
-                      <button
-                        onClick={() => setShowAll(false)}
-                        className="show-all-button"
-                      >
-                        Tampilkan Lebih Sedikit
-                      </button>
-                    </div>
-                  )}
+                {/* Footer Paginasi/Tampilkan Semua */}
+                {getFilteredGuests().length > 10 && !showAll && (
+                  <div className="pagination-footer">
+                    <p className="results-count-info">
+                      Menampilkan {displayedGuests.length} dari{" "}
+                      {getFilteredGuests().length} tamu
+                    </p>
+                    <button
+                      onClick={() => setShowAll(true)}
+                      className="show-all-button btn-link-blue" // Class baru untuk tombol link biru
+                    >
+                      {`Tampilkan Semua (${getFilteredGuests().length})`}
+                    </button>
+                  </div>
+                )}
+                {showAll && getFilteredGuests().length > 10 && (
+                  <div className="pagination-footer">
+                    <p className="results-count-info">
+                      Menampilkan semua {getFilteredGuests().length} tamu
+                    </p>
+                    <button
+                      onClick={() => setShowAll(false)}
+                      className="show-all-button btn-link-blue" // Class baru untuk tombol link biru
+                    >
+                      Tampilkan Lebih Sedikit
+                    </button>
+                  </div>
+                )}
               </>
             ) : (
+              // State Kosong (Tidak Ada Data)
               <div className="empty-state-display">
-                <IconListBullet />
+                <IconListBullet className="empty-state-icon" /> {/* Class untuk ikon */}
                 <p className="empty-state-title">Tidak Ada Data</p>
                 <p className="empty-state-message">{getEmptyStateMessage()}</p>
                 {searchTerm && (
                   <button
-                    className="clear-filter-button"
+                    className="clear-filter-button btn-secondary" // Menggunakan btn-secondary
                     onClick={() => setSearchTerm("")}
                   >
                     Hapus Filter Pencarian
@@ -827,6 +860,7 @@ const AdminDashboard = () => {
         </div>
       </main>
 
+      {/* Modal Detail Tamu */}
       {selectedGuest && (
         <GuestDetailModal
           guest={selectedGuest}
