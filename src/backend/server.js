@@ -1,34 +1,34 @@
 const express = require("express");
 const cors = require("cors");
+const bcrypt = require("bcrypt");
+
 const tamuRoutes = require("./routes/tamu");
 const usersRoutes = require("./routes/users");
-
-const bcrypt = require("bcrypt");
 const db = require("./config/db");
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Middleware
+/* ======================= MIDDLEWARE ======================= */
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
-// Logging middleware
+// Logging setiap request
 app.use((req, res, next) => {
-  console.log(
-    `📥 ${new Date().toISOString()} - ${req.method} ${req.originalUrl}`
-  );
+  console.log(`📥 ${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
   next();
 });
 
-// Error handling middleware
+// Error handling
 app.use((err, req, res, next) => {
   console.error("❌ Server error:", err);
   res.status(500).json({ error: "Terjadi kesalahan pada server" });
 });
 
-// Endpoint status server & koneksi database
+/* ======================= ENDPOINT UMUM ======================= */
+
+// Cek status server dan koneksi database
 app.get("/api/status", async (req, res) => {
   try {
     await db.checkConnection();
@@ -50,7 +50,7 @@ app.get("/api/status", async (req, res) => {
   }
 });
 
-// Validasi skema tabel tamu
+// Cek struktur tabel tamu
 app.get("/api/schema/tamu", (req, res) => {
   db.query("DESCRIBE tamu", (err, results) => {
     if (err) {
@@ -58,20 +58,9 @@ app.get("/api/schema/tamu", (req, res) => {
       return res.status(500).json({ error: "Gagal mendapatkan skema tabel" });
     }
 
-    console.log("✅ Skema tabel tamu:", results);
-
     const requiredColumns = [
-      "id",
-      "nama_lengkap",
-      "jenis_kelamin",
-      "email",
-      "no_hp",
-      "pekerjaan",
-      "alamat",
-      "keperluan",
-      "staff",
-      "dituju",
-      "tanggal_kehadiran",
+      "id", "nama_lengkap", "jenis_kelamin", "email", "no_hp",
+      "pekerjaan", "alamat", "keperluan", "staff", "dituju", "tanggal_kehadiran"
     ];
 
     const missingColumns = requiredColumns.filter(
@@ -87,7 +76,7 @@ app.get("/api/schema/tamu", (req, res) => {
   });
 });
 
-// Endpoint login untuk integrasi dengan data users dari kelola user
+/* ======================= LOGIN USER ======================= */
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
 
@@ -95,45 +84,36 @@ app.post("/api/login", (req, res) => {
     return res.status(400).json({ error: "Username dan password wajib diisi" });
   }
 
-  db.query(
-    "SELECT * FROM users WHERE username = ?",
-    [username],
-    async (err, results) => {
-      if (err) {
-        console.error("❌ Gagal mengambil data user:", err);
-        return res.status(500).json({ error: "Terjadi kesalahan server" });
-      }
-
-      if (results.length === 0) {
-        return res.status(401).json({ error: "Username tidak ditemukan" });
-      }
-
-      const user = results[0];
-
-      // Verifikasi password
-      // Jika menggunakan bcrypt: const isMatch = await bcrypt.compare(password, user.password);
-      const isMatch = password === user.password;
-
-      if (!isMatch) {
-        return res.status(401).json({ error: "Password salah" });
-      }
-
-      // Login berhasil
-      res.json({
-        message: "Login berhasil",
-        user: {
-          id: user.id,
-          name: user.name,
-          nip: user.nip,
-          username: user.username,
-          // Jangan kirim password ke frontend
-        },
-      });
+  db.query("SELECT * FROM users WHERE username = ?", [username], async (err, results) => {
+    if (err) {
+      console.error("❌ Gagal mengambil data user:", err);
+      return res.status(500).json({ error: "Terjadi kesalahan server" });
     }
-  );
+
+    if (results.length === 0) {
+      return res.status(401).json({ error: "Username tidak ditemukan" });
+    }
+
+    const user = results[0];
+    const isMatch = password === user.password; // Gunakan bcrypt jika perlu
+
+    if (!isMatch) {
+      return res.status(401).json({ error: "Password salah" });
+    }
+
+    res.json({
+      message: "Login berhasil",
+      user: {
+        id: user.id,
+        name: user.name,
+        nip: user.nip,
+        username: user.username,
+      },
+    });
+  });
 });
 
-// Endpoint login admin (yang lama, jika masih diperlukan)
+/* ======================= LOGIN ADMIN ======================= */
 app.post("/api/admin-login", (req, res) => {
   const { nama_pengguna, password } = req.body;
 
@@ -141,46 +121,46 @@ app.post("/api/admin-login", (req, res) => {
     return res.status(400).json({ error: "Data wajib tidak lengkap" });
   }
 
-  db.query(
-    "SELECT * FROM admins WHERE nama_pengguna = ?",
-    [nama_pengguna],
-    async (err, results) => {
-      if (err) {
-        console.error("❌ Gagal mengambil data admin:", err);
-        return res.status(500).json({ error: "Terjadi kesalahan server" });
-      }
+  db.query("SELECT * FROM admins WHERE nama_pengguna = ?", [nama_pengguna], async (err, results) => {
+    if (err) {
+      console.error("❌ Gagal mengambil data admin:", err);
+      return res.status(500).json({ error: "Terjadi kesalahan server" });
+    }
 
-      if (results.length === 0) {
-        return res.status(401).json({ error: "Admin tidak ditemukan" });
-      }
+    if (results.length === 0) {
+      return res.status(401).json({ error: "Admin tidak ditemukan" });
+    }
 
-      const admin = results[0];
+    const admin = results[0];
+    const isMatch = password === admin.password; // Gunakan bcrypt jika disimpan dalam bentuk hash
 
-      const isMatch = password === admin.password; // Jika pakai bcrypt: await bcrypt.compare(password, admin.password)
+    if (!isMatch) {
+      return res.status(401).json({ error: "Password salah" });
+    }
 
-      if (!isMatch) {
-        return res.status(401).json({ error: "Password salah" });
-      }
-
+    // Simpan log login admin
+    if (admin.id) {
       db.query(
-        "INSERT INTO admin_logins (nama_pengguna) VALUES (?)",
-        [nama_pengguna],
-        (err) => {
+        "INSERT INTO admin_logins (admin_id) VALUES (?)",
+        [admin.id],
+        (err, result) => {
           if (err) {
             console.error("❌ Gagal menyimpan log login:", err);
+          } else {
+            console.log("✅ Log login disimpan:", result.insertId);
           }
         }
       );
-
-      res.json({
-        message: "Login berhasil",
-        admin: { id: admin.id, nama_pengguna: admin.nama_pengguna },
-      });
     }
-  );
+
+    res.json({
+      message: "Login berhasil",
+      admin: { id: admin.id, nama_pengguna: admin.nama_pengguna },
+    });
+  });
 });
 
-// ✅ Endpoint untuk menyimpan data tamu
+/* ======================= TAMBAH DATA TAMU ======================= */
 app.post("/api/tamu", (req, res) => {
   const {
     nama_lengkap,
@@ -224,24 +204,25 @@ app.post("/api/tamu", (req, res) => {
       return res.status(500).json({ error: "Gagal menyimpan data tamu" });
     }
 
-    res
-      .status(201)
-      .json({ message: "Data tamu berhasil disimpan", id: result.insertId });
+    res.status(201).json({
+      message: "Data tamu berhasil disimpan",
+      id: result.insertId,
+    });
   });
 });
 
-// Routes
+/* ======================= ROUTES TAMBAHAN ======================= */
 app.use("/api/tamu", tamuRoutes);
 app.use("/api/users", usersRoutes);
 
-// Jalankan server
+/* ======================= JALANKAN SERVER ======================= */
 app.listen(port, () => {
   console.log(`✅ Server berjalan di http://localhost:${port}`);
   console.log(`📊 Status endpoint: http://localhost:${port}/api/status`);
   console.log(`📋 Schema validation: http://localhost:${port}/api/schema/tamu`);
 });
 
-// Tangani proses keluar dengan baik
+/* ======================= HANDLE SIGINT ======================= */
 process.on("SIGINT", () => {
   console.log("🛑 Menghentikan server...");
   db.end((err) => {

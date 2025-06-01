@@ -1,6 +1,8 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../Styles.css";
+import logoBPS from '../assets/BPS.png' 
 
 const AdminLogin = () => {
   const [username, setUsername] = useState("");
@@ -22,7 +24,6 @@ const AdminLogin = () => {
     setIsLoading(true);
 
     try {
-      // Panggil API untuk login dengan data dari kelola user
       const response = await fetch("http://localhost:5000/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -37,7 +38,6 @@ const AdminLogin = () => {
       }
 
       if (response.ok) {
-        // Simpan data user yang login ke localStorage jika diperlukan
         localStorage.setItem("currentUser", JSON.stringify(data.user));
         navigate("/admin");
       } else {
@@ -53,6 +53,13 @@ const AdminLogin = () => {
 
   return (
     <div className="admin-container">
+      {/* Tambahkan elemen img untuk logo di sini */}
+     <img
+  src={logoBPS}
+  alt="Logo BPS"
+  className="login-logo"
+/>
+
       <h2>Login Admin</h2>
       <form onSubmit={handleLogin}>
         <div className="form-group">

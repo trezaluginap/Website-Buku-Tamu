@@ -1,0 +1,128 @@
+/* AdminLogin.css */
+
+.admin-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  justify-content: flex-start; 
+  min-height: 100vh;
+  background-color:  #e6f0fa; 
+  padding-top: 8vh; 
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+  box-sizing: border-box;
+}
+
+.login-logo {
+  display: block;
+  width: 120px;
+  height: auto; 
+  margin: 0 auto 20px auto;
+  border-radius: 50%; 
+}
+
+.admin-container h2 {
+  color: #333; /* Warna teks judul */
+  margin-bottom: 25px; /* Mungkin perlu disesuaikan jika ada logo */
+  font-size: 2rem; /* Ukuran font judul */
+  font-weight: 600;
+  text-align: center;
+}
+/* Deklarasi .admin-container h2 yang duplikat telah dihapus */
+
+.admin-container form {
+  background-color: #ffffff; /* Warna latar belakang form */
+  padding: 30px 40px;
+  border-radius: 20px; /* Mengembalikan ke 10px atau sesuaikan, sebelumnya 20px */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Efek bayangan halus */
+  width: 100%; /* Diperbaiki dari 200% menjadi 100% */
+  max-width: 600px; /* Lebar maksimum form */
+  box-sizing: border-box;
+  height: 300   px;
+}
+
+.form-group {
+  margin-bottom: 20px; /* Jarak antar grup form */
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem; /* Ukuran font label */
+  color: #555; /* Warna teks label */
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"] {
+  width: 100%;
+  padding: 12px 15px; /* Padding di dalam input */
+  border: 1px solid #ddd; /* Garis batas input */
+  border-radius: 6px; /* Sudut melengkung untuk input */
+  box-sizing: border-box;
+  font-size: 1rem; /* Ukuran font di dalam input */
+  color: #333;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Transisi halus */
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="password"]:focus {
+  border-color: #007bff; /* Warna border saat input aktif/fokus */
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Efek glow saat fokus */
+  outline: none; /* Hilangkan outline default */
+}
+
+.form-group input[type="text"]::placeholder,
+.form-group input[type="password"]::placeholder {
+  color: #aaa; /* Warna teks placeholder */
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 12px 15px;
+  background-color: #007bff; /* Warna latar tombol utama */
+  color: white; /* Warna teks tombol */
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer; /* Ubah kursor menjadi tangan saat hover */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Transisi halus */
+}
+
+button[type="submit"]:hover {
+  background-color: #0056b3; /* Warna latar tombol saat hover */
+  transform: translateY(-2px); /* Efek sedikit terangkat saat hover */
+}
+
+button[type="submit"]:disabled {
+  background-color: #6c757d; /* Warna latar tombol saat non-aktif */
+  cursor: not-allowed; /* Kursor menunjukkan tidak diizinkan */
+  transform: none;
+}
+
+.error-message {
+  color: #dc3545; /* Warna teks pesan error */
+  background-color: #f8d7da; /* Warna latar pesan error */
+  border: 1px solid #f5c6cb; /* Garis batas pesan error */
+  padding: 10px 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* Responsif untuk layar kecil */
+@media (max-width: 480px) {
+  .admin-container {
+    padding-top: 5vh; /* Sesuaikan padding atas untuk layar kecil jika perlu */
+  }
+  .admin-container form {
+    padding: 25px 30px;
+  }
+
+  .admin-container h2 {
+    font-size: 1.8rem;
+  }
+}

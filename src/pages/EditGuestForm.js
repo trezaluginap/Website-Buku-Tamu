@@ -166,7 +166,7 @@ const EditGuestForm = () => {
       console.log("EditGuestForm: Update response data:", response.data);
       if (response.status === 200 || response.status === 201) {
         setSuccess("Data tamu berhasil diperbarui!");
-        setTimeout(() => navigate("/admin-dashboard"), 1500);
+        setTimeout(() => navigate("/admin"), 1500);
       } else {
         setError(
           `Gagal memperbarui: Server merespons dengan status ${response.status}`
@@ -194,7 +194,7 @@ const EditGuestForm = () => {
     }
   };
 
-  const handleCancel = () => navigate("/admin-dashboard");
+  const handleCancel = () => navigate("/admin");
 
   const statusOptions = [
     { value: "Belum Diproses", label: "Belum Diproses" },
