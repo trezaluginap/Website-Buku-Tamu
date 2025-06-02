@@ -11,7 +11,9 @@ router.get("/", (req, res) => {
   db.query(sql, (err, results) => {
     if (err) {
       console.error("❌ BACKEND: Gagal mengambil semua data tamu:", err);
-      return res.status(500).json({ error: "Gagal mengambil data tamu" });
+      return res
+        .status(500)
+        .json({ error: "Gagal mengambil data tamu", detail: err.message });
     }
     res.json(results);
   });
@@ -20,7 +22,6 @@ router.get("/", (req, res) => {
 // GET /api/tamu/:id
 router.get("/:id", (req, res) => {
   const guestId = req.params.id;
-  console.log(`BACKEND: Menerima permintaan GET untuk /api/tamu/${guestId}`);
   const sql = "SELECT * FROM tamu WHERE id = ?";
   db.query(sql, [guestId], (err, results) => {
     if (err) {
@@ -103,6 +104,9 @@ router.post("/", (req, res) => {
   const finalDateTimeStringForDB_WIB = `${datePartFromForm_YYYY_MM_DD} ${currentTimeString_HH_MM_SS_WIB}`;
   console.log("BACKEND: Final DateTime string untuk SQL (WIB wall clock):", finalDateTimeStringForDB_WIB);
 
+  // --- PERBAIKAN SQL QUERY ---
+  // Hapus komentar JavaScript (//) dari dalam string SQL.
+  // Jika ingin memberi catatan, gunakan komentar SQL /* ... */ atau letakkan di luar string.
   const sql = `
     INSERT INTO tamu 
     (nama_lengkap, jenis_kelamin, email, no_hp, pekerjaan, alamat, keperluan, 
@@ -161,22 +165,15 @@ router.put("/:id", (req, res) => {
   const valuesForUpdate = []; 
 
   allowedFieldsToUpdate.forEach((field) => {
-    if (receivedFields.hasOwnProperty(field)) { // Hanya proses field yang dikirim oleh frontend
-      fieldsToSet.push(`\`${field}\` = ?`); // Gunakan backtick untuk nama field jika mengandung karakter khusus atau merupakan keyword SQL
+    if (receivedFields.hasOwnProperty(field)) { 
+      fieldsToSet.push(`\`${field}\` = ?`); 
 
       if (field === "tanggal_kehadiran" && receivedFields[field]) {
-        // Logika untuk memformat ulang tanggal_kehadiran jika diperlukan saat update
-        // Saat ini, frontend mengirimkan YYYY-MM-DD dari date picker, jadi bisa langsung digunakan jika formatnya sudah sesuai DB
-        // Atau jika frontend mengirim ISO String lengkap, dan Anda hanya ingin tanggal:
         let dateToStore;
         try {
           const parsedDate = parseISO(receivedFields[field]); // Coba parse sebagai ISO string
           if (isValidDate(parsedDate)) {
-            // Jika Anda ingin menyimpan tanggal dan waktu:
-            // dateToStore = formatInTimeZone(parsedDate, 'Asia/Jakarta', "yyyy-MM-dd HH:mm:ss"); // Ke format MySQL DATETIME WIB
-            // atau jika DB Anda bisa handle ISO string UTC langsung:
-            // dateToStore = parsedDate.toISOString();
-            // Untuk sekarang, jika frontend sudah mengirim YYYY-MM-DD atau YYYY-MM-DDTHH:mm:ssZ yang bisa diterima MySQL:
+      
             dateToStore = receivedFields[field]; // Asumsikan format sudah oke atau MySQL bisa handle
             // Jika HANYA tanggal: dateToStore = parsedDate.toISOString().split("T")[0]; 
           } else {

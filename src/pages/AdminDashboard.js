@@ -2,12 +2,12 @@
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "../styles/AdminDashboard.css"; // Pastikan path CSS ini benar
-import BPSLogo from "../assets/BPS.png"; // Pastikan path logo ini benar
-import Sidebar from "../pages/sidebar"; // Impor Sidebar Anda
-import GuestDetailModal from "./GuestDetailModal"; // Impor Modal Anda (path disesuaikan)
+import "../styles/AdminDashboard.css"; // Pastikan ini adalah file CSS yang Anda berikan
+import BPSLogo from "../assets/BPS.png";
+import Sidebar from "../pages/sidebar";
+import GuestDetailModal from "./GuestDetailModal";
 
-// --- Definisi Komponen Ikon SVG (DARI KODE ANDA - TIDAK SAYA UBAH) ---
+// --- Definisi Komponen Ikon SVG ---
 const IconMenu = ({ isOpen = false }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -186,13 +186,16 @@ const IconChevronDown = () => (
     />
   </svg>
 );
-const IconListBullet = () => (
+const IconListBullet = (
+  { className = "empty-state-icon-svg" }
+) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"
     strokeWidth={1.5}
     stroke="currentColor"
+    className={className}
   >
     <path
       strokeLinecap="round"
@@ -225,120 +228,145 @@ const AdminDashboard = () => {
     axios
       .get(`${API_BASE_URL}/tamu`)
       .then((res) => {
-        console.log("[FRONTEND fetchGuests] Raw data from backend:", JSON.stringify(res.data, null, 2));
-        // Pastikan backend mengirim field jam_tindak_lanjut untuk setiap guest
-        if (Array.isArray(res.data)) {
-            res.data.forEach((guest, index) => { 
-                console.log(`[FRONTEND fetchGuests] Guest #${index + 1} - ID: ${guest.id}, Tanggal Kehadiran: "${guest.tanggal_kehadiran}", Jam Tindak Lanjut: "${guest.jam_tindak_lanjut}"`);
-            });
+        const data = res.data;
+        // Flexible handling: data might be an array directly, or nested under a 'tamu' key
+        const guestList = Array.isArray(data) ? data : (data && data.tamu ? data.tamu : []);
+        
+        if (Array.isArray(guestList)) {
+            setGuests(guestList);
+        } else {
+            console.error("Data from API is not in expected format (array or {tamu: array}):", data);
+            setGuests([]);
+            setError("Format data dari server tidak sesuai.");
         }
-        setGuests(Array.isArray(res.data) ? res.data : (res.data.tamu || []));
         setIsLoading(false);
       })
       .catch((err) => {
         console.error("Error fetching data:", err);
-        setError("Gagal memuat data. Silakan coba lagi nanti.");
+        setError("Gagal memuat data tamu. Silakan coba lagi nanti.");
         setIsLoading(false);
       });
-  }, [API_BASE_URL]); // API_BASE_URL tidak berubah, jadi bisa dihilangkan jika mau, tapi tidak masalah
+  }, [API_BASE_URL]);
 
   useEffect(() => {
     fetchGuests();
-    const intervalId = setInterval(fetchGuests, 30000); // Refresh setiap 30 detik
+    const intervalId = setInterval(fetchGuests, 30000); // Refresh data setiap 30 detik
     return () => clearInterval(intervalId);
   }, [fetchGuests]);
 
-  const formatDate = (dateString) => {
-    // Fungsi formatDate Anda yang sudah ada (tidak diubah)
-    // ... (kode fungsi formatDate Anda yang panjang)
-    // Pastikan fungsi ini mengembalikan format yang benar untuk tanggal_kehadiran
-    // console.log(`[formatDate] Menerima dateString: "${dateString}" (tipe: ${typeof dateString})`);
-    if (!dateString) {
-    //   console.log("[formatDate] dateString kosong atau undefined, mengembalikan N/A.");
-      return "N/A";
-    }
-    let dateObject;
-    const initialParsedDate = new Date(dateString);
-    // console.log(`[formatDate] Hasil parsing awal 'new Date(dateString)':`, initialParsedDate);
-    if (!isNaN(initialParsedDate.getTime())) {
-        dateObject = initialParsedDate;
-    } else {
-    //   console.warn(`[formatDate] Parsing awal dengan 'new Date("${dateString}")' menghasilkan Invalid Date. Mencoba fallback...`);
-      const parts = String(dateString).replace("T", " ").replace("Z", "").split(/[- :.]/); // Tambah . untuk handle milidetik jika ada
-      if (parts.length >= 3) {
-        const year = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
-        const day = parseInt(parts[2], 10);
-        const hours = parts.length > 3 ? parseInt(parts[3], 10) : 0;
-        const minutes = parts.length > 4 ? parseInt(parts[4], 10) : 0;
-        const seconds = parts.length > 5 ? parseInt(parts[5], 10) : 0;
-        if ([year, month, day, hours, minutes, seconds].some(isNaN)) {
-        //   console.warn("[formatDate] Fallback parsing menghasilkan NaN pada salah satu bagian untuk:", dateString);
-          return "Invalid Date (Fallback NaN)";
+  // Fungsi format tanggal dan waktu yang lebih baik
+  const formatDateTime = useCallback(
+    (dateString, includeDate = true, includeTime = true) => {
+      if (!dateString) return "N/A";
+      try {
+        let date = new Date(dateString); 
+        if (isNaN(date.getTime())) {
+          // Fallback parsing jika format dari DB tidak standar ISO (misal, spasi bukan 'T')
+          const normalizedDateString = String(dateString).replace(" ", "T");
+          const fallbackDate = new Date(normalizedDateString);
+          if (isNaN(fallbackDate.getTime())) {
+            // Further fallback for YYYY-MM-DD HH:MM:SS
+            const parts = String(dateString).split(/[- :]/);
+            if (parts.length >= 3) {
+                const year = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) -1; // Month is 0-indexed
+                const day = parseInt(parts[2], 10);
+                const hours = parts.length > 3 ? parseInt(parts[3], 10) : 0;
+                const minutes = parts.length > 4 ? parseInt(parts[4], 10) : 0;
+                const seconds = parts.length > 5 ? parseInt(parts[5], 10) : 0;
+                if (![year, month, day, hours, minutes, seconds].some(isNaN)) {
+                    date = new Date(year, month, day, hours, minutes, seconds);
+                }
+            }
+            if (isNaN(date.getTime())) {
+                 console.warn(`Invalid date format encountered: ${dateString}`);
+                 return "Tgl Invalid";
+            }
+          } else {
+            date.setTime(fallbackDate.getTime()); 
+          }
         }
-        dateObject = new Date(Date.UTC(year, month, day, hours, minutes, seconds)); // Gunakan UTC jika string ISO
-        // console.log(`[formatDate] Fallback parsing berhasil. Objek Date (UTC based): "${dateObject.toString()}", ISO (UTC): "${dateObject.toISOString()}"`);
-      } else {
-        // console.error("[formatDate] Fallback parsing gagal, tidak cukup bagian untuk:", dateString);
-        return "Invalid Date Format";
+
+        const dateOptions = { day: "numeric", month: "short", year: "numeric" };
+        const timeOptions = {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        };
+
+        let parts = [];
+        if (includeDate) {
+          parts.push(date.toLocaleDateString("id-ID", dateOptions));
+        }
+        if (includeTime) {
+          parts.push(date.toLocaleTimeString("id-ID", timeOptions));
+        }
+        return parts.join(", ").trim() || (includeDate ? "Tgl Invalid" : "Waktu Invalid");
+      } catch (e) {
+        console.error(
+          "Error formatting date:",
+          e,
+          "for dateString:",
+          dateString
+        );
+        return "Error Tgl";
       }
+    },
+    []
+  );
+  
+  // Format tanggal saja (Hari Ini, Kemarin, atau DD Mmm YYYY)
+  const formatDateForDisplay = useCallback((dateString) => {
+    if (!dateString) return "N/A";
+    let date = new Date(dateString);
+    
+    // Handle YYYY-MM-DD as local date, not UTC midnight
+    if (String(dateString).match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const [year, month, day] = String(dateString).split('-').map(Number);
+        date = new Date(year, month - 1, day); 
+    } else if (isNaN(date.getTime())) {
+        const normalizedDateString = String(dateString).replace(" ", "T");
+        date = new Date(normalizedDateString);
     }
-    if (!dateObject || isNaN(dateObject.getTime())) {
-    //   console.error("[formatDate] Gagal membuat objek Date yang valid dari:", dateString, "setelah semua usaha parsing.");
-      return "Invalid Date Value";
-    }
-    // console.log(`[formatDate] Objek Date final yang akan diformat: ${dateObject.toString()}`);
+
+    if (isNaN(date.getTime())) return "Tgl Invalid";
+
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
-    const inputDateOnly = new Date(dateObject.getFullYear(), dateObject.getMonth(), dateObject.getDate());
-    const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const yesterdayDateOnly = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
-    const timeOptions = { hour: "2-digit", minute: "2-digit", hour12: false };
-    try {
-      if (inputDateOnly.getTime() === todayDateOnly.getTime()) {
-        return `Hari Ini, ${dateObject.toLocaleTimeString("id-ID", timeOptions)}`;
-      }
-      if (inputDateOnly.getTime() === yesterdayDateOnly.getTime()) {
-        return `Kemarin, ${dateObject.toLocaleTimeString("id-ID", timeOptions)}`;
-      }
-      return (
-        dateObject.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) +
-        `, ${dateObject.toLocaleTimeString("id-ID", timeOptions)}`
-      );
-    } catch (e) {
-    //   console.error("[formatDate] Error saat formatting akhir dengan toLocaleString:", e, "untuk dateObject:", dateObject);
-      return "Date Display Error";
-    }
-  };
 
-  // --- Fungsi Baru untuk Format Jam Tindak Lanjut ---
-  const formatFollowUpTime = (isoString) => {
-    if (!isoString) {
-      return "-"; // Atau string kosong, sesuai preferensi
-    }
-    try {
-      const dateObj = new Date(isoString);
-      if (isNaN(dateObj.getTime())) {
-        console.warn("formatFollowUpTime: Invalid date string received:", isoString);
-        return "Invalid Time";
-      }
-      // Format ke HH:MM (misalnya: 14:30)
-      return dateObj.toLocaleTimeString("id-ID", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false, // Gunakan format 24 jam
-      });
-    } catch (error) {
-      console.error("Error formatting follow-up time:", isoString, error);
-      return "Error";
-    }
-  };
-  // --- End Fungsi Baru ---
+    const inputDateOnly = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
+    );
+    const todayDateOnly = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    const yesterdayDateOnly = new Date(
+      yesterday.getFullYear(),
+      yesterday.getMonth(),
+      yesterday.getDate()
+    );
+
+    if (inputDateOnly.getTime() === todayDateOnly.getTime()) return "Hari Ini";
+    if (inputDateOnly.getTime() === yesterdayDateOnly.getTime())
+      return "Kemarin";
+
+    return date.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  }, []);
 
 
-  const getFilteredGuests = () => {
-    let filtered = guests.filter((guest) => {
+  const getFilteredGuests = useCallback(() => {
+    let filtered = Array.isArray(guests) ? guests : []; 
+
+    filtered = filtered.filter((guest) => {
       const statusMatch = (() => {
         switch (activeTab) {
           case "completed":
@@ -351,33 +379,29 @@ const AdminDashboard = () => {
             return true;
         }
       })();
-
       const searchTermLower = searchTerm.toLowerCase();
       const searchMatch =
         !searchTerm ||
         guest.nama_lengkap?.toLowerCase().includes(searchTermLower) ||
-        guest.instansi?.toLowerCase().includes(searchTermLower) ||
+        guest.pekerjaan?.toLowerCase().includes(searchTermLower) || 
         guest.keperluan?.toLowerCase().includes(searchTermLower) ||
         (guest.topik_konsultasi &&
           guest.topik_konsultasi.toLowerCase().includes(searchTermLower));
-
       return statusMatch && searchMatch;
     });
 
     return filtered.sort((a, b) => {
       switch (sortBy) {
         case "newest":
-          // Sort by tanggal_kehadiran descending, then by jam_tindak_lanjut descending if available
           const dateB = b.tanggal_kehadiran ? new Date(b.tanggal_kehadiran) : null;
           const dateA = a.tanggal_kehadiran ? new Date(a.tanggal_kehadiran) : null;
           if (dateB && dateA) {
             const dateDiff = dateB.getTime() - dateA.getTime();
             if (dateDiff !== 0) return dateDiff;
-            // If dates are same, sort by jam_tindak_lanjut
-            const timeB = b.jam_tindak_lanjut ? new Date(b.jam_tindak_lanjut) : null;
-            const timeA = a.jam_tindak_lanjut ? new Date(a.jam_tindak_lanjut) : null;
+            const timeB = b.jam_tindak_lanjut ? new Date(b.jam_tindak_lanjut) : (b.tanggal_kehadiran ? dateB : null);
+            const timeA = a.jam_tindak_lanjut ? new Date(a.jam_tindak_lanjut) : (a.tanggal_kehadiran ? dateA : null);
             if (timeB && timeA) return timeB.getTime() - timeA.getTime();
-            if (timeB) return 1;
+            if (timeB) return 1; 
             if (timeA) return -1;
             return 0;
           }
@@ -390,8 +414,8 @@ const AdminDashboard = () => {
           if (dateAOld && dateBOld) {
             const dateDiff = dateAOld.getTime() - dateBOld.getTime();
             if (dateDiff !== 0) return dateDiff;
-            const timeAOld = a.jam_tindak_lanjut ? new Date(a.jam_tindak_lanjut) : null;
-            const timeBOld = b.jam_tindak_lanjut ? new Date(b.jam_tindak_lanjut) : null;
+            const timeAOld = a.jam_tindak_lanjut ? new Date(a.jam_tindak_lanjut) : (a.tanggal_kehadiran ? dateAOld : null);
+            const timeBOld = b.jam_tindak_lanjut ? new Date(b.jam_tindak_lanjut) : (b.tanggal_kehadiran ? dateBOld : null);
             if (timeAOld && timeBOld) return timeAOld.getTime() - timeBOld.getTime();
             if (timeAOld) return 1;
             if (timeBOld) return -1;
@@ -405,11 +429,11 @@ const AdminDashboard = () => {
         case "status":
           const statusOrder = {
             "Belum Diproses": 0,
-            null: 0, 
+            null: 0, // Handles actual null status
             Diproses: 1,
+            "Perlu Tindak Lanjut": 1, 
+            "Penjadwalan Berikutnya": 1,
             Selesai: 2,
-            "Perlu Tindak Lanjut": 1, // Sesuaikan urutan jika ada status lain
-            "Penjadwalan Berikutnya": 1
           };
           const statusAVal = statusOrder.hasOwnProperty(a.status) ? statusOrder[a.status] : (a.status === null ? statusOrder.null : 3);
           const statusBVal = statusOrder.hasOwnProperty(b.status) ? statusOrder[b.status] : (b.status === null ? statusOrder.null : 3);
@@ -418,56 +442,47 @@ const AdminDashboard = () => {
           return 0;
       }
     });
-  };
+  }, [guests, activeTab, searchTerm, sortBy]);
   
-  // Fungsi getStatistics, updateGuestStatus, dll. (tidak diubah, kecuali jika perlu menggunakan jam_tindak_lanjut)
-  // ... (kode fungsi Anda yang lain)
   const getStatistics = useCallback(() => {
-    const todayDate = new Date();
-    const todayStr = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, '0')}-${String(todayDate.getDate()).padStart(2, '0')}`;
-
-    const weekStart = new Date(todayDate);
-    const dayOfWeek = weekStart.getDay(); // Sunday - 0, Monday - 1, ...
-    const diff = weekStart.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust to Monday of the week
-    weekStart.setDate(diff);
-    weekStart.setHours(0, 0, 0, 0); // Start of the day
+    const today = new Date().toISOString().split("T")[0];
+    const weekStartObj = new Date();
+    weekStartObj.setDate(
+      weekStartObj.getDate() -
+        weekStartObj.getDay() +
+        (weekStartObj.getDay() === 0 ? -6 : 1) // Adjust to Monday of the week
+    );
+    const weekStartStr = weekStartObj.toISOString().split("T")[0];
+    const safeGuests = Array.isArray(guests) ? guests : [];
     
     return {
-      todayGuests: guests.filter(
-        (g) => {
-            if (!g.tanggal_kehadiran) return false;
-            const guestDate = new Date(g.tanggal_kehadiran);
-            return guestDate.getFullYear() === todayDate.getFullYear() &&
-                   guestDate.getMonth() === todayDate.getMonth() &&
-                   guestDate.getDate() === todayDate.getDate();
-        }
+      todayGuests: safeGuests.filter(
+        (g) => g.tanggal_kehadiran && String(g.tanggal_kehadiran).startsWith(today)
       ).length,
-      weeklyGuests: guests.filter(
-        (g) => {
-            if (!g.tanggal_kehadiran) return false;
-            const guestDate = new Date(g.tanggal_kehadiran);
-            guestDate.setHours(0,0,0,0);
-            return guestDate.getTime() >= weekStart.getTime();
-        }
+      weeklyGuests: safeGuests.filter(
+        (g) => g.tanggal_kehadiran && String(g.tanggal_kehadiran) >= weekStartStr
       ).length,
-      unprocessedGuests: guests.filter(
+      unprocessedGuests: safeGuests.filter(
         (g) => g.status === "Belum Diproses" || !g.status
       ).length,
-      completedGuests: guests.filter((g) => g.status === "Selesai").length,
+      completedGuests: safeGuests.filter((g) => g.status === "Selesai").length,
     };
   }, [guests]);
 
   const statistics = getStatistics();
-  const displayedGuests = getFilteredGuests().slice(
+  const itemsPerPage = 10;
+  const filteredGuests = getFilteredGuests(); // Call it once
+  const displayedGuests = filteredGuests.slice(
     0,
-    showAll ? undefined : 10
+    showAll ? filteredGuests.length : itemsPerPage
   );
 
   const updateGuestStatus = useCallback(
     (guestId, newStatus) => {
       const guestToUpdate = guests.find((g) => g.id === guestId);
       if (!guestToUpdate) return;
-      const previousGuests = JSON.parse(JSON.stringify(guests)); // Deep copy
+      
+      const previousGuests = JSON.parse(JSON.stringify(guests)); // Deep copy for rollback
       
       setGuests((prevGuests) =>
         prevGuests.map((g) =>
@@ -479,36 +494,37 @@ const AdminDashboard = () => {
         setSelectedGuest(prev => prev ? {...prev, status: newStatus} : null);
       }
       
-      // Jika status diubah menjadi 'Selesai' atau status lain yang menandakan akhir proses,
-      // Anda mungkin ingin mengirim jam_tindak_lanjut yang baru juga.
-      // Namun, logika jam_tindak_lanjut utama ada di FollowUpForm.
-      // Perubahan status di dashboard ini mungkin tidak selalu berarti 'follow-up' formal.
       let payload = { status: newStatus };
+      // Uncomment if "Selesai" should auto-set jam_tindak_lanjut if not present
       // if (newStatus === "Selesai" && !guestToUpdate.jam_tindak_lanjut) {
       //    payload.jam_tindak_lanjut = new Date().toISOString();
       // }
 
-
       axios
         .put(`${API_BASE_URL}/tamu/${guestId}`, payload)
         .then((response) => {
-          // Idealnya, backend mengembalikan data tamu yang terupdate sepenuhnya
-          setGuests(prevGuests => prevGuests.map(g => g.id === guestId ? {...g, ...(response.data.guest || response.data)} : g ));
-          if (selectedGuest && selectedGuest.id === guestId && (response.data.guest || response.data)) {
-            setSelectedGuest(response.data.guest || response.data); 
+          // Update with potentially more complete data from backend
+          const updatedGuestData = response.data.guest || response.data;
+          setGuests(prevGuests => prevGuests.map(g => g.id === guestId ? {...g, ...updatedGuestData} : g ));
+          if (selectedGuest && selectedGuest.id === guestId && updatedGuestData) {
+            setSelectedGuest(prev => ({...prev, ...updatedGuestData})); 
           }
         })
         .catch((err) => {
-          console.error("Error updating guest status:", err);
-          setError("Gagal mengupdate status tamu. Perubahan dikembalikan.");
-          setGuests(previousGuests); 
+          console.error("Error updating guest status:", err.response?.data || err.message);
+          setError(
+             err.response?.data?.error ||
+             err.response?.data?.message ||
+             "Gagal mengupdate status tamu. Perubahan dikembalikan."
+          );
+          setGuests(previousGuests); // Rollback optimistic update
           if (selectedGuest && selectedGuest.id === guestId) { 
             const originalGuestInModal = previousGuests.find(g => g.id === guestId);
             if (originalGuestInModal) setSelectedGuest(originalGuestInModal);
           }
         });
     },
-    [guests, selectedGuest, API_BASE_URL] 
+    [guests, selectedGuest, API_BASE_URL, fetchGuests] // fetchGuests might be needed if PUT response is minimal
   );
 
   const startProcessing = useCallback(
@@ -538,19 +554,14 @@ const AdminDashboard = () => {
     );
   };
 
-  const getPriorityIndicator = (guest) => { 
+  const getPriorityIndicator = (guest) => {
     if (!guest || !guest.tanggal_kehadiran) return null;
-    const todayDate = new Date();
-    const guestDate = new Date(guest.tanggal_kehadiran);
-
-    const isToday = guestDate.getFullYear() === todayDate.getFullYear() &&
-                    guestDate.getMonth() === todayDate.getMonth() &&
-                    guestDate.getDate() === todayDate.getDate();
-
+    const today = new Date().toISOString().split("T")[0];
+    const isToday = String(guest.tanggal_kehadiran).startsWith(today);
     const isUrgent =
-      guest.keperluan &&
-      (guest.keperluan.toLowerCase().includes("mendesak") ||
-        guest.keperluan.toLowerCase().includes("urgent"));
+      guest.keperluan?.toLowerCase().includes("mendesak") ||
+      guest.keperluan?.toLowerCase().includes("urgent");
+    
     if (isToday && (guest.status === "Belum Diproses" || !guest.status))
       return <span className="priority-indicator today">Hari Ini</span>;
     if (isUrgent)
@@ -559,8 +570,8 @@ const AdminDashboard = () => {
   };
 
   const truncateText = (text, maxLength = 30) => {
-    if (text === null || typeof text === "undefined") return ""; 
-    const stringText = String(text); 
+    if (text === null || typeof text === "undefined") return "";
+    const stringText = String(text);
     return stringText.length > maxLength
       ? stringText.substring(0, maxLength) + "..."
       : stringText;
@@ -581,7 +592,11 @@ const AdminDashboard = () => {
   };
 
   const tabs = [
-    { key: "all", label: "Semua", count: guests.length },
+    {
+      key: "all",
+      label: "Semua",
+      count: Array.isArray(guests) ? guests.length : 0,
+    },
     {
       key: "unprocessed",
       label: "Belum Diproses",
@@ -590,7 +605,9 @@ const AdminDashboard = () => {
     {
       key: "processing",
       label: "Diproses",
-      count: guests.filter((g) => g.status === "Diproses").length,
+      count: Array.isArray(guests)
+        ? guests.filter((g) => g.status === "Diproses").length
+        : 0,
     },
     { key: "completed", label: "Selesai", count: statistics.completedGuests },
   ];
@@ -635,11 +652,10 @@ const AdminDashboard = () => {
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <main className="main-content-area">
         <header className="dashboard-header-sticky">
-          {/* ... Header Anda ... */}
           <div className="header-inner">
             <div className="header-left">
                 <button
-                className="sidebar-toggle"
+                className="sidebar-toggle btn-icon"
                 onClick={toggleSidebar}
                 aria-label={isSidebarOpen ? "Tutup Sidebar" : "Buka Sidebar"}
                 >
@@ -650,7 +666,7 @@ const AdminDashboard = () => {
             </div>
             <div className="header-right">
                 <button
-                className={`refresh-action-btn ${
+                className={`refresh-action-btn btn-primary ${
                     isLoading ? "is-loading" : ""
                 }`}
                 onClick={fetchGuests}
@@ -665,7 +681,6 @@ const AdminDashboard = () => {
         </header>
         <div className="dashboard-content-wrapper">
           <section className="stats-grid-container">
-            {/* ... Stat Items Anda ... */}
             {statItems.map((item) => (
               <div
                 key={item.id}
@@ -681,14 +696,13 @@ const AdminDashboard = () => {
           </section>
           <section className="data-panel">
             <div className="panel-header">
-              {/* ... Panel Header Anda (Judul, Search, Sort) ... */}
               <h2 className="panel-title">Daftar Tamu</h2>
                 <div className="controls-group">
                     <div className="search-input-wrapper">
                     <IconSearch />
                     <input
                         type="text"
-                        placeholder="Cari tamu, keperluan, instansi..."
+                        placeholder="Cari tamu, keperluan, pekerjaan..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="search-field"
@@ -710,7 +724,6 @@ const AdminDashboard = () => {
                 </div>
             </div>
             <nav className="tab-navigation">
-              {/* ... Tab Navigation Anda ... */}
               {tabs.map((tab) => (
                 <button
                     key={tab.key}
@@ -724,15 +737,18 @@ const AdminDashboard = () => {
                 </button>
                 ))}
             </nav>
+
             {isLoading ? (
               <div className="loading-state">
-                <div className="spinner"></div>
-                <p>Memuat data tamu...</p>
+                <div className="spinner"></div> <p>Memuat data tamu...</p>
               </div>
             ) : error ? (
               <div className="error-state">
                 <p>{error}</p>
-                <button onClick={fetchGuests} className="retry-button">
+                <button
+                  onClick={fetchGuests}
+                  className="retry-button btn-primary"
+                >
                   Coba Lagi
                 </button>
               </div>
@@ -742,12 +758,12 @@ const AdminDashboard = () => {
                   <table className="data-table">
                     <thead>
                       <tr>
-                        <th data-label="#">No</th>
-                        <th data-label="Nama & Instansi">Nama & Instansi</th>
+                        <th data-label="#">#</th>
+                        <th data-label="Nama & Pekerjaan">Nama & Pekerjaan</th>
                         <th data-label="Keperluan">Keperluan</th>
-                        <th data-label="Tgl Kunjungan">Tgl Kunjungan</th> {/* Diubah untuk kejelasan */}
-                        <th data-label="Jam Tindak Lanjut">Jam Tindak Lanjut</th> {/* KOLOM BARU */}
-                        <th data-label="Status">Status</th>
+                        <th data-label="Waktu Kunjungan">Waktu Kunjungan</th>
+                        <th data-label="Jam Tindak Lanjut">Jam Tindak Lanjut</th>
+                        <th data-label="Status & Detail Proses">Status & Detail Proses</th>
                         <th data-label="Aksi" className="text-center">
                           Aksi
                         </th>
@@ -767,53 +783,122 @@ const AdminDashboard = () => {
                           >
                             {index + 1}
                           </td>
-                          <td data-label="Nama & Instansi">
-                            {/* ... Info Nama & Instansi ... */}
+                          <td data-label="Nama & Pekerjaan">
                             <div className="guest-primary-info">
                                 <span className="guest-name-text">
-                                {guest.nama_lengkap || "-"} 
+                                {guest.nama_lengkap || "-"}
                                 </span>
-                                {getPriorityIndicator(guest)} 
-                                {guest.instansi && (
+                                {getPriorityIndicator(guest)}
+                                {guest.pekerjaan && (
                                 <span className="guest-company-text">
-                                    {truncateText(guest.instansi, 25)}
+                                    {truncateText(guest.pekerjaan, 25)}
                                 </span>
                                 )}
                             </div>
                           </td>
                           <td data-label="Keperluan" className="cell-purpose">
-                            {/* ... Info Keperluan ... */}
-                            {guest.keperluan &&
-                            guest.keperluan
-                                .toLowerCase()
+                            {guest.keperluan
+                                ?.toLowerCase()
                                 .includes("konsultasi") &&
-                            guest.topik_konsultasi
-                                ? `${truncateText(
-                                    guest.keperluan,
-                                    20
-                                )} (${truncateText(
-                                    guest.topik_konsultasi,
-                                    25
-                                )})`
-                                : truncateText(guest.keperluan, 50)}
+                            guest.topik_konsultasi ? (
+                                <>
+                                {truncateText(guest.keperluan, 20)}
+                                <span className="topic-detail">
+                                    {" "}
+                                    ({truncateText(guest.topik_konsultasi, 25)})
+                                </span>
+                                </>
+                            ) : guest.keperluan
+                                ?.toLowerCase()
+                                .includes("mitra") && guest.tujuan_kunjungan ? (
+                                <>
+                                {truncateText(guest.keperluan, 20)}
+                                <span className="topic-detail">
+                                    {" "}
+                                    ({truncateText(guest.tujuan_kunjungan, 25)})
+                                </span>
+                                </>
+                            ) : guest.keperluan
+                                ?.toLowerCase()
+                                .includes("umum") && guest.tujuan_kunjungan ? (
+                                <>
+                                {truncateText(guest.keperluan, 20)}
+                                <span className="topic-detail">
+                                    {" "}
+                                    ({truncateText(guest.tujuan_kunjungan, 25)})
+                                </span>
+                                </>
+                            ) : (
+                                truncateText(guest.keperluan, 50)
+                            )}
                           </td>
-                          <td data-label="Tgl Kunjungan" className="cell-date">
-                            {formatDate(guest.tanggal_kehadiran)}
+                          <td data-label="Waktu Kunjungan" className="cell-datetime">
+                            <div className="datetime-entry">
+                                <span className="datetime-label">Datang:</span>
+                                <span>
+                                {formatDateForDisplay(guest.tanggal_kehadiran)}
+                                </span>
+                            </div>
+                            {guest.jam_submit_data && (
+                                <div className="datetime-entry subtle">
+                                <span className="datetime-label">Submit:</span>
+                                <span>
+                                    {formatDateTime(
+                                    guest.jam_submit_data,
+                                    false, // includeDate = false
+                                    true   // includeTime = true
+                                    )}
+                                </span>
+                                </div>
+                            )}
                           </td>
-                          {/* --- SEL BARU UNTUK JAM TINDAK LANJUT --- */}
                           <td data-label="Jam Tindak Lanjut" className="cell-time">
-                            {formatFollowUpTime(guest.jam_tindak_lanjut)}
+                            {guest.jam_tindak_lanjut ? formatDateTime(guest.jam_tindak_lanjut, false, true) : "-"}
                           </td>
-                          {/* --- END SEL BARU --- */}
-                          <td data-label="Status">
-                            {renderGuestStatusBadge(guest)}
+                          <td data-label="Status & Detail Proses" className="cell-status-proses">
+                            <div
+                                style={{
+                                marginBottom:
+                                    guest.jam_diterima ||
+                                    guest.jam_selesai_tindak_lanjut
+                                    ? "0.25rem"
+                                    : "0",
+                                }}
+                            >
+                                {renderGuestStatusBadge(guest)}
+                            </div>
+                            {guest.jam_diterima && (
+                                <div className="datetime-entry small">
+                                <span className="datetime-label">
+                                    Diproses:
+                                </span>
+                                <span>
+                                    {formatDateTime(
+                                    guest.jam_diterima,
+                                    true, 
+                                    true  
+                                    )}
+                                </span>
+                                </div>
+                            )}
+                            {guest.jam_selesai_tindak_lanjut && (
+                                <div className="datetime-entry small">
+                                <span className="datetime-label">Selesai TL:</span> 
+                                <span>
+                                    {formatDateTime(
+                                    guest.jam_selesai_tindak_lanjut,
+                                    true, 
+                                    true  
+                                    )}
+                                </span>
+                                </div>
+                            )}
                           </td>
                           <td data-label="Aksi" className="cell-actions">
-                            {/* ... Tombol Aksi Anda ... */}
                             <div className="action-buttons-group">
                                 <button
                                 onClick={() => setSelectedGuest(guest)}
-                                className="action-button"
+                                className="action-button btn-blue-icon"
                                 title="Lihat Detail"
                                 >
                                 <IconEye />
@@ -822,7 +907,7 @@ const AdminDashboard = () => {
                                 guest.status === "Belum Diproses") && (
                                 <button
                                     onClick={() => startProcessing(guest.id)}
-                                    className="action-button"
+                                    className="action-button btn-blue-icon"
                                     title="Mulai Proses"
                                 >
                                     <IconPlay />
@@ -831,16 +916,12 @@ const AdminDashboard = () => {
                                 {guest.status === "Diproses" && (
                                 <button
                                     onClick={() => markAsCompleted(guest.id)}
-                                    className="action-button"
+                                    className="action-button btn-blue-icon"
                                     title="Tandai Selesai"
                                 >
                                     <IconCheck />
                                 </button>
                                 )}
-                                {/* Tombol untuk ke FollowUpForm bisa ditambahkan di sini jika diperlukan */}
-                                {/* <button onClick={() => navigate(`/pages/FollowUpForm/${guest.id}`)} className="action-button" title="Tindak Lanjut">
-                                    <IconPencilSquare /> // Ganti dengan ikon yang sesuai
-                                </button> */}
                             </div>
                           </td>
                         </tr>
@@ -848,50 +929,46 @@ const AdminDashboard = () => {
                     </tbody>
                   </table>
                 </div>
-                {/* ... Pagination Footer Anda ... */}
-                {getFilteredGuests().length > 10 &&
-                    !showAll && ( 
-                    <div className="pagination-footer">
-                        <p className="results-count-info">
-                        Menampilkan {displayedGuests.length} dari{" "}
-                        {getFilteredGuests().length} tamu
-                        </p>
-                        <button
-                        onClick={() => setShowAll(true)} 
-                        className="show-all-button"
-                        >
-                        {`Tampilkan Semua (${getFilteredGuests().length})`}
-                        </button>
-                    </div>
-                    )}
-                {showAll &&
-                    getFilteredGuests().length > 10 && ( 
-                    <div className="pagination-footer">
-                        <p className="results-count-info">
-                        Menampilkan semua {getFilteredGuests().length} tamu
-                        </p>
-                        <button
-                        onClick={() => setShowAll(false)}
-                        className="show-all-button"
-                        >
-                        Tampilkan Lebih Sedikit
-                        </button>
-                    </div>
-                    )}
+                {filteredGuests.length > itemsPerPage && !showAll && (
+                  <div className="pagination-footer">
+                    <p className="results-count-info">
+                      Menampilkan {displayedGuests.length} dari{" "}
+                      {filteredGuests.length} tamu
+                    </p>
+                    <button
+                      onClick={() => setShowAll(true)}
+                      className="show-all-button btn-link-blue"
+                    >{`Tampilkan Semua (${
+                      filteredGuests.length
+                    })`}</button>
+                  </div>
+                )}
+                {showAll && filteredGuests.length > itemsPerPage && (
+                  <div className="pagination-footer">
+                    <p className="results-count-info">
+                      Menampilkan semua {filteredGuests.length} tamu
+                    </p>
+                    <button
+                      onClick={() => setShowAll(false)}
+                      className="show-all-button btn-link-blue"
+                    >
+                      Tampilkan Lebih Sedikit
+                    </button>
+                  </div>
+                )}
               </>
             ) : (
               <div className="empty-state-display">
-                {/* ... Empty State Display Anda ... */}
-                <IconListBullet />
+                <IconListBullet className="empty-state-icon-svg" />
                 <p className="empty-state-title">Tidak Ada Data</p>
                 <p className="empty-state-message">{getEmptyStateMessage()}</p>
                 {searchTerm && (
-                    <button
-                    className="clear-filter-button"
+                  <button
+                    className="clear-filter-button btn-secondary"
                     onClick={() => setSearchTerm("")}
-                    >
+                  >
                     Hapus Filter Pencarian
-                    </button>
+                  </button>
                 )}
               </div>
             )}
@@ -907,9 +984,9 @@ const AdminDashboard = () => {
           onMarkCompleted={markAsCompleted}
           onNavigateToEdit={(id) => navigate(`/pages/EditGuestForm/${id}`)}
           onNavigateToFollowUp={(id) => navigate(`/pages/FollowUpForm/${id}`)}
-          getStatusBadge={renderGuestStatusBadge}
-          formatDate={formatDate} // Kirim formatDate
-          formatTime={formatFollowUpTime} // Kirim juga formatFollowUpTime jika modal memerlukannya
+          renderStatusBadge={renderGuestStatusBadge} 
+          formatDateTime={formatDateTime} 
+          formatDateForDisplay={formatDateForDisplay}
         />
       )}
     </div>
