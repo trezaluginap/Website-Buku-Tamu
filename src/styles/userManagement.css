@@ -1,5 +1,6 @@
 /* src/styles/userManagement.css */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Variabel :root telah dihapus, nilai diterapkan langsung */
 
 * {
   box-sizing: border-box;
@@ -9,38 +10,56 @@
 
 body {
   font-family: 'Poppins', sans-serif;
-  background-color: #ffffff; /* Ubah warna ini menjadi putih */
-  color: #333; /* Warna teks utama agar kontras dengan background putih */
+  background-color: #b2ebf2;
+  color: #333333; /* Sebelumnya var(--primary-text-color) */
+  line-height: 1.6; 
+  font-size: 15px; 
 }
 
-/* --- PERBAIKAN PENTING UNTUK LATAR BELAKANG KONTEN UTAMA --- */
+/* --- Main Layout & Content Container --- */
 .content-container {
   flex-grow: 1;
-  padding: 24px;
+  padding: 28px; 
   min-height: 100vh;
-  background-color: #F4F7F6; /* Warna latar belakang terang untuk area konten utama */
+  /* PASTIKAN BARIS INI YANG DIGUNAKAN UNTUK GRADASI */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
   overflow-y: auto;
   transition: margin-left 0.3s ease;
 }
 
-/* Aturan untuk mengontrol margin-left konten utama */
 .content-container.sidebar-open-active {
-  margin-left: 240px; /* Sesuaikan dengan lebar sidebar yang terbuka */
+  margin-left: 250px; 
 }
 
 .content-container.sidebar-closed-active {
-  margin-left: 0;
+  margin-left: 0; 
 }
 
-/* Dashboard Header */
+/* --- Dashboard Header --- */
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 32px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1); /* Sesuaikan dengan dark bg */
-  color: #333; /* Pastikan teks di header berwarna gelap untuk kontras */
+  border-bottom: 1px solid #e2e8f0; /* Sebelumnya var(--border-color-soft) */
+  background-color: #ffffff; /* Sebelumnya var(--header-bg-color) */
+  padding: 20px 28px; 
+  position: sticky; 
+  top: 0;
+  z-index: 100; 
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); /* Sebelumnya var(--shadow-soft) */
+}
+
+.header-left-section { 
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.app-logo { 
+  height: 100px; 
+  width: 100px; 
+  object-fit: contain;
 }
 
 .app-info {
@@ -49,65 +68,55 @@ body {
 }
 
 .app-title {
-  color: #333333; /* Pastikan judul aplikasi gelap */
-  font-size: 36px;
-  font-weight: 700;
+  color: #333333; /* Sebelumnya var(--primary-text-color) */
+  font-size: 30px; 
+  font-weight: 600; 
   margin: 0;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px; 
 }
 
 .app-subtitle {
-  color: #60a5fa; /* Pastikan subjudul tetap biru terang */
-  font-size: 16px;
-  font-weight: 500;
+  color: black; /* Sebelumnya var(--muted-text-color) */
+  font-size: 28px; 
+  font-weight: 400; 
   margin: 0;
 }
 
 .user-badge {
   display: flex;
   align-items: center;
-  background-color: white; /* Tetap putih agar kontras */
+  background-color: #ffffff; /* Sebelumnya var(--panel-bg-color) */
   padding: 8px 16px;
   border-radius: 50px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); /* Sebelumnya var(--shadow-soft) */
 }
 
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #020129;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  margin-right: 12px;
-}
+
 
 .user-details {
   display: flex;
   flex-direction: column;
+  text-align: right; 
 }
 
 .user-role {
-  font-size: 14px;
+  font-size: 30px;
   font-weight: 600;
-  color: #1e3a8a;
+  color: black; /* Sebelumnya var(--accent-color) - Synced */
 }
 
 .user-nip {
-  font-size: 12px;
-  color: #64748b;
+  font-size: 27px;
+  color: #777777; /* Sebelumnya var(--muted-text-color) */
 }
 
-/* Content Card */
+/* --- Content Card --- */
 .content-card {
-  background-color: white; /* Ini yang membuat setiap card menjadi putih */
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  background-color: #ffffff; /* Sebelumnya var(--panel-bg-color) */
+  border-radius: 12px; /* Sebelumnya var(--card-border-radius) */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); /* Sebelumnya var(--shadow-medium) */
   overflow: hidden;
-  margin-bottom: 24px; /* Added for spacing between cards if multiple */
+  margin-bottom: 28px; 
 }
 
 .card-header {
@@ -115,18 +124,18 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  background-color: #f8fafc; /* Tetap warna ini untuk header kartu */
-  border-bottom: 1px solid #e2e8f0;
+  background-color: #f8fafc; /* Sebelumnya var(--card-header-bg-color) */
+  border-bottom: 1px solid #e2e8f0; /* Sebelumnya var(--border-color-soft) */
 }
 
 .section-title {
-  font-size: 18px;
+  font-size: 18px; 
   font-weight: 600;
-  color: #1e3a8a;
+  color: #667eea; /* Sebelumnya var(--accent-color) - Synced */
   margin: 0;
 }
 
-/* Table Styles */
+/* --- Table Styles --- */
 .table-container {
   padding: 0 24px 24px;
   overflow-x: auto;
@@ -134,53 +143,67 @@ body {
 
 .data-table {
   width: 100%;
-  border-collapse: separate;
+  border-collapse: separate; 
   border-spacing: 0;
   margin-top: 20px;
-  color: #333; /* Pastikan teks tabel gelap */
+  color: #333333; /* Sebelumnya var(--primary-text-color) */
 }
 
 .data-table th,
 .data-table td {
-  padding: 16px;
+  padding: 14px 16px; 
   text-align: left;
+  vertical-align: middle; 
 }
 
 .data-table th {
-  background-color: #f1f5f9;
-  color: #475569;
+  background-color: #f1f5f9; /* Sebelumnya var(--table-header-bg-color) */
+  color: #555555; /* Sebelumnya var(--secondary-text-color) */
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px; 
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 2px solid #e2e8f0;
+  letter-spacing: 0.75px; 
+  border-bottom: 1px solid #e2e8f0; /* Sebelumnya var(--border-color-soft) */
 }
 
 .data-table td {
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0; /* Sebelumnya var(--border-color-soft) */
   font-size: 14px;
-  color: #334155;
+  color: #555555; /* Sebelumnya var(--secondary-text-color) */
 }
 
 .data-table tr:last-child td {
   border-bottom: none;
 }
 
-.data-table tr:hover {
-  background-color: #f8fafc;
+.data-table tbody tr:hover { 
+  background-color: #f8fafc; /* Sebelumnya var(--table-row-hover-bg-color) */
 }
+
+.data-table th:first-child,
+.data-table td:first-child {
+  border-top-left-radius: 8px; /* Sebelumnya var(--standard-border-radius) */
+  border-bottom-left-radius: 8px; /* Sebelumnya var(--standard-border-radius) */
+}
+.data-table th:last-child,
+.data-table td:last-child {
+  border-top-right-radius: 8px; /* Sebelumnya var(--standard-border-radius) */
+  border-bottom-right-radius: 8px; /* Sebelumnya var(--standard-border-radius) */
+}
+
 
 .empty-table {
   text-align: center;
-  padding: 32px;
-  color: #94a3b8;
+  padding: 40px; 
+  color: #777777; /* Sebelumnya var(--muted-text-color) */
   font-style: italic;
+  font-size: 15px; 
 }
 
-/* Button Styles */
+/* --- Button Styles --- */
 .action-buttons {
   display: flex;
-  gap: 8px;
+  gap: 10px; 
 }
 
 .edit-button,
@@ -190,118 +213,116 @@ body {
 .cancel-button {
   padding: 8px 16px;
   border: none;
-  border-radius: 6px;
+  border-radius: 6px; /* Sebelumnya var(--button-border-radius) */
   cursor: pointer;
   font-weight: 500;
   font-size: 14px;
-  transition: all 0.2s ease;
-  display: flex;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease; 
+  display: inline-flex; 
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px; 
+  line-height: 1.5; 
 }
 
 .edit-button {
-  background-color: #e0f2fe;
-  color: #0284c7;
+  background-color: #27548A; /* Sebelumnya var(--success-bg-light) */
+  color: white; /* Sebelumnya var(--success-text-dark) */
 }
-
 .edit-button:hover {
-  background-color: #bae6fd;
+  background-color: green; 
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); /* Sebelumnya var(--shadow-soft) */
+  transform: translateY(-1px);
 }
 
 .delete-button {
-  background-color: #fee2e2;
-  color: #ef4444;
+  background-color: red; /* Sebelumnya var(--danger-bg-light) */
+  color: white; /* Sebelumnya var(--danger-text-dark) */
 }
-
 .delete-button:hover {
   background-color: #fecaca;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); /* Sebelumnya var(--shadow-soft) */
+  transform: translateY(-1px);
 }
 
 .add-button {
-  background-color: #1e40af;
+  background-color: green; /* Sebelumnya var(--accent-color) - Synced */
   color: white;
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
+  padding: 10px 20px; 
+  font-weight: 500; 
 }
-
 .add-button:hover {
-  background-color: #1e3a8a;
+  background-color: #5a67d8; /* Sebelumnya var(--accent-hover-color) - Synced */
   transform: translateY(-1px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); /* Sebelumnya var(--shadow-medium) */
 }
 
-.add-icon {
+.add-icon { 
   font-size: 18px;
-  font-weight: 600;
-  margin-right: 6px;
+  font-weight: 600; 
 }
 
-/* Modal Styles */
+/* --- Modal Styles --- */
 .modal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.55); 
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 1050; 
+  padding: 20px; 
 }
 
 .modal-content {
-  background-color: white;
-  width: 500px;
-  max-width: 90%;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  background-color: #ffffff; /* Sebelumnya var(--panel-bg-color) */
+  width: 550px; 
+  max-width: 100%; 
+  border-radius: 12px; /* Sebelumnya var(--card-border-radius) */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); 
   overflow: hidden;
-  animation: slideIn 0.3s ease;
+  animation: slideInUp 0.3s ease-out; 
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px;
-  background-color: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 18px 24px; 
+  background-color: #f8fafc; /* Sebelumnya var(--card-header-bg-color) */
+  border-bottom: 1px solid #e2e8f0; /* Sebelumnya var(--border-color-soft) */
 }
 
 .modal-header h3 {
   font-size: 18px;
   font-weight: 600;
-  color: #1e3a8a;
+  color: #667eea; /* Sebelumnya var(--accent-color) - Synced */
   margin: 0;
 }
 
 .close-button {
   background: none;
   border: none;
-  font-size: 24px;
-  color: #64748b;
+  font-size: 28px; 
+  color: #777777; /* Sebelumnya var(--muted-text-color) */
   cursor: pointer;
-  width: 32px;
-  height: 32px;
+  width: 36px; 
+  height: 36px; 
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
-
 .close-button:hover {
-  background-color: #f1f5f9;
-  color: #1e3a8a;
+  background-color: #e2e8f0; /* Sebelumnya var(--border-color-soft) */
+  color: #667eea; /* Sebelumnya var(--accent-color) - Synced */
 }
 
-form {
+form { 
   padding: 24px;
 }
 
@@ -314,76 +335,83 @@ form {
   margin-bottom: 8px;
   font-size: 14px;
   font-weight: 500;
-  color: #475569;
+  color: #555555; /* Sebelumnya var(--secondary-text-color) */
 }
 
-.form-group input {
+.form-group input[type="text"], 
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group select {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  border: 1px solid #cbd5e1; /* Sebelumnya var(--border-color-medium) */
+  border-radius: 6px; /* Sebelumnya var(--button-border-radius) */
   font-size: 14px;
-  transition: border 0.2s ease;
+  background-color: #ffffff; /* Sebelumnya var(--panel-bg-color) */
+  color: #333333; /* Sebelumnya var(--primary-text-color) */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  border-color: #667eea; /* Sebelumnya var(--accent-color) - Synced */
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15); 
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 24px;
+  margin-top: 28px; 
 }
 
 .cancel-button {
-  background-color: #f1f5f9;
-  color: #64748b;
+  background-color: #e2e8f0; /* Sebelumnya var(--border-color-soft) */
+  color: #555555; /* Sebelumnya var(--secondary-text-color) */
+  border: 1px solid #cbd5e1; /* Sebelumnya var(--border-color-medium) */
 }
-
 .cancel-button:hover {
-  background-color: #e2e8f0;
+  background-color: #e2e8f0; 
+  border-color: #cbd5e1;
 }
 
 .submit-button {
-  background-color: #1e40af;
+  background-color: #667eea; /* Sebelumnya var(--accent-color) - Synced */
   color: white;
 }
-
 .submit-button:hover {
-  background-color: #1e3a8a;
+  background-color: #5a67d8; /* Sebelumnya var(--accent-hover-color) - Synced */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); /* Sebelumnya var(--shadow-medium) */
+  transform: translateY(-1px);
 }
 
 /* --- New Styles for Loading and Error Messages --- */
 .loading-message,
 .error-message {
-  padding: 20px;
-  margin: 20px 0;
-  border-radius: 8px;
-  font-size: 16px;
+  padding: 16px 20px; 
+  margin: 20px 24px; 
+  border-radius: 8px; /* Sebelumnya var(--standard-border-radius) */
+  font-size: 15px; 
   font-weight: 500;
   text-align: center;
+  border-width: 1px;
+  border-style: solid;
+  background-color: rgba(255, 255, 255, 0.9); 
+  color: #333333; /* Sebelumnya var(--primary-text-color) */
 }
 
 .loading-message {
-  background-color: #e0f7fa; /* Light blue */
-  color: #00796b; /* Dark cyan */
-  border: 1px solid #b2ebf2;
+  border-color: #b2ebf2;
 }
 
 .error-message {
-  background-color: #ffe0b2; /* Light orange */
-  color: #e65100; /* Dark orange */
-  border: 1px solid #ffcc80;
+  border-color: #ffe0b2; 
 }
 
-
-@keyframes slideIn {
+/* --- Animations --- */
+@keyframes slideInUp { 
   from {
-    transform: translateY(-20px);
+    transform: translateY(15px); 
     opacity: 0;
   }
   to {
@@ -392,73 +420,100 @@ form {
   }
 }
 
-/* Responsive Styles */
+/* --- Responsive Styles --- */
 @media (max-width: 1024px) {
   .content-container.sidebar-open-active {
-    margin-left: 0; /* Di layar yang lebih kecil, sidebar mungkin overlay */
+    margin-left: 0;
+  }
+  .app-title {
+    font-size: 24px; 
+  }
+  .app-subtitle {
+    font-size: 14px;
   }
 }
 
 @media (max-width: 768px) {
+  .content-container {
+    padding: 20px; 
+  }
   .dashboard-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
+    padding: 16px 20px; 
   }
-
   .user-badge {
-    align-self: flex-end;
+    align-self: flex-end; 
   }
-
   .card-header {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px; 
     align-items: flex-start;
   }
-
   .add-button {
-    width: 100%;
-    justify-content: center;
+    width: auto; 
+    align-self: flex-start; 
   }
-
   .data-table th,
   .data-table td {
-    padding: 12px 8px;
+    padding: 10px 8px; 
     font-size: 13px;
   }
-
-  .action-buttons {
+  .action-buttons { 
     flex-direction: column;
-    gap: 6px;
+    align-items: stretch; 
+    width: 100px; 
   }
-
   .edit-button,
   .delete-button {
-    padding: 6px 8px;
-    width: 100%;
-  }
-
-  .content-container.sidebar-open-active {
-    margin-left: 0; /* Pastikan konten tidak bergeser di mobile saat sidebar terbuka sebagai overlay */
+    padding: 8px 10px; 
+    width: 100%; 
+    justify-content: flex-start; 
   }
 }
 
 @media (max-width: 480px) {
+  body {
+    font-size: 14px; 
+  }
   .content-container {
     padding: 16px;
   }
-
+  .dashboard-header {
+    padding: 12px 16px;
+  }
+  .app-logo {
+    height: 40px; 
+  }
+  .app-title {
+    font-size: 20px;
+  }
+  .app-subtitle {
+    font-size: 13px;
+  }
   .table-container {
     padding: 0 12px 12px;
   }
-
   .data-table th,
   .data-table td {
-    padding: 8px 4px;
+    padding: 8px 6px;
     font-size: 12px;
   }
-
-  .form-group input {
+  .form-group input[type="text"],
+  .form-group input[type="email"],
+  .form-group input[type="password"],
+  .form-group select {
     padding: 10px 12px;
+  }
+  .modal-content {
+    width: calc(100% - 32px); 
+    margin: 16px;
+  }
+  .form-actions {
+    flex-direction: column; 
+  }
+  .submit-button, .cancel-button {
+    width: 100%; 
   }
 }

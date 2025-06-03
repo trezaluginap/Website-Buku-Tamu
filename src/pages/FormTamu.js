@@ -1,9 +1,11 @@
 // src/pages/FormTamu.js
 import React, { useState, useEffect, useCallback } from "react";
-import "../styles/Form.css"; // Pastikan ini adalah file CSS yang Anda gunakan dan sudah disesuaikan
+
+import styles from "../styles/Form.module.css"; // Pastikan path ini benar
 import BPSLogo from "../assets/BPS.png";
 
 const FormTamu = () => {
+  // ... (kode state dan functions Anda yang lain tetap sama) ...
   const today = new Date();
   // Format YYYY-MM-DD untuk value default input type="date"
   const getYYYYMMDD = (dateObj) => {
@@ -30,7 +32,6 @@ const FormTamu = () => {
   };
 
   const [formData, setFormData] = useState(initialFormData);
-  // selectedKeperluanUI dihilangkan, akan menggunakan formData.keperluan
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formStep, setFormStep] = useState(1);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -38,7 +39,6 @@ const FormTamu = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 100);
-    // Pastikan tanggal_kehadiran diinisialisasi dengan benar saat komponen mount jika belum
     if (!formData.tanggal_kehadiran) {
       setFormData((prev) => ({
         ...prev,
@@ -46,13 +46,12 @@ const FormTamu = () => {
       }));
     }
     return () => clearTimeout(timer);
-  }, [currentDateForInput]); // Dependensi bisa dikosongkan jika currentDateForInput tidak berubah setelah mount
+  }, [currentDateForInput, formData.tanggal_kehadiran]); // Tambahkan formData.tanggal_kehadiran
 
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData((prev) => {
       const newState = { ...prev, [name]: value };
-      // Jika keperluan diubah, reset field deskripsi terkait
       if (name === "keperluan") {
         newState.tujuan_kunjungan = "";
         newState.topik_konsultasi = "";
@@ -64,13 +63,11 @@ const FormTamu = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Pindahkan validasi step 2 ke sini sebelum konfirmasi submit
     if (formStep !== totalSteps) {
       alert("Selesaikan semua langkah terlebih dahulu.");
       return;
     }
     if (!validateStep2()) {
-      // Validasi untuk step terakhir
       return;
     }
 
@@ -79,13 +76,12 @@ const FormTamu = () => {
 
     setIsSubmitting(true);
     try {
-      // Buat tanggal ISO lengkap dari formData.tanggal_kehadiran (YYYY-MM-DD) + waktu saat ini
       const dateParts = formData.tanggal_kehadiran.split("-");
       const year = parseInt(dateParts[0], 10);
-      const month = parseInt(dateParts[1], 10) - 1; // Bulan di JS 0-indexed
+      const month = parseInt(dateParts[1], 10) - 1;
       const day = parseInt(dateParts[2], 10);
 
-      const now = new Date(); // Waktu saat ini
+      const now = new Date();
       const finalDateTime = new Date(
         year,
         month,
@@ -97,11 +93,10 @@ const FormTamu = () => {
 
       let payload = {
         ...formData,
-        tanggal_kehadiran: finalDateTime.toISOString(), // Kirim ISO string lengkap
+        tanggal_kehadiran: finalDateTime.toISOString(),
         status: "Belum Diproses",
       };
 
-      // Bersihkan payload: set field deskripsi yang tidak relevan menjadi null
       if (formData.keperluan === "konsultasi_statistik") {
         payload.tujuan_kunjungan = null;
       } else if (
@@ -111,7 +106,6 @@ const FormTamu = () => {
         payload.topik_konsultasi = null;
         payload.deskripsi_kebutuhan = null;
       } else {
-        // Jika keperluan tidak dipilih atau jenis lain (seharusnya dicegah validasi)
         payload.tujuan_kunjungan = null;
         payload.topik_konsultasi = null;
         payload.deskripsi_kebutuhan = null;
@@ -136,18 +130,14 @@ const FormTamu = () => {
           }`
         );
         setFormData({
-          // Reset form
           ...initialFormData,
-          tanggal_kehadiran: getYYYYMMDD(new Date()), // Reset tanggal ke hari ini
+          tanggal_kehadiran: getYYYYMMDD(new Date()),
         });
         setFormStep(1);
       } else {
-        const errorData = await response
-          .json()
-          .catch(() => ({
-            message:
-              "Gagal mengirim data. Respons server tidak dapat diproses.",
-          }));
+        const errorData = await response.json().catch(() => ({
+          message: "Gagal mengirim data. Respons server tidak dapat diproses.",
+        }));
         alert(
           `Gagal mengirim data. Server: ${response.status} - ${
             errorData.message || errorData.error || response.statusText
@@ -250,74 +240,114 @@ const FormTamu = () => {
       "Jumat",
       "Sabtu",
     ];
-    return days[new Date().getDay()];
-  };
-  const formatDateForDisplay = (dateYMDString) => {
-    if (!dateYMDString) return "";
-    const parts = dateYMDString.split("-"); // Input adalah YYYY-MM-DD
-    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`; // Format ke DD/MM/YYYY
-    return dateYMDString; // Fallback
+    // Jika tanggal_kehadiran dipilih, gunakan tanggal itu, jika tidak, gunakan hari ini
+    const dateToCheck = formData.tanggal_kehadiran
+      ? new Date(formData.tanggal_kehadiran)
+      : new Date();
+    // Perlu penyesuaian jika formData.tanggal_kehadiran tidak sesuai format Date()
+    // Untuk YYYY-MM-DD, new Date() akan menganggap UTC, jadi perlu adjust timezone offset jika ada masalah
+    // Solusi aman:
+    let targetDate;
+    if (formData.tanggal_kehadiran) {
+      const [year, month, day] = formData.tanggal_kehadiran
+        .split("-")
+        .map(Number);
+      targetDate = new Date(year, month - 1, day); // month is 0-indexed
+    } else {
+      targetDate = new Date();
+    }
+    return days[targetDate.getDay()];
   };
 
+  const formatDateForDisplay = (dateYMDString) => {
+    if (!dateYMDString) return "";
+    const parts = dateYMDString.split("-");
+    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    return dateYMDString;
+  };
+
+  // Ubah semua className menjadi styles.namaClass
   return (
-    // Ganti class .form-container dengan class yang sesuai dari CSS Anda (misal .form-tamu-ms-container)
-    <div className={`form-container ${isLoaded ? "loaded" : ""}`}>
+    <div className={`${styles.formContainer} ${isLoaded ? styles.loaded : ""}`}>
       <form
         onSubmit={handleSubmit}
         onReset={handleFormReset}
         id="guestRegistrationMultiStepForm"
-        className="guest-registration-form"
+        className={styles.guestRegistrationForm} // Ganti di sini
       >
-        <div className="form-header">
-          <div className="logo-container">
-            <img src={BPSLogo} alt="BPS Logo" className="bps-logo" />
+        <div className={styles.formHeader}>
+          {" "}
+          {/* Ganti di sini */}
+          <div className={styles.logoContainer}>
+            {" "}
+            {/* Ganti di sini */}
+            <img src={BPSLogo} alt="BPS Logo" className={styles.bpsLogo} />{" "}
+            {/* Ganti di sini */}
           </div>
           <h2>Buku Tamu Digital</h2>
-          <p className="form-description">
+          <p className={styles.formDescription}>
+            {" "}
+            {/* Ganti di sini */}
             Registrasi kunjungan untuk hari {getDayName()},{" "}
             {formatDateForDisplay(formData.tanggal_kehadiran)}. Mohon lengkapi
             semua field bertanda{" "}
-            <span className="required-asterisk-info">*</span>.
+            <span className={styles.requiredAsteriskInfo}>*</span>.{" "}
+            {/* Ganti di sini */}
           </p>
         </div>
 
-        {/* Progress Bar (pastikan ada styling di Form.css) */}
-        <div className="progress-bar-container">
+        <div className={styles.progressBarContainer}>
+          {" "}
+          {/* Ganti di sini */}
           <div
-            className="progress-bar-fill"
+            className={styles.progressBarFill} // Ganti di sini
             style={{ width: `${((formStep - 1) / (totalSteps - 1)) * 100}%` }}
           ></div>
-          <div className="progress-steps">
+          <div className={styles.progressSteps}>
+            {" "}
+            {/* Ganti di sini */}
             <div
-              className={`progress-step ${formStep >= 1 ? "active" : ""} ${
-                formStep === 1 ? "current" : ""
-              }`}
+              className={`${styles.progressStep} ${
+                formStep >= 1 ? styles.active : ""
+              } ${formStep === 1 ? styles.current : ""}`}
             >
-              <div className="step-dot">1</div>
-              <div className="step-label">Informasi Pribadi</div>
+              <div className={styles.stepDot}>1</div> {/* Ganti di sini */}
+              <div className={styles.stepLabel}>Informasi Pribadi</div>{" "}
+              {/* Ganti di sini */}
             </div>
             <div
-              className={`progress-step ${formStep >= 2 ? "active" : ""} ${
-                formStep === 2 ? "current" : ""
-              }`}
+              className={`${styles.progressStep} ${
+                formStep >= 2 ? styles.active : ""
+              } ${formStep === 2 ? styles.current : ""}`}
             >
-              <div className="step-dot">2</div>
-              <div className="step-label">Detail Kunjungan</div>
+              <div className={styles.stepDot}>2</div> {/* Ganti di sini */}
+              <div className={styles.stepLabel}>Detail Kunjungan</div>{" "}
+              {/* Ganti di sini */}
             </div>
           </div>
         </div>
 
-        {/* Ganti semua class form-tamu-ms-* dengan class yang ada di Form.css Anda jika berbeda */}
-        <div className="form-content">
+        <div className={styles.formContent}>
+          {" "}
+          {/* Ganti di sini */}
           {formStep === 1 && (
-            <div className="form-step active-step">
+            <div className={`${styles.formStep} ${styles.activeStep}`}>
               {" "}
-              {/* Tambah class 'form-step' jika perlu untuk styling step */}
-              <div className="form-section">
-                <h3 className="section-title">Informasi Pribadi</h3>
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label htmlFor="nama_lengkap" className="required">
+              {/* Ganti di sini */}
+              <div className={styles.formSection}>
+                {" "}
+                {/* Ganti di sini */}
+                <h3 className={styles.sectionTitle}>Informasi Pribadi</h3>{" "}
+                {/* Ganti di sini */}
+                <div className={styles.formGrid}>
+                  {" "}
+                  {/* Ganti di sini */}
+                  <div className={styles.formGroup}>
+                    {" "}
+                    {/* Ganti di sini */}
+                    <label htmlFor="nama_lengkap" className={styles.required}>
+                      {" "}
+                      {/* Ganti di sini */}
                       Nama Lengkap
                     </label>
                     <input
@@ -330,8 +360,12 @@ const FormTamu = () => {
                       placeholder="Masukkan nama lengkap Anda"
                     />
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="jenis_kelamin" className="required">
+                  <div className={styles.formGroup}>
+                    {" "}
+                    {/* Ganti di sini */}
+                    <label htmlFor="jenis_kelamin" className={styles.required}>
+                      {" "}
+                      {/* Ganti di sini */}
                       Jenis Kelamin
                     </label>
                     <select
@@ -346,7 +380,9 @@ const FormTamu = () => {
                       <option value="Perempuan">Perempuan</option>
                     </select>
                   </div>
-                  <div className="form-group">
+                  <div className={styles.formGroup}>
+                    {" "}
+                    {/* Ganti di sini */}
                     <label htmlFor="email">Email</label>
                     <input
                       id="email"
@@ -357,8 +393,12 @@ const FormTamu = () => {
                       placeholder="contoh@email.com (opsional)"
                     />
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="no_hp" className="required">
+                  <div className={styles.formGroup}>
+                    {" "}
+                    {/* Ganti di sini */}
+                    <label htmlFor="no_hp" className={styles.required}>
+                      {" "}
+                      {/* Ganti di sini */}
                       No. Handphone
                     </label>
                     <input
@@ -373,7 +413,9 @@ const FormTamu = () => {
                       placeholder="08xxxxxxxxxx"
                     />
                   </div>
-                  <div className="form-group">
+                  <div className={styles.formGroup}>
+                    {" "}
+                    {/* Ganti di sini */}
                     <label htmlFor="pekerjaan">Pekerjaan / Instansi</label>
                     <input
                       id="pekerjaan"
@@ -384,22 +426,33 @@ const FormTamu = () => {
                       placeholder="Mahasiswa, PNS, Swasta, dll."
                     />
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="tanggal_kehadiran" className="required">
+                  <div className={styles.formGroup}>
+                    {" "}
+                    {/* Ganti di sini */}
+                    <label
+                      htmlFor="tanggal_kehadiran"
+                      className={styles.required}
+                    >
+                      {" "}
+                      {/* Ganti di sini */}
                       Tanggal Kedatangan
                     </label>
                     <input
                       id="tanggal_kehadiran"
                       type="date"
                       name="tanggal_kehadiran"
-                      value={formData.tanggal_kehadiran} // value untuk input type="date" adalah YYYY-MM-DD
+                      value={formData.tanggal_kehadiran}
                       required
                       onChange={handleChange}
-                      className="date-input"
+                      className={styles.dateInput} // Ganti di sini jika ada class khusus
                     />
                   </div>
-                  <div className="form-group full-span">
-                    <label htmlFor="alamat" className="required">
+                  <div className={`${styles.formGroup} ${styles.fullSpan}`}>
+                    {" "}
+                    {/* Ganti di sini */}
+                    <label htmlFor="alamat" className={styles.required}>
+                      {" "}
+                      {/* Ganti di sini */}
                       Alamat
                     </label>
                     <textarea
@@ -414,17 +467,19 @@ const FormTamu = () => {
                   </div>
                 </div>
               </div>
-              <div className="form-actions">
+              <div className={styles.formActions}>
+                {" "}
+                {/* Ganti di sini */}
                 <button
                   type="button"
                   onClick={handleFormReset}
-                  className="btn btn-secondary"
+                  className={`${styles.btn} ${styles.btnSecondary}`} // Ganti di sini
                 >
                   Reset Form
                 </button>
                 <button
                   onClick={goToNextStep}
-                  className="btn btn-primary"
+                  className={`${styles.btn} ${styles.btnPrimary}`} // Ganti di sini
                   type="button"
                 >
                   Lanjutkan
@@ -432,18 +487,26 @@ const FormTamu = () => {
               </div>
             </div>
           )}
-
           {formStep === 2 && (
-            <div className="form-step active-step">
+            <div className={`${styles.formStep} ${styles.activeStep}`}>
               {" "}
-              {/* Tambah class 'form-step' jika perlu */}
-              <div className="form-section">
-                <h3 className="section-title">Detail Kunjungan</h3>
-                <div className="form-grid single-column-grid">
+              {/* Ganti di sini */}
+              <div className={styles.formSection}>
+                {" "}
+                {/* Ganti di sini */}
+                <h3 className={styles.sectionTitle}>Detail Kunjungan</h3>{" "}
+                {/* Ganti di sini */}
+                <div
+                  className={`${styles.formGrid} ${styles.singleColumnGrid}`}
+                >
                   {" "}
-                  {/* Atau .form-grid jika ingin 2 kolom */}
-                  <div className="form-group">
-                    <label htmlFor="keperluan" className="required">
+                  {/* Ganti di sini */}
+                  <div className={styles.formGroup}>
+                    {" "}
+                    {/* Ganti di sini */}
+                    <label htmlFor="keperluan" className={styles.required}>
+                      {" "}
+                      {/* Ganti di sini */}
                       Keperluan Utama
                     </label>
                     <select
@@ -463,7 +526,9 @@ const FormTamu = () => {
                       <option value="tamu_umum">Tamu Umum Lainnya</option>
                     </select>
                   </div>
-                  <div className="form-group">
+                  <div className={styles.formGroup}>
+                    {" "}
+                    {/* Ganti di sini */}
                     <label htmlFor="dituju">Bertemu Dengan (Seksi/Staff)</label>
                     <input
                       id="dituju"
@@ -475,17 +540,20 @@ const FormTamu = () => {
                     />
                   </div>
                 </div>
-
                 {formData.keperluan === "mitra_statistik" && (
-                  <div className="form-sub-section active">
+                  <div className={`${styles.formSubSection} ${styles.active}`}>
                     {" "}
-                    {/* Gunakan class dari CSS Anda jika berbeda */}
+                    {/* Ganti di sini */}
                     <h4>Detail Kegiatan Mitra Statistik</h4>
-                    <div className="form-group full-span">
+                    <div className={`${styles.formGroup} ${styles.fullSpan}`}>
+                      {" "}
+                      {/* Ganti di sini */}
                       <label
                         htmlFor="tujuan_kunjungan_mitra"
-                        className="required"
+                        className={styles.required}
                       >
+                        {" "}
+                        {/* Ganti di sini */}
                         Tujuan Kunjungan Mitra
                       </label>
                       <textarea
@@ -501,12 +569,19 @@ const FormTamu = () => {
                   </div>
                 )}
                 {formData.keperluan === "konsultasi_statistik" && (
-                  <div className="form-sub-section active">
+                  <div className={`${styles.formSubSection} ${styles.active}`}>
+                    {" "}
+                    {/* Ganti di sini */}
                     <h4>Detail Konsultasi Statistik</h4>
-                    <div className="form-group">
+                    <div className={styles.formGroup}>
                       {" "}
-                      {/* Dibuat tidak full-span agar bisa sejajar jika ada field lain di CSS grid */}
-                      <label htmlFor="topik_konsultasi" className="required">
+                      {/* Ganti di sini, tidak perlu fullSpan jika ingin 2 kolom di sub-section */}
+                      <label
+                        htmlFor="topik_konsultasi"
+                        className={styles.required}
+                      >
+                        {" "}
+                        {/* Ganti di sini */}
                         Topik Konsultasi
                       </label>
                       <input
@@ -519,8 +594,15 @@ const FormTamu = () => {
                         placeholder="Contoh: Data PDRB, Inflasi"
                       />
                     </div>
-                    <div className="form-group full-span">
-                      <label htmlFor="deskripsi_kebutuhan" className="required">
+                    <div className={`${styles.formGroup} ${styles.fullSpan}`}>
+                      {" "}
+                      {/* Ganti di sini */}
+                      <label
+                        htmlFor="deskripsi_kebutuhan"
+                        className={styles.required}
+                      >
+                        {" "}
+                        {/* Ganti di sini */}
                         Deskripsi Kebutuhan Data/Konsultasi
                       </label>
                       <textarea
@@ -536,13 +618,19 @@ const FormTamu = () => {
                   </div>
                 )}
                 {formData.keperluan === "tamu_umum" && (
-                  <div className="form-sub-section active">
+                  <div className={`${styles.formSubSection} ${styles.active}`}>
+                    {" "}
+                    {/* Ganti di sini */}
                     <h4>Detail Kunjungan Umum</h4>
-                    <div className="form-group full-span">
+                    <div className={`${styles.formGroup} ${styles.fullSpan}`}>
+                      {" "}
+                      {/* Ganti di sini */}
                       <label
                         htmlFor="tujuan_kunjungan_umum"
-                        className="required"
+                        className={styles.required}
                       >
+                        {" "}
+                        {/* Ganti di sini */}
                         Tujuan Kunjungan Umum
                       </label>
                       <textarea
@@ -558,18 +646,22 @@ const FormTamu = () => {
                   </div>
                 )}
               </div>
-              <div className="form-actions space-between">
+              <div className={`${styles.formActions} ${styles.spaceBetween}`}>
+                {" "}
+                {/* Ganti di sini */}
                 <button
                   type="button"
                   onClick={goToPrevStep}
-                  className="btn btn-outline"
+                  className={`${styles.btn} ${styles.btnOutline}`} // Ganti di sini
                 >
                   Kembali
                 </button>
-                <div className="action-right">
+                <div className={styles.actionRight}>
+                  {" "}
+                  {/* Ganti di sini */}
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className={`${styles.btn} ${styles.btnSecondary}`} // Ganti di sini
                     style={{ marginRight: "0.5rem" }}
                     onClick={() => {
                       if (
@@ -590,7 +682,7 @@ const FormTamu = () => {
                   </button>
                   <button
                     type="submit"
-                    className="btn btn-primary"
+                    className={`${styles.btn} ${styles.btnPrimary}`} // Ganti di sini
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? "Mengirim..." : "Kirim Registrasi"}

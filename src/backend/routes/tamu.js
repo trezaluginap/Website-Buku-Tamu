@@ -2,10 +2,12 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
-const { formatInTimeZone } = require('date-fns-tz'); // Untuk format ke string WIB
-const { parseISO, isValid: isValidDate, getUTCFullYear, getUTCMonth, getUTCDate } = require('date-fns'); // Untuk parsing dan validasi
+// const multer = require("multer"); // Uncomment jika Anda akan implementasi upload file
+// const path = require("path");
 
-// GET /api/tamu
+// ... (Konfigurasi Multer jika ada, bisa sama seperti sebelumnya) ...
+
+// GET /api/tamu - Ambil semua data tamu
 router.get("/", (req, res) => {
   const sql = "SELECT * FROM tamu ORDER BY tanggal_kehadiran DESC, id DESC";
   db.query(sql, (err, results) => {
@@ -19,18 +21,26 @@ router.get("/", (req, res) => {
   });
 });
 
-// GET /api/tamu/:id
+// GET /api/tamu/:id - Ambil data tamu spesifik
 router.get("/:id", (req, res) => {
   const guestId = req.params.id;
   const sql = "SELECT * FROM tamu WHERE id = ?";
   db.query(sql, [guestId], (err, results) => {
     if (err) {
-      console.error(`❌ BACKEND: Gagal mengambil data tamu dengan ID ${guestId}:`, err);
-      return res.status(500).json({ error: "Gagal mengambil data tamu dari database" });
+      console.error(
+        `❌ BACKEND: Gagal mengambil data tamu dengan ID ${guestId}:`,
+        err
+      );
+      return res.status(500).json({
+        error: "Gagal mengambil data tamu dari database",
+        detail: err.message,
+      });
     }
     if (results.length === 0) {
       console.log(`BACKEND: Tamu dengan ID ${guestId} tidak ditemukan.`);
-      return res.status(404).json({ message: `Data tamu dengan ID ${guestId} tidak ditemukan` });
+      return res
+        .status(404)
+        .json({ message: `Data tamu dengan ID ${guestId} tidak ditemukan` });
     }
     console.log(`BACKEND: Tamu dengan ID ${guestId} ditemukan:`, results[0]);
     res.json(results[0]);
@@ -39,230 +49,341 @@ router.get("/:id", (req, res) => {
 
 // POST /api/tamu - Menyimpan data tamu baru
 router.post("/", (req, res) => {
-  console.log("[POST /api/tamu] DATA DITERIMA (req.body):", JSON.stringify(req.body, null, 2));
-  const newGuestData = { ...req.body, status: req.body.status || "Belum Diproses" };
+  const newGuestData = { ...req.body };
+  console.log(
+    "✔️ BACKEND: Menerima data POST /api/tamu:",
+    JSON.stringify(newGuestData, null, 2)
+  );
+
+  const jam_submit_data = new Date();
+
   const {
-    nama_lengkap, jenis_kelamin, email, no_hp, pekerjaan, alamat, keperluan,
-    staff, dituju, tanggal_kehadiran: tanggalKehadiranInputString,
-    status, tujuan_kunjungan, topik_konsultasi, deskripsi_kebutuhan,
-    diterima_oleh, isi_pertemuan, dokumentasi,
+    nama_lengkap,
+    jenis_kelamin,
+    email,
+    no_hp,
+    pekerjaan,
+    alamat,
+    keperluan,
+    staff,
+    dituju,
+    tanggal_kehadiran,
+    tujuan_kunjungan,
+    topik_konsultasi,
+    deskripsi_kebutuhan,
   } = newGuestData;
 
-  console.log("[POST /api/tamu] NILAI SETELAH DESTRUCTURING:", {
-    nama_lengkap, jenis_kelamin, email, no_hp, pekerjaan, alamat, keperluan,
-    staff, dituju, tanggalKehadiranInputString, status, tujuan_kunjungan,
-    topik_konsultasi, deskripsi_kebutuhan, diterima_oleh, isi_pertemuan, dokumentasi
-  });
+  const status = newGuestData.status || "Belum Diproses";
 
-  if (!nama_lengkap || !jenis_kelamin || !keperluan || !tanggalKehadiranInputString) {
-    console.warn("[POST /api/tamu] Validasi gagal: Data wajib tidak lengkap.");
+  if (
+    !nama_lengkap ||
+    !jenis_kelamin ||
+    !keperluan ||
+    !tanggal_kehadiran ||
+    !alamat ||
+    !no_hp
+  ) {
+    console.error(
+      "❌ BACKEND: Data POST tidak lengkap. Wajib: Nama, JK, Keperluan, Tgl Kehadiran, Alamat, No HP.",
+      newGuestData
+    );
     return res.status(400).json({
-      error: "Data wajib (Nama, Jenis Kelamin, Keperluan, Tanggal Kehadiran) tidak lengkap.",
+      error:
+        "Data wajib (Nama, Jenis Kelamin, No HP, Alamat, Keperluan, Tanggal Kehadiran) tidak lengkap.",
     });
   }
 
-  const targetTimeZone = 'Asia/Jakarta';
-  let datePartFromForm_YYYY_MM_DD;
-
+  let validatedDateKehadiran;
   try {
-    let year, month, day;
-    if (/^\d{4}-\d{2}-\d{2}$/.test(tanggalKehadiranInputString)) {
-        const parsed = parseISO(tanggalKehadiranInputString);
-        if (isValidDate(parsed)) {
-            year = parsed.getUTCFullYear(); // Sebaiknya gunakan getFullYear jika input dianggap local date
-            month = parsed.getUTCMonth() + 1; // getMonth jika input dianggap local date
-            day = parsed.getUTCDate();       // getDate jika input dianggap local date
-        }
-    } else {
-        const parts = String(tanggalKehadiranInputString).split('/'); // Pastikan ini string
-        if (parts.length === 3 && parts.every(p => /^\d+$/.test(p))) {
-            const d = parseInt(parts[0]);
-            const m = parseInt(parts[1]);
-            const y = parseInt(parts[2]);
-            if (y > 1900 && y < 2100 && m >= 1 && m <= 12 && d >= 1 && d <= 31) { // Validasi sederhana
-                year = y; month = m; day = d;
-            }
-        }
+    const d = new Date(tanggal_kehadiran);
+    if (isNaN(d.getTime())) {
+      throw new Error(
+        `Format tanggal tidak valid setelah parsing: ${tanggal_kehadiran}`
+      );
     }
-    if (!year || !month || !day) throw new Error("Format tanggal input tidak dikenali atau tidak valid.");
-    datePartFromForm_YYYY_MM_DD = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    console.log("[DEBUG] Date part from form (YYYY-MM-DD):", datePartFromForm_YYYY_MM_DD);
+    validatedDateKehadiran = d;
   } catch (e) {
-    console.error("BACKEND: Error parsing tanggal_kehadiranInputString:", tanggalKehadiranInputString, e);
-    return res.status(400).json({ error: "Format Tanggal Kedatangan tidak valid. Gunakan YYYY-MM-DD atau DD/MM/YYYY." });
+    console.error(
+      "❌ BACKEND: Error parsing tanggal_kehadiran dari frontend:",
+      tanggal_kehadiran,
+      e
+    );
+    return res.status(400).json({
+      error: "Format tanggal kehadiran tidak valid.",
+      detail: e.message,
+    });
   }
-
-  let currentTimeString_HH_MM_SS_WIB;
-  try {
-    currentTimeString_HH_MM_SS_WIB = formatInTimeZone(new Date(), targetTimeZone, 'HH:mm:ss');
-    console.log("[DEBUG] Current time string in WIB (HH:mm:ss):", currentTimeString_HH_MM_SS_WIB);
-  } catch(e) {
-    console.error("BACKEND: Error formatting current time in WIB:", e);
-    return res.status(500).json({ error: "Gagal mendapatkan waktu server saat ini." });
-  }
-  
-  const finalDateTimeStringForDB_WIB = `${datePartFromForm_YYYY_MM_DD} ${currentTimeString_HH_MM_SS_WIB}`;
-  console.log("BACKEND: Final DateTime string untuk SQL (WIB wall clock):", finalDateTimeStringForDB_WIB);
 
   // --- PERBAIKAN SQL QUERY ---
   // Hapus komentar JavaScript (//) dari dalam string SQL.
   // Jika ingin memberi catatan, gunakan komentar SQL /* ... */ atau letakkan di luar string.
   const sql = `
-    INSERT INTO tamu 
-    (nama_lengkap, jenis_kelamin, email, no_hp, pekerjaan, alamat, keperluan, 
-     staff, dituju, tanggal_kehadiran, status, tujuan_kunjungan, 
-     topik_konsultasi, deskripsi_kebutuhan, diterima_oleh, isi_pertemuan, dokumentasi) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO tamu (
+      nama_lengkap, jenis_kelamin, email, no_hp, pekerjaan, alamat, keperluan, 
+      staff, dituju, tanggal_kehadiran, status, 
+      tujuan_kunjungan, topik_konsultasi, deskripsi_kebutuhan, 
+      jam_submit_data
+      /* Kolom yang tidak disebutkan di sini dan nullable 
+         akan otomatis diisi NULL oleh database atau nilai defaultnya. */
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
-  
-  const values = [
-    nama_lengkap, jenis_kelamin, email || null, no_hp || null, pekerjaan || null, alamat || null, keperluan,
-    staff || null, dituju || null, finalDateTimeStringForDB_WIB, 
-    status, tujuan_kunjungan || null, topik_konsultasi || null, deskripsi_kebutuhan || null,
-    diterima_oleh || null, isi_pertemuan || null, dokumentasi || null,
-  ];
+  // Jumlah kolom di atas adalah 15, jadi 15 placeholder '?'.
 
-  console.log("[POST /api/tamu] VALUES UNTUK SQL:", values);
-  console.log("[POST /api/tamu] SQL QUERY:", sql);
+  const values = [
+    nama_lengkap,
+    jenis_kelamin,
+    email || null,
+    no_hp,
+    pekerjaan || null,
+    alamat,
+    keperluan,
+    staff || null,
+    dituju || null,
+    validatedDateKehadiran,
+    status,
+    keperluan === "mitra_statistik" || keperluan === "tamu_umum"
+      ? tujuan_kunjungan || null
+      : null,
+    keperluan === "konsultasi_statistik" ? topik_konsultasi || null : null,
+    keperluan === "konsultasi_statistik" ? deskripsi_kebutuhan || null : null,
+    jam_submit_data,
+  ];
+  // Pastikan array 'values' ini memiliki 15 item.
+
+  console.log(
+    "✔️ BACKEND: Values yang akan diinsert ke DB:",
+    JSON.stringify(values, null, 2)
+  );
 
   db.query(sql, values, (err, result) => {
     if (err) {
-      console.error("❌ BACKEND: Gagal menyimpan data tamu baru:", err);
-      if (err.code === "ER_DUP_ENTRY") { return res.status(409).json({ error: "Data duplikat ditemukan", detail: err.sqlMessage });}
-      else if (err.code === "ER_NO_REFERENCED_ROW_2") { return res.status(400).json({ error: "Referensi foreign key tidak valid",detail: err.sqlMessage,});}
-      else if (err.code === "ER_DATA_TOO_LONG") { return res.status(400).json({ error: "Data terlalu panjang untuk kolom", detail: err.sqlMessage,});}
-      else if (err.code === 'ER_TRUNCATED_WRONG_VALUE_FOR_FIELD' || err.message.includes('datetime')) {
-          console.error("Detail error SQL: Kemungkinan format datetime tidak sesuai dengan kolom database tamu.");
-          return res.status(500).json({ error: "Gagal menyimpan data tamu (masalah format tanggal)", detail: err.message });
-      }
-      return res.status(500).json({ error: "Gagal menyimpan data tamu", detail: err.message });
+      console.error("❌ BACKEND: Gagal menyimpan data tamu baru ke DB:", err);
+      return res.status(500).json({
+        error: "Gagal menyimpan data tamu ke database.",
+        detail: err.message,
+        sqlState: err.sqlState,
+        sqlMessage: err.sqlMessage, // Ini penting untuk debug
+      });
     }
-    console.log("BACKEND: Data tamu baru berhasil disimpan, ID:", result.insertId);
-    res.status(201).json({
-        message: "Data tamu berhasil disimpan!",
-        id: result.insertId,
-        status: status, // Mengembalikan status yang disimpan
-        tanggalKehadiranTersimpan: finalDateTimeStringForDB_WIB 
-    });
+    console.log(
+      "✔️ BACKEND: Data tamu baru berhasil disimpan, ID:",
+      result.insertId
+    );
+    db.query(
+      "SELECT * FROM tamu WHERE id = ?",
+      [result.insertId],
+      (errSelect, newGuestArray) => {
+        if (errSelect || newGuestArray.length === 0) {
+          console.error(
+            "❌ BACKEND: Gagal mengambil data tamu setelah insert:",
+            errSelect
+          );
+          return res.status(201).json({
+            message:
+              "Data tamu berhasil disimpan! (Gagal mengambil data terbaru setelah penyimpanan)",
+            id: result.insertId,
+            status: status,
+          });
+        }
+        res.status(201).json({
+          message: "Data tamu berhasil disimpan!",
+          id: result.insertId,
+          guest: newGuestArray[0],
+        });
+      }
+    );
   });
 });
 
-// PUT /api/tamu/:id
+// ... (kode PUT dan DELETE Anda) ...
 router.put("/:id", (req, res) => {
   const guestId = req.params.id;
-  const receivedFields = req.body; 
+  const receivedFields = req.body;
+  const currentTime = new Date();
 
-  console.log(`[PUT /api/tamu/${guestId}] DATA DITERIMA (req.body):`, JSON.stringify(receivedFields, null, 2));
+  console.log(`✔️ BACKEND: Menerima permintaan PUT untuk /api/tamu/${guestId}`);
+  console.log(
+    "✔️ BACKEND: Data yang diterima (req.body) untuk diupdate:",
+    JSON.stringify(receivedFields, null, 2)
+  );
 
-  const allowedFieldsToUpdate = [ // Pastikan "jam_tindak_lanjut" ada di sini
-    "nama_lengkap", "jenis_kelamin", "email", "no_hp", "pekerjaan", 
-    "alamat", "keperluan", "staff", "dituju", "tanggal_kehadiran", 
-    "status", "tujuan_kunjungan", "topik_konsultasi", "deskripsi_kebutuhan", 
-    "diterima_oleh", "isi_pertemuan", "dokumentasi", "jam_tindak_lanjut" 
-  ];
+  const selectSql = "SELECT * FROM tamu WHERE id = ?";
+  db.query(selectSql, [guestId], (errFetch, currentResults) => {
+    if (errFetch) {
+      console.error(
+        `❌ BACKEND: Gagal mengambil data tamu ID ${guestId} sebelum update:`,
+        errFetch
+      );
+      return res.status(500).json({
+        error: "Gagal memproses update (fetch awal).",
+        detail: errFetch.message,
+      });
+    }
+    if (currentResults.length === 0) {
+      return res
+        .status(404)
+        .json({ error: `Data tamu ID ${guestId} tidak ditemukan.` });
+    }
+    const currentGuest = currentResults[0];
 
-  const fieldsToSet = [];
-  const valuesForUpdate = []; 
+    const fieldsToUpdate = {};
+    const allowedFieldsToUpdate = [
+      "nama_lengkap",
+      "jenis_kelamin",
+      "email",
+      "no_hp",
+      "pekerjaan",
+      "alamat",
+      "keperluan",
+      "staff",
+      "dituju",
+      "tanggal_kehadiran",
+      "status",
+      "tujuan_kunjungan",
+      "topik_konsultasi",
+      "deskripsi_kebutuhan",
+      "diterima_oleh",
+      "isi_pertemuan",
+      "dokumentasi",
+    ];
 
-  allowedFieldsToUpdate.forEach((field) => {
-    if (receivedFields.hasOwnProperty(field)) { 
-      fieldsToSet.push(`\`${field}\` = ?`); 
-
-      if (field === "tanggal_kehadiran" && receivedFields[field]) {
-        let dateToStore;
-        try {
-          const parsedDate = parseISO(receivedFields[field]); // Coba parse sebagai ISO string
-          if (isValidDate(parsedDate)) {
-      
-            dateToStore = receivedFields[field]; // Asumsikan format sudah oke atau MySQL bisa handle
-            // Jika HANYA tanggal: dateToStore = parsedDate.toISOString().split("T")[0]; 
-          } else {
-            // Fallback jika parseISO gagal tapi mungkin formatnya YYYY-MM-DD manual
-            if (/^\d{4}-\d{2}-\d{2}$/.test(receivedFields[field])) {
-                dateToStore = receivedFields[field];
-            } else {
-                throw new Error('Invalid date string for tanggal_kehadiran update');
-            }
+    allowedFieldsToUpdate.forEach((field) => {
+      if (receivedFields.hasOwnProperty(field)) {
+        if (field === "tanggal_kehadiran" && receivedFields[field]) {
+          try {
+            const d = new Date(receivedFields[field]);
+            if (isNaN(d.getTime()))
+              throw new Error("Format tanggal tidak valid saat update");
+            fieldsToUpdate[field] = d;
+          } catch (e) {
+            console.warn(
+              `⚠️ BACKEND: Format tanggal_kehadiran diabaikan saat update karena tidak valid: ${receivedFields[field]}`
+            );
           }
-        } catch (dateError) {
-          console.warn(`BACKEND (PUT): Format tanggal tidak valid untuk ${field}: ${receivedFields[field]}. Menggunakan nilai null.`);
-          dateToStore = null; 
+        } else {
+          fieldsToUpdate[field] =
+            receivedFields[field] === "" || receivedFields[field] === undefined
+              ? null
+              : receivedFields[field];
         }
-        valuesForUpdate.push(dateToStore);
-      } else {
-        // Untuk semua field lain, termasuk jam_tindak_lanjut
-        // Jika frontend mengirim string ISO timestamp untuk jam_tindak_lanjut, itu akan masuk sini
-        valuesForUpdate.push(
-          (receivedFields[field] === "" || receivedFields[field] === undefined) && field !== 'status'
-            ? null
-            : receivedFields[field]
-        );
       }
-    }
-  });
-  
-  console.log(`[PUT /api/tamu/${guestId}] FIELDS TO SET: [${fieldsToSet.join(", ")}]`);
-  console.log(`[PUT /api/tamu/${guestId}] VALUES FOR UPDATE:`, valuesForUpdate);
-
-
-  if (fieldsToSet.length === 0) {
-    console.log(`[PUT /api/tamu/${guestId}] Tidak ada field valid yang dikirim untuk diupdate.`);
-    // Mengembalikan data tamu saat ini tanpa melakukan update jika tidak ada field yang valid
-    // atau bisa juga dianggap sebagai sukses jika memang tidak ada yang perlu diubah.
-    // Untuk konsistensi, kita ambil data terbaru saja.
-    db.query("SELECT * FROM tamu WHERE id = ?", [guestId], (errSelect, currentGuest) => {
-        if (errSelect || currentGuest.length === 0) {
-          return res.status(404).json({ message: "Data tamu tidak ditemukan (saat mencoba mengembalikan data tanpa update)." });
-        }
-        return res.json({ message: "Tidak ada perubahan data.", guest: currentGuest[0] });
     });
-    return; // Hentikan eksekusi lebih lanjut
-  }
 
-  valuesForUpdate.push(guestId); // Tambahkan guestId untuk klausa WHERE
-  const sql = `UPDATE tamu SET ${fieldsToSet.join(", ")} WHERE id = ?`;
+    if (
+      !currentGuest.jam_diterima &&
+      (fieldsToUpdate.status === "Diproses" ||
+        (fieldsToUpdate.diterima_oleh &&
+          fieldsToUpdate.diterima_oleh !== currentGuest.diterima_oleh))
+    ) {
+      fieldsToUpdate.jam_diterima = currentTime;
+      console.log(`✔️ BACKEND: jam_diterima di-set untuk ID ${guestId}`);
+    }
+    if (
+      !currentGuest.jam_selesai_tindak_lanjut &&
+      fieldsToUpdate.status === "Selesai"
+    ) {
+      fieldsToUpdate.jam_selesai_tindak_lanjut = currentTime;
+      console.log(
+        `✔️ BACKEND: jam_selesai_tindak_lanjut di-set untuk ID ${guestId}`
+      );
+    }
 
-  console.log("BACKEND (PUT): SQL Update Query:", sql);
-  console.log("BACKEND (PUT): SQL Values:", valuesForUpdate);
-  
-  db.query(sql, valuesForUpdate, (err, result) => {
-    if (err) {
-      console.error(`❌ BACKEND: Gagal update tamu ID ${guestId}:`, err);
-      // Tambahkan penanganan error spesifik jika ada
-      if (err.code === 'ER_TRUNCATED_WRONG_VALUE_FOR_FIELD' || err.message.includes('datetime')) {
-        console.error("Detail error SQL: Kemungkinan format datetime (tanggal_kehadiran atau jam_tindak_lanjut) tidak sesuai dengan kolom database tamu.");
-        return res.status(500).json({ error: "Gagal mengupdate data tamu (masalah format tanggal)", detail: err.message });
+    if (fieldsToUpdate.hasOwnProperty("keperluan")) {
+      if (fieldsToUpdate.keperluan === "konsultasi_statistik") {
+        if (!fieldsToUpdate.hasOwnProperty("tujuan_kunjungan"))
+          fieldsToUpdate.tujuan_kunjungan = null;
+      } else if (
+        fieldsToUpdate.keperluan === "mitra_statistik" ||
+        fieldsToUpdate.keperluan === "tamu_umum"
+      ) {
+        if (!fieldsToUpdate.hasOwnProperty("topik_konsultasi"))
+          fieldsToUpdate.topik_konsultasi = null;
+        if (!fieldsToUpdate.hasOwnProperty("deskripsi_kebutuhan"))
+          fieldsToUpdate.deskripsi_kebutuhan = null;
       }
-      return res.status(500).json({ error: "Gagal mengupdate data tamu.", detail: err.sqlMessage || err.message });
     }
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: `Tamu ID ${guestId} tidak ditemukan untuk diupdate.`});
+
+    const fieldEntries = Object.entries(fieldsToUpdate).filter(
+      ([key, value]) => value !== undefined
+    );
+
+    if (fieldEntries.length === 0) {
+      console.log(
+        "✔️ BACKEND: Tidak ada field yang perlu diupdate untuk ID:",
+        guestId
+      );
+      return res
+        .status(200)
+        .json({ message: "Tidak ada data yang diubah.", guest: currentGuest });
     }
-    // Ambil data terbaru setelah update untuk dikirim kembali
-    db.query("SELECT * FROM tamu WHERE id = ?", [guestId], (errSelect, updatedGuest) => {
-      if (errSelect || updatedGuest.length === 0) {
-        // Ini seharusnya tidak terjadi jika update berhasil pada baris yang ada
-        console.error(`❌ BACKEND: Gagal mengambil data tamu ID ${guestId} setelah update berhasil.`);
-        return res.json({ message: "Data tamu berhasil diperbarui (tetapi gagal mengambil data terbaru)." });
+
+    const setClauses = fieldEntries.map(([key]) => `\`${key}\` = ?`).join(", ");
+    const finalValues = fieldEntries.map(([, value]) => value);
+    finalValues.push(guestId);
+
+    const updateSql = `UPDATE tamu SET ${setClauses} WHERE id = ?`;
+    console.log("✔️ BACKEND: SQL Update Query:", updateSql);
+    console.log(
+      "✔️ BACKEND: Values untuk SQL Update:",
+      JSON.stringify(finalValues, null, 2)
+    );
+
+    db.query(updateSql, finalValues, (errUpdate, result) => {
+      if (errUpdate) {
+        console.error(
+          `❌ BACKEND: Gagal mengupdate data tamu ID ${guestId}:`,
+          errUpdate
+        );
+        return res.status(500).json({
+          error: "Gagal mengupdate data tamu di database.",
+          detail: errUpdate.sqlMessage || errUpdate.message,
+        });
       }
-      console.log(`BACKEND: Data tamu ID ${guestId} berhasil diupdate.`);
-      res.json({ message: "Data tamu berhasil diperbarui", guest: updatedGuest[0] });
+      if (result.affectedRows === 0) {
+        return res.status(404).json({
+          error: `Data tamu dengan ID ${guestId} tidak ditemukan saat mencoba update.`,
+        });
+      }
+      console.log(`✔️ BACKEND: Data tamu ID ${guestId} berhasil diupdate.`);
+      db.query(selectSql, [guestId], (errFetchAgain, updatedGuestResult) => {
+        if (errFetchAgain || updatedGuestResult.length === 0) {
+          console.error(
+            `❌ BACKEND: Gagal mengambil data tamu ID ${guestId} setelah update:`,
+            errFetchAgain
+          );
+          return res.status(200).json({
+            message:
+              "Data tamu berhasil diperbarui (gagal mengambil data terbaru setelah update).",
+            updated_id: guestId,
+          });
+        }
+        res.json({
+          message: "Data tamu berhasil diperbarui!",
+          guest: updatedGuestResult[0],
+        });
+      });
     });
   });
 });
 
-// DELETE /api/tamu/:id
 router.delete("/:id", (req, res) => {
   const guestId = req.params.id;
   console.log(`BACKEND: Menerima permintaan DELETE untuk /api/tamu/${guestId}`);
   const sql = "DELETE FROM tamu WHERE id = ?";
   db.query(sql, [guestId], (err, result) => {
     if (err) {
-      console.error(`❌ BACKEND: Gagal menghapus data tamu ID ${guestId}:`,err);
-      return res.status(500).json({ error: "Gagal menghapus data tamu" });
+      console.error(
+        `❌ BACKEND: Gagal menghapus data tamu ID ${guestId}:`,
+        err
+      );
+      return res
+        .status(500)
+        .json({ error: "Gagal menghapus data tamu", detail: err.message });
     }
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: `Data tamu dengan ID ${guestId} tidak ditemukan untuk dihapus`});
+      return res.status(404).json({
+        error: `Data tamu dengan ID ${guestId} tidak ditemukan untuk dihapus`,
+      });
     }
     console.log(`BACKEND: Data tamu ID ${guestId} berhasil dihapus.`);
     res.json({ message: "Data tamu berhasil dihapus" });

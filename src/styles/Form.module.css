@@ -1,0 +1,821 @@
+/* src/styles/Form.module.css */
+
+/* ===== GLOBAL VARIABLES ===== */
+/* Variabel ini akan di-scope ke module ini atau bisa juga Anda letakkan di file CSS global seperti index.css jika ingin digunakan di banyak tempat */
+:root {
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  
+  --primary-color: #667eea;
+  --secondary-color: #764ba2;
+  --accent-color: #f093fb;
+  --success-color: #00f2fe; /* Digunakan untuk .btnSuccess */
+  --danger-color: #fa709a;
+  --warning-color: #fee140;
+  
+  --text-primary: #2d3748;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
+  --text-light: #a0aec0;
+  
+  --bg-primary: #ffffff;
+  --bg-secondary: #f7fafc;
+  --bg-tertiary: #edf2f7;
+  --bg-glass: rgba(255, 255, 255, 0.25);
+  --bg-overlay: rgba(0, 0, 0, 0.1);
+  
+  --border-light: #e2e8f0;
+  --border-medium: #cbd5e0;
+  --border-dark: #a0aec0;
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 0 20px rgba(102, 126, 234, 0.3);
+  
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  
+  --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== MAIN CONTAINER ===== */
+.formContainer { /* Sesuai dengan className={styles.formContainer} */
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: var(--transition-slow);
+  /* Background gradient dipindahkan ke body di global CSS atau di sini jika hanya untuk container ini */
+  background: var(--background); 
+}
+
+.formContainer.loaded { /* Sesuai dengan className={`${styles.formContainer} ${isLoaded ? styles.loaded : ""}`} */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.formContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 40% 70%, rgba(240, 147, 251, 0.1) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0; /* Pastikan di bawah form */
+}
+
+/* ===== FORM STYLING ===== */
+.guestRegistrationForm { /* Sesuai dengan className={styles.guestRegistrationForm} */
+  width: 100%;
+  max-width: 800px;
+  background: white;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px); /* Safari support */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl), var(--shadow-glow);
+  position: relative;
+  overflow: hidden;
+  z-index: 1; /* Pastikan di atas pseudo-element container */
+}
+
+.guestRegistrationForm::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-gradient);
+}
+
+/* ===== FORM HEADER ===== */
+.formHeader {
+  text-align: center;
+  padding: 2.5rem 2rem 1.5rem;
+  background: #27548A;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.logoContainer {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.bpsLogo {
+  height: 80px;
+  width: auto;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+  transition: var(--transition-smooth);
+}
+
+.bpsLogo:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15));
+}
+
+.formHeader h2 { /* Ini akan di-scope oleh .formHeader otomatis jika tidak ada h2 lain */
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: white;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.formDescription {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 400;
+  margin-bottom: 0;
+}
+
+.requiredAsteriskInfo {
+  color: var(--danger-color);
+  font-weight: 600;
+}
+
+/* ===== PROGRESS BAR ===== */
+.progressBarContainer {
+  padding: 2rem;
+  background: #27548A;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+
+
+.progressSteps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.progressSteps::before {
+  content: '';
+  position: absolute;
+  top: 20px; /* Sesuaikan dengan ukuran .stepDot */
+  left: 20px; /* Setengah ukuran .stepDot */
+  right: 20px; /* Setengah ukuran .stepDot */
+  height: 2px;
+  background: white;
+  z-index: 1;
+}
+
+.progressStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.stepDot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  color: d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+  border: white;
+  transition: var(--transition-smooth);
+  margin-bottom: 0.5rem;
+}
+
+.progressStep.active .stepDot {
+  background: var(--success-gradient);
+  color: white;
+  border-color: red;
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+  transform: scale(1.1);
+}
+
+.progressStep.current .stepDot {
+  background: white;
+  color: black;
+  border-color: blue;
+  box-shadow: 0 0 15px rgba(102, 126, 234, 0.4);
+  animation: pulse 2s infinite; /* Pastikan @keyframes pulse ada di file ini */
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1.1); }
+  50% { transform: scale(1.2); }
+}
+
+.stepLabel {
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
+  transition: var(--transition-smooth);
+}
+
+.progressStep.active .stepLabel,
+.progressStep.current .stepLabel {
+  color: white; /* Atau var(--text-primary) jika lebih kontras di mode gelap */
+  font-weight: 600;
+}
+
+/* ===== FORM CONTENT ===== */
+.formContent {
+  padding: 2rem;
+}
+
+.formStep {
+  opacity: 0;
+  transform: translateX(30px);
+  transition: var(--transition-smooth);
+  display: none; /* Sembunyikan by default */
+}
+
+.formStep.activeStep { /* Untuk step yang aktif */
+  opacity: 1;
+  transform: translateX(0);
+  display: block; /* Tampilkan */
+}
+
+.formSection {
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--primary-color);
+  position: relative;
+}
+
+.sectionTitle::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; /* Tepat di atas border utama */
+  left: 0;
+  width: 50px;
+  height: 2px;
+  background: var(--accent-color);
+}
+
+/* ===== FORM GRID ===== */
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  /* margin-bottom: 2rem; Dihapus karena .formSection sudah punya margin-bottom */
+}
+
+.singleColumnGrid { /* class tambahan jika perlu 1 kolom saja */
+  grid-template-columns: 1fr;
+}
+
+.formGroup {
+  position: relative;
+}
+
+.formGroup.fullSpan { /* Class untuk elemen yang mengambil lebar penuh di grid */
+  grid-column: 1 / -1;
+}
+
+/* Styling untuk label, input, select, textarea di dalam form ini */
+.guestRegistrationForm label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  position: relative;
+}
+
+.guestRegistrationForm label.required::after {
+  content: '*';
+  color: var(--danger-color);
+  margin-left: 4px;
+  font-weight: 700;
+}
+
+.guestRegistrationForm input[type="text"],
+.guestRegistrationForm input[type="email"],
+.guestRegistrationForm input[type="tel"],
+.guestRegistrationForm input[type="date"],
+.guestRegistrationForm select,
+.guestRegistrationForm textarea {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.9);
+  transition: var(--transition-fast);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-sizing: border-box; /* Pastikan padding dan border termasuk dalam width/height */
+}
+
+.guestRegistrationForm input[type="text"]:focus,
+.guestRegistrationForm input[type="email"]:focus,
+.guestRegistrationForm input[type="tel"]:focus,
+.guestRegistrationForm input[type="date"]:focus,
+.guestRegistrationForm select:focus,
+.guestRegistrationForm textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1), var(--shadow-md);
+  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+}
+
+.guestRegistrationForm input[type="text"]:hover,
+.guestRegistrationForm input[type="email"]:hover,
+.guestRegistrationForm input[type="tel"]:hover,
+.guestRegistrationForm input[type="date"]:hover,
+.guestRegistrationForm select:hover,
+.guestRegistrationForm textarea:hover {
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-sm);
+}
+
+.guestRegistrationForm ::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.guestRegistrationForm textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit; /* Ambil font dari body atau container */
+}
+
+.guestRegistrationForm select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem; /* Ruang untuk arrow */
+  appearance: none; /* Hapus default appearance */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* ===== DATE INPUT STYLING ===== */
+.dateInput { /* Sesuai dengan className={styles.dateInput} */
+  position: relative;
+}
+
+.dateInput::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+}
+
+
+/* ===== SUB SECTIONS ===== */
+.formSubSection {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: var(--transition-smooth);
+}
+
+.formSubSection.active { /* Untuk sub-section yang aktif/terlihat */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.formSubSection h4 { /* akan di-scope oleh .formSubSection */
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ===== FORM ACTIONS ===== */
+.formActions {
+  display: flex;
+  justify-content: flex-end; /* Default untuk step 1 */
+  align-items: center;
+  gap: 1rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 2rem;
+}
+
+.formActions.spaceBetween { /* Untuk step 2, space-between */
+  justify-content: space-between;
+}
+
+.actionRight { /* Untuk mengelompokkan tombol di kanan pada step 2 */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* jarak antar tombol di kanan */
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.875rem 2rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+  min-width: 120px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn::before { /* Efek hover */
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: var(--transition-smooth);
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+.btnPrimary {
+  background: #27548A;
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+.btnPrimary:active {
+  transform: translateY(0);
+}
+
+.btnSecondary {
+  background: green;
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+.btnSecondary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btnOutline {
+  background: transparent;
+  color: white; /* Pastikan kontras dengan background form */
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.btnOutline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.btnSuccess { /* jika Anda ingin tombol sukses yang berbeda */
+  background: var(--success-gradient);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+.btnSuccess:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important; /* Hentikan transform saat disabled */
+}
+.btn:disabled:hover::before {
+  left: -100% !important; /* Hentikan efek hover saat disabled */
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  .formContainer {
+    padding: 1rem 0.5rem;
+  }
+  .formHeader {
+    padding: 2rem 1.5rem 1rem;
+  }
+  .formHeader h2 {
+    font-size: 2rem;
+  }
+  .formContent {
+    padding: 1.5rem;
+  }
+  .progressBarContainer {
+    padding: 1.5rem;
+  }
+  .formGrid {
+    grid-template-columns: 1fr; /* Semua jadi 1 kolom */
+    gap: 1rem;
+  }
+  .formActions {
+    flex-direction: column;
+    gap: 1rem; /* Jarak antar tombol yang ditumpuk */
+  }
+  .formActions.spaceBetween {
+    flex-direction: column; /* Tetap kolom */
+  }
+  .actionRight {
+    width: 100%;
+    justify-content: center; /* Tombol di kanan jadi full width juga */
+    flex-direction: column; /* Tumpuk juga jika perlu */
+    gap: 1rem;
+  }
+  .btn { /* Semua tombol jadi full width */
+    width: 100%;
+    min-width: auto;
+  }
+  .progressSteps {
+    flex-direction: column; /* Progress steps jadi vertikal */
+    gap: 1rem;
+  }
+  .progressSteps::before { /* Garis horizontal dihilangkan di mobile */
+    display: none;
+  }
+  .stepDot {
+    margin-bottom: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .formHeader h2 {
+    font-size: 1.75rem;
+  }
+  .bpsLogo {
+    height: 60px;
+  }
+  .formContent { padding: 1rem; }
+  .progressBarContainer { padding: 1rem; }
+
+  .guestRegistrationForm input[type="text"],
+  .guestRegistrationForm input[type="email"],
+  .guestRegistrationForm input[type="tel"],
+  .guestRegistrationForm input[type="date"],
+  .guestRegistrationForm select,
+  .guestRegistrationForm textarea {
+    padding: 0.75rem;
+    font-size: 0.95rem; /* Sedikit kecilkan font input di mobile */
+  }
+  .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+  .guestRegistrationForm *, /* Target semua elemen di dalam form */
+  .guestRegistrationForm *::before,
+  .guestRegistrationForm *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    animation-delay: -0.01ms !important; /* Untuk mengatasi beberapa kasus */
+    transition-delay: -0.01ms !important;
+  }
+}
+
+/* ===== DARK MODE SUPPORT ===== */
+@media (prefers-color-scheme: dark) {
+  /* Anda bisa override variabel CSS di sini untuk dark mode */
+  /* Contoh:
+  :root { 
+    --text-primary: #f7fafc;
+    --bg-glass: rgba(0,0,0,0.3);
+  }
+  Atau scope ke .guestRegistrationForm jika variabel tidak di global :root
+  .guestRegistrationForm {
+    --text-primary: #f7fafc; 
+    --bg-glass: rgba(0,0,0,0.3);
+  }
+  */
+
+  .guestRegistrationForm {
+    background: rgba(0, 0, 0, 0.4); /* Latar form lebih gelap */
+    border-color: rgba(255, 255, 255, 0.1); /* Border lebih soft */
+  }
+
+  /* Pastikan variabel :root di atas sudah didefinisikan atau definisikan ulang di sini untuk dark mode */
+  .guestRegistrationForm label,
+  .guestRegistrationForm .sectionTitle,
+  .guestRegistrationForm .formSubSection h4 {
+    color: #f7fafc; /* Contoh warna teks primer untuk dark mode */
+  }
+  .guestRegistrationForm .formHeader h2 {
+    background: linear-gradient(135deg, #e2e8f0 0%, #b3c5d8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+   .guestRegistrationForm .formDescription {
+    color: #cbd5e0; /* Contoh warna teks sekunder untuk dark mode */
+  }
+
+  .guestRegistrationForm input[type="text"],
+  .guestRegistrationForm input[type="email"],
+  .guestRegistrationForm input[type="tel"],
+  .guestRegistrationForm input[type="date"],
+  .guestRegistrationForm select,
+  .guestRegistrationForm textarea {
+    background: rgba(0, 0, 0, 0.3);
+    color: #f7fafc;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .guestRegistrationForm input[type="text"]:focus,
+  .guestRegistrationForm input[type="email"]:focus,
+  .guestRegistrationForm input[type="tel"]:focus,
+  .guestRegistrationForm input[type="date"]:focus,
+  .guestRegistrationForm select:focus,
+  .guestRegistrationForm textarea:focus {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: var(--primary-color); /* Tetap gunakan primary color untuk focus */
+  }
+  
+  .guestRegistrationForm ::placeholder {
+    color: #a0aec0; /* Warna placeholder lebih terang */
+  }
+
+  .guestRegistrationForm .btnOutline {
+    color: #f7fafc; /* Warna teks tombol outline lebih terang */
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+  .guestRegistrationForm .btnOutline:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.7);
+  }
+
+  .progressBarContainer, .formHeader, .formSubSection {
+      background: rgba(0,0,0,0.15);
+      border-bottom-color: rgba(255,255,255,0.1) !important; /* Ensure specificity for border */
+      border-color: rgba(255,255,255,0.1) !important; /* For formSubSection */
+  }
+   .stepDot {
+      background: rgba(255,255,255,0.1);
+      color: #a0aec0;
+      border-color: rgba(255,255,255,0.2);
+  }
+   .stepLabel {
+      color: #a0aec0;
+  }
+  .progressStep.active .stepLabel,
+  .progressStep.current .stepLabel {
+      color: #f7fafc;
+  }
+
+}
+
+/* ===== ENHANCED FOCUS STYLES ===== */
+/* Ini bisa global atau di-scope juga */
+.guestRegistrationForm .btn:focus-visible,
+.guestRegistrationForm input:focus-visible,
+.guestRegistrationForm select:focus-visible,
+.guestRegistrationForm textarea:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* ===== SUCCESS/ERROR STATES for form groups (jika digunakan) ===== */
+.formGroup.success input, /* className={`${styles.formGroup} ${isSuccess ? styles.success : ""}`} */
+.formGroup.success select,
+.formGroup.success textarea {
+  border-color: var(--success-color) !important; /* Use important to override default if needed */
+  box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.1) !important;
+}
+
+.formGroup.error input,
+.formGroup.error select,
+.formGroup.error textarea {
+  border-color: var(--danger-color) !important;
+  box-shadow: 0 0 0 3px rgba(250, 112, 154, 0.1) !important;
+}
+
+.errorMessage { /* Untuk pesan error di bawah input */
+  color: var(--danger-color);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* ===== TOOLTIP STYLES (jika digunakan) ===== */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 200px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1000;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px; /* Setengah dari width */
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.875rem;
+}
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Scrollbar styling is inherently global-like. 
+    CSS Modules might not scope it as expected, or it might need :global() wrapper.
+    It's often better in a true global CSS file (e.g., index.css or App.css) */
+:global(::-webkit-scrollbar) {
+  width: 8px;
+}
+:global(::-webkit-scrollbar-track) {
+  background: rgba(255, 255, 255, 0.1); /* Mungkin perlu disesuaikan untuk dark mode juga */
+  border-radius: 4px;
+}
+:global(::-webkit-scrollbar-thumb) {
+  background: var(--primary-gradient);
+  border-radius: 4px;
+}
+:global(::-webkit-scrollbar-thumb:hover) {
+  background: var(--secondary-gradient);
+}
+
+/* Aturan font family dan reset dasar sebaiknya ada di file CSS global (misal: src/index.css) */
+/* Contoh untuk src/index.css atau file global lainnya:
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.6;
+  color: var(--text-primary); // Variabel text-primary harus didefinisikan global juga jika dipakai di body
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); // Pindahkan dari .formContainer ke body
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+*/
