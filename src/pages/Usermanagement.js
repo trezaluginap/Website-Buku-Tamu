@@ -5,8 +5,7 @@ import "../styles/userManagement.css"; // CSS utama Anda
 import "../styles/sidebar.css"; // CSS untuk Sidebar itu sendiri
 import LogoBps from "../assets/BPS.png"; // Logo sudah diimpor dengan benar
 
-// const API_URL = "http://localhost:5000/api/users"; // Pastikan URL API Anda benar
-// Untuk pengujian tanpa backend, Anda bisa menggunakan data dummy:
+// Fungsi untuk menghasilkan data dummy jika API tidak tersedia
 const generateDummyUsers = (count) => {
   const dummies = [];
   for (let i = 1; i <= count; i++) {
@@ -34,33 +33,82 @@ const UserManagement = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Default sidebar bisa true jika ingin terbuka awalnya
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
+  // Inisialisasi state loggedInUser dengan NIP juga
+  const [loggedInUser, setLoggedInUser] = useState({ 
+    username: "Memuat...", 
+    name: "Memuat...", 
+    nip: "Memuat...", // Tambahkan NIP
+    role: "..." 
+  });
+
+  // Efek untuk mengambil data pengguna yang login dari localStorage saat komponen dimuat
+  useEffect(() => {
+    console.log("Mencoba mengambil data pengguna dari localStorage...");
+    const userDataString = localStorage.getItem('currentUser'); 
+    console.log("Data string dari localStorage ('currentUser'):", userDataString);
+
+    if (userDataString) {
+      try {
+        const userData = JSON.parse(userDataString);
+        console.log("Data pengguna setelah di-parse:", userData);
+
+        // Pastikan userData memiliki properti yang benar
+        // Sesuaikan nama properti (misal: userData.employeeNip jika backend mengirim itu)
+        if (userData && (userData.username || userData.name)) { 
+          setLoggedInUser({
+            username: userData.username || "N/A", 
+            name: userData.name || userData.username || "Pengguna", 
+            nip: userData.nip || "NIP Tidak Ada", // Ambil NIP, beri fallback
+            role: userData.role || "Role Tidak Diketahui" 
+          });
+          console.log("State loggedInUser berhasil diupdate:", {
+            username: userData.username || "N/A",
+            name: userData.name || userData.username || "Pengguna",
+            nip: userData.nip || "NIP Tidak Ada",
+            role: userData.role || "Role Tidak Diketahui"
+          });
+        } else {
+          console.warn("Data pengguna di localStorage ('currentUser') tidak memiliki properti 'username' atau 'name' yang diharapkan.");
+          setLoggedInUser({ username: "Pengguna", name: "Pengguna", nip: "N/A", role: "Role Default" });
+        }
+      } catch (e) {
+        console.error("Gagal mem-parse data pengguna dari localStorage ('currentUser'):", e);
+        setLoggedInUser({ username: "Error Parse", name: "Error Parse", nip: "Error", role: "Error" });
+      }
+    } else {
+      console.warn("Tidak ada data pengguna yang login (key 'currentUser' tidak ditemukan di localStorage).");
+      setLoggedInUser({ username: "Belum Login", name: "Belum Login", nip: "N/A", role: "Guest" });
+    }
+  }, []);
+
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  // Gunakan URL API Anda jika backend sudah siap
   const API_URL = "http://localhost:5000/api/users";
 
   const fetchUsers = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(API_URL);
-      if (!response.ok) {
-        // Jika fetch gagal, coba tampilkan data dummy untuk pengembangan
-        console.warn(`HTTP error! Status: ${response.status}. Falling back to dummy data.`);
-        setUsers(generateDummyUsers(5)); // Tampilkan 5 user dummy
-        // throw new Error(`HTTP error! Status: ${response.status}`); // Komentari ini jika ingin fallback ke dummy
-        return; // Hentikan eksekusi jika fallback ke dummy
+      let dataToSet = generateDummyUsers(3); 
+      if (API_URL) { 
+          const response = await fetch(API_URL);
+          if (response.ok) {
+            dataToSet = await response.json();
+          } else {
+            console.warn(`HTTP error! Status: ${response.status}. Falling back to dummy data.`);
+          }
+      } else {
+          console.warn("API_URL is not set. Using dummy data.");
       }
-      const data = await response.json();
-      setUsers(data);
+      setUsers(dataToSet);
     } catch (err) {
       console.error("❌ Failed to load user data:", err);
-      setError("Failed to load user data. Displaying dummy data instead.");
-      setUsers(generateDummyUsers(5)); // Tampilkan data dummy jika ada error fetch
+      setError("Gagal memuat data pengguna. Menampilkan data contoh.");
+      setUsers(generateDummyUsers(3));
     } finally {
       setIsLoading(false);
     }
@@ -77,9 +125,9 @@ const UserManagement = () => {
       name: user.name,
       nip: user.nip,
       username: user.username,
-      password: "", // Jangan pre-fill password
+      password: "", 
     });
-    setError(null); // Bersihkan error sebelumnya saat membuka modal
+    setError(null); 
     setShowModal(true);
   };
 
@@ -91,7 +139,7 @@ const UserManagement = () => {
       username: "",
       password: "",
     });
-    setError(null); // Bersihkan error sebelumnya saat membuka modal
+    setError(null); 
     setShowModal(true);
   };
 
@@ -102,19 +150,16 @@ const UserManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Hapus setError(null) di awal agar error dari validasi tetap tampil
-    // setError(null); 
-
-    // Validasi sederhana di frontend
+    
     if (!formData.name.trim() || !formData.nip.trim() || !formData.username.trim()) {
-        setError("Name, NIP, and Username are required.");
+        setError("Nama, NIP, dan Username wajib diisi.");
         return;
     }
-    if (!selectedUser && !formData.password.trim()) { // Password wajib hanya untuk user baru
-        setError("Password is required for new users.");
+    if (!selectedUser && !formData.password.trim()) {
+        setError("Password wajib diisi untuk pengguna baru.");
         return;
     }
-
+    setError(null); 
 
     try {
       let response;
@@ -139,36 +184,33 @@ const UserManagement = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: `HTTP error! Status: ${response.status}` }));
-        // Set error agar tampil di modal
-        setError(errorData.message || `Failed to save data. Status: ${response.status}`);
-        throw new Error(errorData.message || `Failed to save data. Status: ${response.status}`);
+        setError(errorData.message || `Gagal menyimpan data. Status: ${response.status}`);
+        return; 
       }
 
       fetchUsers();
       closeModal(); 
     } catch (err) {
       console.error("❌ Failed to save data:", err);
-      // Error sudah di-set di atas jika dari response.json(), 
-      // jadi tidak perlu setError lagi di sini kecuali untuk error network murni.
-      if (!error) { // Hanya set error jika belum ada error dari response
-        setError(`Failed to save data: ${err.message}`);
+      if (!error && !(err.message.includes("Gagal menyimpan data"))) { 
+        setError(`Gagal menyimpan data: ${err.message}`);
       }
     }
   };
 
   const handleDelete = async (userId) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
+    if (window.confirm("Apakah Anda yakin ingin menghapus pengguna ini?")) {
       setError(null);
       try {
         const response = await fetch(`${API_URL}/${userId}`, { method: "DELETE" });
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ message: `HTTP error! Status: ${response.status}` }));
-          throw new Error(errorData.message || `Failed to delete user. Status: ${response.status}`);
+          throw new Error(errorData.message || `Gagal menghapus pengguna. Status: ${response.status}`);
         }
         fetchUsers();
       } catch (err) {
         console.error("❌ Failed to delete user:", err);
-        setError(`Failed to delete user: ${err.message}`);
+        setError(`Gagal menghapus pengguna: ${err.message}`);
       }
     }
   };
@@ -177,7 +219,7 @@ const UserManagement = () => {
     setShowModal(false);
     setSelectedUser(null);
     setFormData({ name: "", nip: "", username: "", password: "" });
-    setError(null); // Bersihkan error saat modal ditutup
+    setError(null); 
   };
 
   return (
@@ -187,7 +229,7 @@ const UserManagement = () => {
       <div className={`content-container ${isSidebarOpen ? "sidebar-open-active" : "sidebar-closed-active"}`}>
         <div className="dashboard-header">
           <div className="header-left-section">
-            <img src={LogoBps} alt="Logo BPS" className="app-logo" /> {/* Menggunakan LogoBps */}
+            <img src={LogoBps} alt="Logo BPS" className="app-logo" />
             <div className="app-info">
               <h1 className="app-title">AKU</h1>
               <h2 className="app-subtitle">Aplikasi Buku Tamu</h2>
@@ -195,16 +237,16 @@ const UserManagement = () => {
           </div>
           <div className="user-badge">
             <div className="user-avatar">
-        
+              <span>{loggedInUser.name ? loggedInUser.name.substring(0, 2).toUpperCase() : (loggedInUser.username ? loggedInUser.username.substring(0,2).toUpperCase() : "??")}</span>
             </div>
             <div className="user-details">
-              <span className="user-role">Faisal</span> {/* Ganti dengan role user */}
-              <span className="user-nip">NIP: 12345678</span> {/* Ganti dengan NIP user */}
+              <span className="user-role">{loggedInUser.name || loggedInUser.username}</span> 
+              {/* PERBAIKAN: Menampilkan NIP */}
+              <span className="user-nip">{loggedInUser.nip ? `NIP: ${loggedInUser.nip}` : "NIP: -"}</span>
             </div>
           </div>
         </div>
 
-        {/* Error message global (untuk fetch, delete) ditampilkan di luar card */}
         {error && !showModal && <div className="error-message">{error}</div>}
 
         <div className="content-card">
@@ -272,7 +314,6 @@ const UserManagement = () => {
                 </button>
               </div>
               <form onSubmit={handleSubmit}>
-                {/* Error message spesifik form ditampilkan di dalam modal */}
                 {error && <div className="error-message" style={{ margin: "0 0 16px 0" }}>{error}</div>}
                 
                 <div className="form-group">

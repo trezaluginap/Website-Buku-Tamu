@@ -59,6 +59,7 @@ a:hover {
   top: 0;
   z-index: 1020; 
   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Shadow sm */
+  height: 120px;
 }
 
 .header-inner {
@@ -104,10 +105,12 @@ a:hover {
 }
 
 .header-title {
-  font-size: 1.375rem; /* 22px */
+  font-size: 30px; /* 22px */    
   font-weight: 600;
   color: #212529; 
   margin: 0; 
+  justify-content: center;
+  align-items: center;
 }
 
 .header-right {

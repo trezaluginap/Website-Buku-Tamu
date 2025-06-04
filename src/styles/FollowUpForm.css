@@ -1,55 +1,11 @@
 /* src/styles/SharedFormStyles.css */
-/* Mengganti nama file agar lebih jelas bahwa ini bisa dipakai bersama */
-
-:root {
-  --primary-color: blue; /* Updated to a more modern blue */
-  --primary-hover-color: blue;
-  --primary-gradient-start: #667eea; /* Original gradient for header */
-  --primary-gradient-end: #764ba2;
-  --button-gradient-start: #3b82f6; /* Gradient for primary buttons */
-  --button-gradient-end: #1d4ed8;
-
-  --secondary-color: #64748b; /* Updated for better contrast */
-  --secondary-hover-color: #475569;
-  --secondary-background-hover: #e2e8f0; /* For secondary button hover bg */
-
-  --success-color: #16a34a;
-  --success-background: #f0fdf4;
-  --success-border: #bbf7d0;
-
-  --error-color: #dc2626;
-  --error-background: #fef2f2;
-  --error-border: #fecaca;
-  
-  --warning-color: #f59e0b; /* For warning states */
-  --warning-background: #fffbeb;
-  --warning-border: #fde68a;
-
-  --text-color: #1e293b; /* Darker text for better readability */
-  --text-color-light: #64748b; /* Lighter text for secondary info */
-  --border-color: #cbd5e1; /* Softer border color */
-  --background-light: #f8fafc; /* Page background */
-  --background-white: #ffffff;
-  
-  --shadow-light: rgba(0, 0, 0, 0.05);
-  --shadow-medium: rgba(0, 0, 0, 0.1);
-  --shadow-strong: rgba(0, 0, 0, 0.15);
-
-  --border-radius-sm: 4px;
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
-  --border-radius-xl: 16px; /* For larger cards/containers */
-
-  --spacing-unit: 1rem; /* 16px base */
-  --font-family-sans: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Define font stack */
-}
 
 /* --- Base Styles --- */
 body {
-  font-family: var(--font-family-sans);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
-  color: var(--text-color);
-  background-color: var(--background-light);
+  color: #1e293b; 
+  background-color: red; 
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
@@ -65,23 +21,23 @@ body {
 .main-content {
   flex: 1;
   transition: margin-left 0.3s ease-in-out;
-  padding: 0; /* Padding akan diatur oleh .edit-guest-form atau .follow-up-form */
+  padding: 0; 
   overflow-x: hidden;
-  display: flex; /* To allow centering of form wrapper if needed */
+  display: flex; 
   flex-direction: column;
 }
 
 .main-content.sidebar-open {
-  margin-left: 250px; /* Sesuaikan dengan lebar sidebar Anda */
+  margin-left: 250px; 
 }
 
 /* --- Form Page Wrapper (untuk EditGuestForm & FollowUpForm) --- */
-.edit-guest-form-page, /* Menggunakan nama yang lebih spesifik untuk wrapper halaman */
+.edit-guest-form-page, 
 .follow-up-form-page {
-  max-width: 1200px; /* Lebar maksimum konten form */
+  max-width: 1200px; 
   width: 100%;
-  margin: calc(var(--spacing-unit) * 2) auto; /* Jarak atas-bawah dan auto kiri-kanan */
-  padding: 0 var(--spacing-unit); /* Padding horizontal untuk layar kecil */
+  margin: 2rem auto; /* calc(1rem * 2) */
+  padding: 0 1rem; 
   box-sizing: border-box;
 }
 
@@ -91,22 +47,22 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 60vh; /* Ambil sebagian besar tinggi viewport */
-  gap: var(--spacing-unit);
-  color: var(--primary-color);
+  min-height: 60vh; 
+  gap: 1rem;
+  color: #667eea; 
 }
 
 .loading-spinner {
   width: 48px;
   height: 48px;
-  border: 4px solid var(--border-color);
-  border-top-color: var(--primary-color); /* Hanya top border yang berwarna */
+  border: 4px solid #cbd5e1; 
+  border-top-color: #667eea; 
   border-radius: 50%;
-  animation: spin 0.8s linear infinite; /* Percepat sedikit animasi */
+  animation: spin 0.8s linear infinite; 
 }
 
 .loading-spinner.small {
-  width: 20px; /* Sedikit lebih besar untuk visibilitas */
+  width: 20px; 
   height: 20px;
   border-width: 3px;
   margin-right: 0.5rem;
@@ -118,63 +74,59 @@ body {
 }
 
 /* --- Main Form Structure (Card) --- */
-/* .form-wrapper digunakan untuk membungkus header dan .form-container (konten) */
 .form-wrapper {
-  background-color: white;
-  border-radius: var(--border-radius-lg); /* Satu radius untuk keseluruhan card */
-  box-shadow: 0 8px 25px var(--shadow-medium);
-  overflow: hidden; /* Penting jika ada elemen anak yang 'bleed' */
+  background-color: #ffffff; 
+  border-radius: 12px; 
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); 
+  overflow: hidden; 
 }
 
 
 /* --- Form Header --- */
 .form-header {
-  background: #27548A;
-  color: var(--background-white);
-  padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2);
-  /* border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0; Dihapus, karena .form-wrapper sudah handle radius */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff; 
+  padding: 1.5rem 2rem; /* calc(1rem * 1.5) calc(1rem * 2) */
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* max-width: 1200px; Dihapus, biarkan .form-page-wrapper yang mengatur max-width */
-  /* margin: 0 auto; Dihapus */
 }
 
 .logo-title {
   display: flex;
   align-items: center;
-  gap: var(--spacing-unit);
+  gap: 1rem;
 }
 
 .bps-logo {
-  width: 60px; /* Ukuran konsisten */
+  width: 60px; 
   height: 60px;
   object-fit: contain;
-  padding: 0.5rem;
-  border-radius: var(--border-radius-md);
+  padding: 0.5rem; 
+  border-radius: 8px; 
 }
 
 .form-header h1 {
-  font-size: 1.8rem; /* Ukuran judul form */
-  font-weight: 600; /* Sedikit lebih ringan */
+  font-size: 1.8rem; 
+  font-weight: 600; 
   margin: 0;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 .back-btn {
-  background: white;
-  color: red;
-  border: black;
-  padding: 0.7rem 1.4rem; /* Padding disesuaikan */
-  border-radius: var(--border-radius-md);
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff; 
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 0.7rem 1.4rem; 
+  border-radius: 8px; 
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  text-decoration: none; /* Jika ini adalah link */
-  display: inline-flex; /* Agar bisa align-items */
+  text-decoration: none; 
+  display: inline-flex; 
   align-items: center;
   gap: 0.5rem;
 }
@@ -187,50 +139,50 @@ body {
 
 /* --- Guest Summary (Follow Up Form) --- */
 .guest-summary {
-  background: var(--background-light); /* Warna beda sedikit dari form utama */
-  padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2);
-  border-left: 5px solid var(--primary-color); /* Aksen border lebih tebal */
-  margin: calc(var(--spacing-unit) * 1.5) 0; /* Jarak atas bawah dari konten form */
-  border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
-  box-shadow: 0 2px 5px var(--shadow-light);
+  background: #f8fafc; 
+  padding: 1.5rem 2rem; /* calc(1rem * 1.5) calc(1rem * 2) */
+  border-left: 5px solid #667eea; 
+  margin: 1.5rem 0; /* calc(1rem * 1.5) */
+  border-radius: 0 8px 8px 0; 
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); 
 }
 
 .guest-summary h3 {
-  margin: 0 0 calc(var(--spacing-unit) * 1.2) 0;
-  color: var(--text-color);
-  font-size: 1.3rem; /* Sedikit lebih besar */
+  margin: 0 0 1.2rem 0; /* calc(1rem * 1.2) */
+  color: #1e293b; 
+  font-size: 1.3rem; 
   font-weight: 600;
 }
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Sedikit lebih kecil minmax */
-  gap: calc(var(--spacing-unit) * 1.25); /* Gap disesuaikan */
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+  gap: 1.25rem; /* calc(1rem * 1.25) */
 }
 
 .summary-item {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem; /* Gap antara label dan value */
+  gap: 0.3rem; 
 }
 
 .summary-label {
-  font-size: 0.8rem; /* Lebih kecil */
-  font-weight: 500; /* Tidak terlalu bold */
-  color: var(--text-color-light);
+  font-size: 0.8rem; 
+  font-weight: 500; 
+  color: #64748b; 
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .summary-value {
-  font-size: 0.95rem; /* Sedikit lebih kecil agar tidak mendominasi */
-  color: var(--text-color);
+  font-size: 0.95rem; 
+  color: #1e293b; 
   font-weight: 500;
 }
 
 /* --- Form Content Container (di dalam .form-wrapper) --- */
-.form-content-container { /* Mengganti .form-container yang ada di CSS Anda */
-  padding: calc(var(--spacing-unit) * 2); /* Padding untuk konten form */
+.form-content-container { 
+  padding: 2rem; /* calc(1rem * 2) */
 }
 
 /* --- Alert Messages --- */
@@ -238,77 +190,70 @@ body {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: var(--spacing-unit) calc(var(--spacing-unit) * 1.25);
-  margin-bottom: var(--spacing-unit); /* Jarak antar alert atau elemen lain */
-  border-radius: var(--border-radius-md);
+  padding: 1rem 1.25rem; /* var(--spacing-unit) calc(var(--spacing-unit) * 1.25) */
+  margin-bottom: 1rem; 
+  border-radius: 8px; 
   font-weight: 500;
-  border: 1px solid transparent; /* Base border */
+  border: 1px solid transparent; 
 }
 
 .alert-error {
-  background-color: var(--error-background);
-  color: var(--error-color);
-  border-color: var(--error-border);
+  background-color: #fef2f2; 
+  color: #dc2626; 
+  border-color: #fecaca; 
 }
 
 .alert-success {
-  background-color: var(--success-background);
-  color: var(--success-color);
-  border-color: var(--success-border);
+  background-color: #f0fdf4; 
+  color: #16a34a; 
+  border-color: #bbf7d0; 
 }
 
-.alert-warning { /* Tambahan untuk warning */
-    background-color: var(--warning-background);
-    color: var(--warning-color);
-    border-color: var(--warning-border);
+.alert-warning { 
+  background-color: #fffbeb; 
+  color: #f59e0b; 
+  border-color: #fde68a; 
 }
 
 .alert-icon {
-  font-size: 1.3rem; /* Icon sedikit lebih besar */
-  flex-shrink: 0; /* Agar icon tidak mengecil */
+  font-size: 1.3rem; 
+  flex-shrink: 0; 
 }
-
-/* --- Form Main Structure (guest-form & follow-up-form-content) --- */
-/* Kelas .guest-form dan .follow-up-form-content tidak lagi dibutuhkan jika struktur utama dihandle .form-content-container */
-/* Jika masih dipakai, pastikan paddingnya sesuai */
 
 /* Grid untuk fields */
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Minmax disesuaikan */
-  gap: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2); /* Row and column gap */
-  margin-bottom: calc(var(--spacing-unit) * 1.5);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+  gap: 1.5rem 2rem; /* calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2) */
+  margin-bottom: 1.5rem; /* calc(var(--spacing-unit) * 1.5) */
 }
 
 /* Section di dalam form (jika ada pengelompokan visual) */
 .form-section {
-  /* display: flex; flex-direction: column; gap: 1.5rem; */ /* Bisa diganti jika .form-grid sudah cukup */
-  margin-bottom: calc(var(--spacing-unit) * 2); /* Jarak antar seksi */
+  margin-bottom: 2rem; /* calc(var(--spacing-unit) * 2) */
 }
 .form-section:last-child {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
-
 
 .form-section.full-width {
   grid-column: 1 / -1;
 }
 
-.section-title { /* Untuk judul di dalam .form-section */
+.section-title { 
   font-size: 1.3rem;
   font-weight: 600;
-  color: var(--text-color);
-  margin: 0 0 var(--spacing-unit) 0;
+  color: #1e293b; 
+  margin: 0 0 1rem 0;
   padding-bottom: 0.6rem;
-  border-bottom: 2px solid var(--primary-color); /* Aksen border lebih jelas */
+  border-bottom: 2px solid #667eea; 
   display: inline-block;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem; /* Jarak antara label dan input */
-  /* margin-bottom tidak lagi diperlukan jika .form-grid sudah punya gap */
+  gap: 0.4rem; 
 }
 
 .form-group.full-width {
@@ -316,74 +261,74 @@ body {
 }
 
 .form-label {
-  font-size: 0.9rem; /* Sedikit lebih besar */
-  font-weight: 500; /* Medium weight */
-  color: var(--text-color);
+  font-size: 0.9rem; 
+  font-weight: 500; 
+  color: #1e293b; 
   display: flex;
   align-items: center;
   gap: 0.3rem;
 }
 
 .required {
-  color: var(--error-color);
+  color: #dc2626; 
   font-weight: 700;
-  margin-left: 0.1rem; /* Sedikit spasi */
+  margin-left: 0.1rem; 
 }
 
 .form-input,
 .form-select,
 .form-textarea {
-  padding: 0.8rem 1rem; /* Padding konsisten */
-  border: 1px solid var(--border-color); /* Border lebih soft */
-  border-radius: var(--border-radius-md);
+  padding: 0.8rem 1rem; 
+  border: 1px solid #cbd5e1; 
+  border-radius: 8px; 
   font-size: 1rem;
-  color: var(--text-color);
-  background-color: var(--background-white);
+  color: #1e293b; 
+  background-color: #ffffff; 
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  width: 100%; /* Pastikan mengambil lebar penuh container */
+  width: 100%; 
   box-sizing: border-box;
+  min-height: 46px; 
 }
 
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); /* Glow lebih jelas */
-  /* transform: translateY(-1px); Dihapus, kadang mengganggu layout */
+  border-color: #667eea; 
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.25); 
 }
 
 .form-input:hover,
 .form-select:hover,
 .form-textarea:hover {
-  border-color: #a5b4fc; /* Warna hover lebih ke primary */
+  border-color: #667eea; 
 }
 
 .form-textarea {
   resize: vertical;
-  min-height: 120px; /* Textarea sedikit lebih tinggi */
+  min-height: 120px; 
   line-height: 1.5;
 }
 
 .form-select {
   cursor: pointer;
-  appearance: none; /* Hapus default arrow browser */
+  appearance: none; 
   -webkit-appearance: none;
   -moz-appearance: none;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
   background-position: right 0.8rem center;
   background-repeat: no-repeat;
-  background-size: 1.1rem; /* Ukuran arrow disesuaikan */
-  padding-right: 2.8rem; /* Padding kanan agar teks tidak tertutup arrow */
+  background-size: 1.1rem; 
+  padding-right: 2.8rem; 
 }
 
 /* --- File Upload --- */
 .file-upload-container {
   position: relative;
-  width: 100%;
+  width: 100%; 
 }
 
-.file-input { /* Sebaiknya tidak terlihat, kontrol lewat label */
+.file-input { 
   position: absolute;
   left: 0;
   top: 0;
@@ -391,209 +336,209 @@ body {
   width: 100%;
   height: 100%;
   cursor: pointer;
-  z-index: 10; /* Di atas .file-label */
+  z-index: 10; 
 }
 
-.file-label { /* Ini yang terlihat dan diklik */
+.file-label { 
   display: flex;
-  flex-direction: column; /* Icon di atas teks */
+  flex-direction: column; 
   align-items: center;
   justify-content: center;
-  gap: 0.5rem; /* Jarak icon dan teks */
-  padding: calc(var(--spacing-unit) * 1.5) var(--spacing-unit);
-  border: 2px dashed var(--border-color);
-  border-radius: var(--border-radius-md);
-  background: var(--background-light);
+  gap: 0.25rem; 
+  padding: 0.5rem 1rem; 
+  height: 46px; 
+  border: 2px dashed #cbd5e1; 
+  border-radius: 8px; 
+  background: #f8fafc; 
   cursor: pointer;
   transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
-  font-size: 0.95rem;
-  color: var(--text-color-light);
+  font-size: 0.9rem; 
+  color: #64748b; 
   text-align: center;
-  min-height: 100px; /* Tinggi minimal area upload */
+  box-sizing: border-box; 
+}
+.file-label small { 
+    font-size: 0.75rem;
+    line-height: 1.2;
 }
 
 .file-label:hover {
-  border-color: var(--primary-color);
-  background: #eff6ff; /* Sesuai warna primary-light */
-  color: var(--primary-color);
-}
-
-.file-icon {
-  font-size: 2rem; /* Icon lebih besar */
-  margin-bottom: 0.25rem; /* Jarak dari teks */
+  border-color: #667eea; 
+  background: #eff6ff; 
+  color: #667eea; 
 }
 
 .image-preview {
-  margin-top: var(--spacing-unit);
-  border-radius: var(--border-radius-md);
+  margin-top: 1rem;
+  border-radius: 8px; 
   overflow: hidden;
-  border: 1px solid var(--border-color); /* Border untuk preview */
-  display: inline-block; /* Agar pas dengan gambar */
-  background: var(--background-light); /* Background jika gambar tidak ada */
+  border: 1px solid #cbd5e1; 
+  display: inline-block; 
+  background: #f8fafc; 
 }
 
 .preview-image {
-  display: block; /* Hapus spasi bawah */
-  max-width: 250px; /* Ukuran preview disesuaikan */
+  display: block; 
+  max-width: 250px; 
   height: auto;
-  border-radius: var(--border-radius-md); /* Jika border preview tidak dipakai */
+  border-radius: 8px; 
 }
 
 /* --- Form Actions (Tombol Submit, Cancel, dll.) --- */
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: var(--spacing-unit);
-  padding-top: calc(var(--spacing-unit) * 1.5);
-  border-top: 1px solid var(--border-color);
-  margin-top: calc(var(--spacing-unit) * 2);
+  gap: 1rem;
+  padding-top: 1.5rem; /* calc(1rem * 1.5) */
+  border-top: 1px solid #cbd5e1; 
+  margin-top: 2rem; /* calc(1rem * 2) */
 }
 
 .btn {
-  padding: 0.8rem 1.8rem; /* Padding konsisten */
-  border-radius: var(--border-radius-md);
-  font-size: 0.95rem; /* Ukuran font tombol */
+  padding: 0.8rem 1.8rem; 
+  border-radius: 8px; 
+  font-size: 0.95rem; 
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  display: inline-flex; /* Agar bisa align icon + text */
+  display: inline-flex; 
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  min-width: 100px; /* Lebar minimal tombol */
+  min-width: 100px; 
   border: none;
-  text-decoration: none; /* Hapus underline jika tombol adalah link */
-  line-height: 1.5; /* Pastikan teks tidak terlalu rapat */
+  text-decoration: none; 
+  line-height: 1.5; 
 }
 
 .btn:disabled {
-  opacity: 0.5; /* Opacity lebih jelas untuk disabled */
+  opacity: 0.5; 
   cursor: not-allowed;
   transform: none !important;
   box-shadow: none !important;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--button-gradient-start) 0%, var(--button-gradient-end) 100%);
-  color: var(--background-white);
-  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25); /* Shadow lebih soft */
+  background: linear-gradient(135deg, #667eea 0%, #5a67d8 100%); 
+  color: #ffffff; 
+  box-shadow: 0 4px 10px rgba(102, 126, 234, 0.25); 
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px) scale(1.02); /* Efek hover lebih dinamis */
-  box-shadow: 0 6px 15px rgba(59, 130, 246, 0.35);
+  transform: translateY(-2px) scale(1.02); 
+  box-shadow: 0 6px 15px rgba(102, 126, 234, 0.35);
 }
 
 .btn-secondary {
-  background: var(--background-white);
-  color: var(--secondary-color);
-  border: 1px solid var(--border-color); /* Border lebih jelas untuk secondary */
+  background: #ffffff; 
+  color: #64748b; 
+  border: 1px solid #cbd5e1; 
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--secondary-background-hover);
-  border-color: var(--secondary-color); /* Border jadi lebih gelap saat hover */
+  background: #e2e8f0; 
+  border-color: #64748b; 
   transform: translateY(-1px);
-  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); */ /* Shadow bisa dihilangkan untuk secondary */
 }
 
 
 /* --- Responsive Design Adjustments --- */
-@media (max-width: 992px) { /* Tambah breakpoint untuk tablet landscape */
+@media (max-width: 992px) { 
     .form-grid {
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Minmax lebih kecil */
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
     }
 }
 
 @media (max-width: 768px) {
   .main-content.sidebar-open {
-    margin-left: 0; /* Sidebar mungkin overlay atau hilang di mobile */
+    margin-left: 0; 
   }
   
-  .edit-guest-form-page, /* Update nama kelas wrapper */
+  .edit-guest-form-page, 
   .follow-up-form-page {
-    margin-top: var(--spacing-unit);
-    margin-bottom: var(--spacing-unit);
-    padding: 0 calc(var(--spacing-unit) * 0.5); /* Padding lebih kecil */
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding: 0 0.5rem; /* calc(1rem * 0.5) */
   }
   
   .form-header {
-    padding: var(--spacing-unit);
-    /* border-radius: var(--border-radius-md) var(--border-radius-md) 0 0; */ /* Radius sesuai .form-wrapper */
+    padding: 1rem;
   }
   
   .header-content {
     flex-direction: column;
-    gap: 0.8rem; /* Gap lebih kecil */
+    gap: 0.8rem; 
     text-align: center;
   }
 
   .form-header h1 {
-    font-size: 1.4rem; /* Judul lebih kecil */
+    font-size: 1.4rem; 
   }
 
   .back-btn {
-      align-self: center; /* Tombol kembali di tengah jika header jadi column */
+      align-self: center; 
       margin-top: 0.5rem;
   }
   
   .form-grid {
-    grid-template-columns: 1fr; /* Semua jadi 1 kolom */
-    gap: var(--spacing-unit); /* Gap lebih kecil */
+    grid-template-columns: 1fr; 
+    gap: 1rem; 
   }
   
-  .form-content-container { /* Update padding */
-    padding: var(--spacing-unit);
+  .form-content-container { 
+    padding: 1rem;
   }
   
   .form-actions {
-    flex-direction: column-reverse; /* Tombol submit di atas tombol cancel */
+    flex-direction: column-reverse; 
     gap: 0.8rem;
   }
   
   .btn {
-    width: 100%; /* Tombol lebar penuh */
+    width: 100%; 
   }
   
   .guest-summary {
-    padding: var(--spacing-unit);
-    margin: var(--spacing-unit) 0; /* Jarak disesuaikan */
+    padding: 1rem;
+    margin: 1rem 0; 
   }
    .summary-grid {
     grid-template-columns: 1fr;
   }
+  .file-label {
+    height: auto; 
+    min-height: 60px; 
+    padding: 1rem; 
+  }
 }
 
 @media (max-width: 480px) {
-  /* .edit-guest-form-page, .follow-up-form-page sudah dihandle di 768px */
-  
   .form-header {
-    padding: var(--spacing-unit) 0.75rem;
+    padding: 1rem 0.75rem;
   }
    .form-header h1 {
     font-size: 1.3rem;
   }
   
   .form-content-container {
-    padding: var(--spacing-unit) 0.75rem;
+    padding: 1rem 0.75rem;
   }
   
   .alert {
-    margin: var(--spacing-unit) 0.75rem; /* Margin disesuaikan dengan padding container */
-    padding: 0.8rem var(--spacing-unit);
+    margin: 1rem 0.75rem; 
+    padding: 0.8rem 1rem;
     font-size: 0.9rem;
   }
   
   .bps-logo {
-    width: 60px; /* Logo lebih kecil */
+    width: 60px; 
     height: 60px;
     padding: 0.4rem;
   }
 }
 
 /* --- Animasi Tambahan (jika digunakan di JS) --- */
-/* .form-wrapper bisa jadi target animasi utama */
-.form-wrapper.animate-slideInUp { /* Contoh jika Anda menambahkan kelas ini via JS */
+.form-wrapper.animate-slideInUp { 
   animation: slideInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
 
@@ -608,26 +553,21 @@ body {
   }
 }
 
-/* .form-group bisa dianimasikan satu per satu jika diinginkan, tapi bisa berat */
-/* Saya akan hapus animasi per .form-group karena bisa mengganggu dan berat jika banyak field */
-/* Jika tetap ingin, pastikan selectornya benar dan delaynya diatur baik */
-
-
 /* --- Custom Scrollbar untuk Textarea --- */
 .form-textarea::-webkit-scrollbar {
   width: 8px;
 }
 
 .form-textarea::-webkit-scrollbar-track {
-  background: #e2e8f0; /* Warna track disesuaikan */
-  border-radius: var(--border-radius-sm);
+  background: #e2e8f0; 
+  border-radius: 4px; 
 }
 
 .form-textarea::-webkit-scrollbar-thumb {
-  background: var(--secondary-color);
-  border-radius: var(--border-radius-sm);
+  background: #64748b; 
+  border-radius: 4px; 
 }
 
 .form-textarea::-webkit-scrollbar-thumb:hover {
-  background: var(--secondary-hover-color);
+  background: #475569; 
 }
