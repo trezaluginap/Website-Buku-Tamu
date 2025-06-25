@@ -1,7 +1,9 @@
-// src/pages/FormTamu.js (Versi Multi-Step Disesuaikan & Dipercantik)
+// src/pages/FormTamu.js (Perubahan sangat minimal, fokus pada CSS)
 import React, { useState, useEffect, useCallback } from "react";
 import "../styles/Form.css"; // Pastikan Anda menyesuaikan CSS ini
 import BPSLogo from "../assets/BPS.png";
+// Jika Anda punya gambar latar belakang, import di sini:
+// import HeaderBackground from '../assets/form-header-bg.jpg'; // Contoh: Anda bisa menambahkannya
 
 const FormTamu = () => {
   const initialFormData = {
@@ -35,15 +37,14 @@ const FormTamu = () => {
   }, []);
 
   const handleChange = useCallback((e) => {
-    const { name, value } = e.target; // Hapus `files` karena tidak ada upload file di sini
+    const { name, value } = e.target;
 
     if (name === "keperluan") {
       setSelectedKeperluanUI(value);
       setFormData((prev) => ({
         ...prev,
         keperluan: value,
-        // Reset field terkait saat keperluan utama berubah
-        tujuan_kunjungan: "", // Selalu reset saat keperluan utama berubah
+        tujuan_kunjungan: "",
         topik_konsultasi: "",
         deskripsi_kebutuhan: "",
       }));
@@ -63,7 +64,7 @@ const FormTamu = () => {
     try {
       const payload = {
         ...formData,
-        tanggal_kehadiran: new Date().toISOString(), // Pastikan timestamp terkini
+        tanggal_kehadiran: new Date().toISOString(),
         status: "Belum Diproses",
       };
       console.log("Mengirim data (multi-step):", payload);
@@ -164,6 +165,8 @@ const FormTamu = () => {
             {formatDateForDisplay(new Date().toISOString())}. Mohon lengkapi
             semua field.
           </p>
+          {/* Jika ingin menambahkan elemen visual lain, bisa di sini */}
+          {/* <div className="header-visual"></div> */}
         </div>
 
         {/* Progress Bar */}
@@ -412,7 +415,7 @@ const FormTamu = () => {
               )}
             </div>
 
-            <div className="form-actions space-between">
+            <div className="form-actions">
               <button
                 type="button"
                 onClick={goToPrevStep}
@@ -422,7 +425,7 @@ const FormTamu = () => {
               </button>
               <div className="action-right">
                 <button
-                  type="button" // Ganti ke type="button" agar tidak submit form saat reset
+                  type="button"
                   className="btn btn-secondary"
                   onClick={() => {
                     if (window.confirm("Reset semua isian di step ini?")) {

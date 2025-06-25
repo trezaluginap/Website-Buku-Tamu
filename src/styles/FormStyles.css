@@ -1,161 +1,256 @@
 /* src/styles/Form.css */
 
 /* General Styling */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+body {
+    background-color: #eef2f6; /* Slightly softer background */
+    font-family: "Inter", "Segoe UI", 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-y: auto;
+}
+
 .form-container {
-  max-width: 800px; /* Batasi lebar formulir */
-  margin: 40px auto; /* Tengahkan formulir */
-  padding: 30px;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  transition: opacity 0.5s ease-in-out;
-  opacity: 0; /* Mulai tersembunyi untuk fade-in */
+    max-width: 850px; /* Slightly wider for more breathing room */
+    margin: 50px auto; /* More vertical margin */
+    padding: 35px; /* Slightly more padding */
+    background-color: #ffffff;
+    border-radius: 16px; /* Slightly more rounded corners */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1); /* Deeper, softer shadow */
+    transition: opacity 0.7s ease-in-out, transform 0.7s ease-in-out; /* Slightly longer transition */
+    opacity: 0;
+    transform: translateY(30px); /* More pronounced initial translateY */
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    position: relative; /* Needed for potential future absolute positioning children */
 }
 
 .form-container.loaded {
-  opacity: 1; /* Munculkan setelah dimuat */
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .guest-registration-form {
-  display: flex;
-  flex-direction: column;
-  gap: 25px; /* Jarak antar bagian form */
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* Slightly reduced gap for compactness */
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-right: 12px; /* Adjusted padding for scrollbar */
+    margin-right: -12px; /* Adjusted margin for scrollbar */
+}
+
+.guest-registration-form::-webkit-scrollbar {
+    width: 8px;
+}
+
+.guest-registration-form::-webkit-scrollbar-track {
+    background: #f8f9fa; /* Lighter track */
+    border-radius: 10px;
+}
+
+.guest-registration-form::-webkit-scrollbar-thumb {
+    background: #cdd4da; /* Softer thumb color */
+    border-radius: 10px;
+}
+
+.guest-registration-form::-webkit-scrollbar-thumb:hover {
+    background: #aab2b8; /* Darker on hover */
 }
 
 /* Header Section */
 .form-header {
-  text-align: center;
-  margin-bottom: 30px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 20px;
+    text-align: center;
+    margin-bottom: 45px; /* More space below header */
+    padding: 40px 20px 30px; /* Adjusted padding */
+
+    /* --- PENTING: Perbaiki Jalur Gambar di Bawah Ini --- */
+    background-image: url('../assets/latar.jpg'); /* Pastikan 'latar.jpg' adalah NAMA FILE ASLI Anda */
+    /* --- Akhir Perbaikan Jalur Gambar --- */
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: #ffffff;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); /* Stronger header shadow */
+    position: relative;
+    overflow: hidden;
+}
+
+/* Efek overlay untuk membuat teks lebih mudah dibaca di atas gambar */
+.form-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.55); /* Slightly darker overlay */
+    z-index: 0;
 }
 
 .logo-container {
-  margin-bottom: 15px;
+    margin-bottom: 25px;
+    position: relative;
+    z-index: 1;
 }
 
 .bps-logo {
-  width: 100px;
-  height: auto;
+    width: 130px; /* Slightly larger logo */
+    height: auto;
+    filter: drop-shadow(0 6px 15px rgba(255, 255, 255, 0.4)); /* More prominent drop shadow */
 }
 
 .form-header h2 {
-  color: #2c3e50;
-  font-size: 2.2em;
-  margin-bottom: 10px;
+    color: #ffffff;
+    font-size: 3em; /* Larger, more impactful title */
+    margin-bottom: 18px;
+    font-weight: 900; /* Bolder font weight */
+    letter-spacing: 1.2px;
+    text-shadow: 2px 3px 10px rgba(0, 0, 0, 0.4); /* Deeper text shadow */
+    position: relative;
+    z-index: 1;
 }
 
 .form-description {
-  color: #555;
-  font-size: 1.05em;
-  line-height: 1.5;
+    color: #e8e8e8; /* Slightly brighter description text */
+    font-size: 1.2em; /* Slightly larger description */
+    line-height: 1.8; /* Improved line height for readability */
+    max-width: 85%; /* Slightly narrower max-width */
+    margin: 0 auto;
+    font-weight: 300;
+    position: relative;
+    z-index: 1;
+    opacity: 0.95; /* Less transparent */
 }
 
 /* Progress Bar */
 .progress-bar-container {
-  width: 100%;
-  background-color: #e0e0e0;
-  border-radius: 10px;
-  height: 10px;
-  margin-bottom: 30px;
-  position: relative;
+    width: 100%;
+    background-color: #e3e6ea; /* Slightly darker background */
+    border-radius: 15px; /* More rounded progress bar */
+    height: 15px; /* Taller progress bar */
+    margin-bottom: 40px; /* More space below progress bar */
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle inner shadow */
 }
 
 .progress-bar-fill {
-  height: 100%;
-  background-color: #3498db; /* Warna biru cerah */
-  border-radius: 10px;
-  transition: width 0.5s ease-in-out;
+    height: 100%;
+    background: linear-gradient(to right, #3498db, #5dade2); /* Gradient fill */
+    border-radius: 15px;
+    transition: width 0.7s ease-in-out; /* Slightly longer transition */
+    box-shadow: 0 3px 10px rgba(52, 152, 219, 0.4); /* More pronounced shadow */
 }
 
 .progress-step-indicator {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  transform: translateY(-50%);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    pointer-events: none; /* Prevent dots from blocking clicks if any */
 }
 
 .step-dot {
-  width: 20px;
-  height: 20px;
-  background-color: #ccc;
-  border-radius: 50%;
-  transition: background-color 0.3s ease;
-  position: relative;
-  z-index: 1;
-  border: 3px solid #fff; /* Border putih agar lebih terlihat */
+    width: 28px; /* Larger dots */
+    height: 28px; /* Larger dots */
+    background-color: #bfc7cf; /* Softer inactive dot color */
+    border-radius: 50%;
+    transition: background-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
+    position: relative;
+    z-index: 2;
+    border: 5px solid #ffffff; /* Thicker white border */
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08); /* More defined outer shadow */
 }
 
 .step-dot.active {
-  background-color: #27ae60; /* Hijau saat aktif */
-  box-shadow: 0 0 0 4px rgba(39, 174, 96, 0.4); /* Efek cahaya */
+    background-color: #2ecc71; /* Brighter active color */
+    box-shadow: 0 0 0 6px rgba(46, 204, 113, 0.5), 0 0 15px rgba(46, 204, 113, 0.3); /* More vibrant shadow */
+    transform: scale(1.15); /* More pronounced scale effect */
 }
 
 .progress-labels {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 15px;
-  font-size: 0.9em;
-  color: #666;
-  font-weight: 500;
+    display: flex;
+    justify-content: space-around;
+    margin-top: 25px; /* More space above labels */
+    font-size: 1em; /* Slightly larger labels */
+    color: #495057;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 0.2px;
 }
 
 /* Form Content & Sections */
 .form-content {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
 }
 
 .form-content.active-step {
-  opacity: 1;
-  transform: translateY(0);
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .form-section {
-  background-color: #f9f9f9;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 25px;
-  margin-bottom: 30px;
+    background-color: #fcfcfc; /* Slightly brighter section background */
+    border: 1px solid #e0e6ed; /* Softer border */
+    border-radius: 12px; /* Slightly more rounded */
+    padding: 35px; /* More padding */
+    margin-bottom: 40px; /* More space below section */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06); /* Softer, slightly larger shadow */
 }
 
 .section-title {
-  color: #34495e;
-  font-size: 1.6em;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #3498db;
-  padding-bottom: 10px;
-  display: inline-block; /* Agar border-bottom tidak penuh */
+    color: #2c3e50; /* Darker, more prominent title color */
+    font-size: 2em; /* Larger title */
+    margin-bottom: 28px; /* More space below title */
+    border-bottom: 3px solid #3498db; /* Thicker border */
+    padding-bottom: 12px;
+    display: inline-block;
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
 .form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Slightly wider min column size */
+    gap: 30px; /* Increased gap */
 }
 
 .form-group {
-  margin-bottom: 15px; /* Jarak antar group */
+    margin-bottom: 20px;
 }
 
 .form-group label {
-  display: block;
-  margin-bottom: 8px;
-  color: #333;
-  font-weight: 600;
-  font-size: 0.95em;
+    display: block;
+    margin-bottom: 10px;
+    color: #343a40;
+    font-weight: 600;
+    font-size: 1.05em; /* Slightly larger label font */
 }
 
 .form-group label.required::after {
-  content: " *";
-  color: #e74c3c;
-  margin-left: 4px;
+    content: " *";
+    color: #e74c3c;
+    margin-left: 4px;
+    font-weight: bold;
 }
 
 .form-group input[type="text"],
@@ -163,144 +258,294 @@
 .form-group input[type="tel"],
 .form-group select,
 .form-group textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1em;
-  box-sizing: border-box; /* Pastikan padding tidak menambah lebar */
-  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    width: 100%;
+    padding: 15px; /* Slightly more padding */
+    border: 1px solid #d9dde3; /* Softer border color */
+    border-radius: 10px; /* More rounded inputs */
+    font-size: 1.05em; /* Slightly larger input font */
+    box-sizing: border-box;
+    transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  border-color: #3498db;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
-  outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 5px rgba(52, 152, 219, 0.4); /* More prominent focus shadow */
+    outline: none;
 }
 
 .form-group textarea {
-  resize: vertical;
-  min-height: 80px;
+    resize: vertical;
+    min-height: 100px; /* Slightly taller textarea */
 }
 
 .form-group .date-fixed {
-  background-color: #f0f0f0;
-  cursor: not-allowed;
-  color: #666;
+    background-color: #f2f4f6; /* Slightly softer fixed date background */
+    cursor: not-allowed;
+    color: #7b848c; /* Slightly darker fixed date text */
+    font-weight: 500;
+    border: 1px dashed #cdd4db; /* Softer dashed border */
 }
 
 .form-group.full-span {
-  grid-column: 1 / -1; /* Mengambil seluruh lebar di grid */
+    grid-column: 1 / -1;
+}
+
+/* Styling for error messages */
+.error-message {
+    color: #e74c3c;
+    font-size: 0.9em; /* Slightly larger error message */
+    margin-top: 8px; /* More space above error message */
+    margin-bottom: 0;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Styling for error inputs */
+.form-group input.input-error,
+.form-group select.input-error,
+.form-group textarea.input-error {
+    border-color: #e74c3c;
+    box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.3); /* More pronounced error shadow */
 }
 
 /* Sub-sections (for dynamic fields) */
 .form-sub-section {
-  background-color: #ecf0f1; /* Warna latar belakang sedikit berbeda */
-  border-left: 4px solid #3498db; /* Garis vertikal biru */
-  border-radius: 8px;
-  padding: 20px;
-  margin-top: 25px;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+    background-color: #f7fbff; /* Lighter blue background */
+    border-left: 6px solid #3498db; /* Thicker left border */
+    border-radius: 12px; /* Slightly more rounded */
+    padding: 30px; /* More padding */
+    margin-top: 35px; /* More space above sub-section */
+    opacity: 0;
+    transform: translateY(20px); /* More pronounced initial translateY */
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.05); /* Slightly deeper inner shadow */
 }
 
 .form-sub-section.active {
-  opacity: 1;
-  transform: translateY(0);
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .form-sub-section h4 {
-  color: #2980b9;
-  font-size: 1.3em;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px dashed #aed6f1;
+    color: #2980b9;
+    font-size: 1.5em; /* Slightly larger sub-section title */
+    margin-bottom: 20px; /* More space below title */
+    padding-bottom: 12px;
+    border-bottom: 1px dashed #c0e0f8; /* Softer dashed border */
+    font-weight: 600;
+    letter-spacing: 0.2px;
 }
 
 /* Action Buttons */
 .form-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between; /* Ini kunci untuk memisahkan tombol di desktop */
+    align-items: center; /* Menjajarkan item secara vertikal di tengah jika tingginya berbeda */
+    margin-top: 40px; /* More space above buttons */
+    padding-top: 30px; /* More padding above border */
+    border-top: 1px solid #e9ecef; /* Softer border */
+    flex-wrap: wrap; /* Memungkinkan wrap pada layar yang lebih kecil */
+    gap: 20px; /* Jarak antar grup tombol */
 }
 
 .action-right {
-  display: flex;
-  gap: 15px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    /* justify-content: flex-end; -- Tidak perlu di sini karena parent (form-actions) sudah menggunakan space-between */
 }
 
 .btn {
-  padding: 12px 25px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1em;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-  font-weight: 600;
-  text-transform: uppercase;
+    padding: 15px 35px; /* More padding for buttons */
+    border: none;
+    border-radius: 10px; /* More rounded buttons */
+    font-size: 1.1em; /* Slightly larger font */
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease; /* Slightly longer transition */
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px; /* Increased letter spacing */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12); /* Softer, slightly larger shadow */
 }
 
-.btn-primary {
-  background-color: #28a745; /* Hijau */
-  color: white;
+/* Menambahkan kelas khusus untuk tombol agar mudah diatur gayanya */
+.btn-back {
+    background-color: transparent; /* Mirip dengan btn-outline */
+    color: #007bff; /* Biru terang */
+    border: 2px solid #007bff; /* Border biru terang */
+    box-shadow: none; /* Tanpa bayangan default */
 }
 
-.btn-primary:hover {
-  background-color: #218838;
-  transform: translateY(-2px);
+.btn-back:hover {
+    background-color: #eaf6ff; /* Lighter hover background */
+    color: #0056b3; /* Biru lebih gelap saat hover */
+    transform: translateY(-4px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
 
-.btn-secondary {
-  background-color: #6c757d; /* Abu-abu */
-  color: white;
+.btn-reset-step {
+    background-color: #6c757d; /* Abu-abu seperti di gambar */
+    color: white;
 }
 
-.btn-secondary:hover {
-  background-color: #5a6268;
-  transform: translateY(-2px);
+.btn-reset-step:hover {
+    background-color: #5a6268;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-.btn-outline {
-  background-color: transparent;
-  color: #007bff; /* Biru */
-  border: 2px solid #007bff;
+.btn-submit-registration {
+    background-color: #007bff; /* Biru terang seperti di gambar */
+    color: white;
 }
 
-.btn-outline:hover {
-  background-color: #e7f3ff;
-  color: #0056b3;
-  transform: translateY(-2px);
+.btn-submit-registration:hover {
+    background-color: #0056b3;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .btn:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-  transform: none;
+    background-color: #e0e0e0; /* Lighter disabled background */
+    color: #b0b0b0; /* Lighter disabled text */
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .form-container {
-    margin: 20px;
-    padding: 20px;
-  }
-  .form-grid {
-    grid-template-columns: 1fr; /* Kolom tunggal di layar kecil */
-  }
-  .form-actions {
-    flex-direction: column;
-    gap: 15px;
-  }
-  .action-right {
-    flex-direction: column;
-    gap: 15px;
-  }
-  .btn {
-    width: 100%;
-  }
+    .form-container {
+        margin: 25px; /* Adjusted margin */
+        padding: 28px; /* Adjusted padding */
+        border-radius: 12px;
+    }
+
+    .form-header {
+        padding: 35px 15px 25px;
+        margin-bottom: 35px;
+    }
+
+    .form-header h2 {
+        font-size: 2.5em; /* Adjusted font size */
+    }
+
+    .form-description {
+        font-size: 1em;
+        max-width: 95%; /* Wider max-width on smaller screens */
+    }
+
+    .bps-logo {
+        width: 110px;
+    }
+
+    .progress-bar-container {
+        height: 12px;
+        margin-bottom: 30px;
+    }
+
+    .step-dot {
+        width: 24px;
+        height: 24px;
+        border: 4px solid #ffffff;
+    }
+
+    .progress-labels {
+        font-size: 0.9em;
+        margin-top: 20px;
+    }
+
+    .form-section {
+        padding: 25px;
+        margin-bottom: 30px;
+        border-radius: 10px;
+    }
+
+    .section-title {
+        font-size: 1.8em;
+        margin-bottom: 22px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .form-group label {
+        font-size: 1em;
+        margin-bottom: 8px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="tel"],
+    .form-group select,
+    .form-group textarea {
+        padding: 13px;
+        border-radius: 8px;
+        font-size: 1em;
+    }
+
+    .form-group textarea {
+        min-height: 90px;
+    }
+
+    .error-message {
+        font-size: 0.85em;
+    }
+
+    .form-sub-section {
+        padding: 25px;
+        margin-top: 30px;
+        border-radius: 10px;
+    }
+
+    .form-sub-section h4 {
+        font-size: 1.3em;
+        margin-bottom: 18px;
+    }
+
+    .form-actions {
+        flex-direction: column; /* Tombol bertumpuk secara vertikal di seluler */
+        gap: 15px; /* Sesuaikan jarak untuk penumpukan */
+        padding-top: 25px;
+        align-items: stretch; /* Regangkan tombol hingga lebar penuh */
+    }
+
+    .action-right {
+        flex-direction: column; /* Pastikan tombol grup kanan juga bertumpuk */
+        gap: 15px;
+        width: 100%; /* Ambil lebar penuh di seluler */
+        justify-content: center; /* Pusatkan tombol yang bertumpuk */
+        order: 2; /* Letakkan action-right di bawah tombol kembali tunggal */
+    }
+    /* Menyesuaikan tombol 'KEMBALI' individual agar berada di paling atas saat bertumpuk */
+    .form-actions > .btn-back { /* Targetkan secara spesifik tombol 'KEMBALI' jika itu adalah anak langsung dari form-actions */
+        order: 1; /* Tempatkan di paling atas */
+    }
+    .btn {
+        width: 100%; /* Pastikan semua tombol (termasuk "KEMBALI", "RESET STEP INI", "KIRIM REGISTRASI") mengambil lebar penuh saat bertumpuk */
+        padding: 14px 25px;
+        font-size: 1.05em;
+    }
+}
+
+/* Additional Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px); /* More pronounced animation */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        
+        
+    }
 }
