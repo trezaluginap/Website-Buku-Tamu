@@ -1,9 +1,44 @@
 /* src/styles/printPDF.css */
+/* src/styles/AdminDashboard.css */
+/* ... kode lainnya ... */
+
+/* --- Header --- */
+/* ... kode header lainnya ... */
+
+.sidebar-toggle.btn-icon {
+  background: none; /* Latar belakang transparan */
+  border: 1px solid transparent; /* Border transparan, bisa diubah jika ingin ada border */
+  cursor: pointer;
+  padding: 8px; 
+  color: #212529; /* Warna ikon (garis-garisnya). Ganti ini untuk mengubah warna ikon. */
+  border-radius: 50%; /* Membuat tombol menjadi lingkaran */
+  transition: background-color 0.2s ease, color 0.2s ease;
+  display: flex; /* Ditambahkan untuk memastikan ikon di tengah jika padding tidak sama */
+  align-items: center; /* Ditambahkan */
+  justify-content: center; /* Ditambahkan */
+  width: 40px; /* Contoh ukuran tombol, sesuaikan */
+  height: 40px; /* Contoh ukuran tombol, sesuaikan */
+}
+.sidebar-toggle.btn-icon:hover {
+  background-color: #e9ecef; /* Warna latar saat hover (abu-abu muda) */
+  color: #0d6efd; /* Warna ikon saat hover (biru) */
+}
+.sidebar-toggle.btn-icon svg { /* Jika ikon Anda adalah SVG */
+  width: 24px; /* Lebar SVG ikon */
+  height: 24px; /* Tinggi SVG ikon */
+  display: block;
+  /* fill: currentColor; */ /* Pastikan SVG menggunakan currentColor agar warnanya bisa diubah via properti 'color' di atas */
+}
+
+/* ... kode lainnya ... */
+
+
+
 .content-container {
   margin-left: 220px;
   padding: 20px;
   height: 100vh;
-  background: linear-gradient(135deg, #a8e0ff 0%, #87ceeb 100%);
+  background: #e6f0fa;
   overflow-y: auto;
   transition: margin-left 0.3s ease;
 }
@@ -39,14 +74,14 @@
 }
 
 .content-area {
-  background-color: rgba(255, 255, 255, 0.5);
-  border-radius: 10px;
+  background-color: white;
+  border-radius: 20px;
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .print-form {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
